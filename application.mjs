@@ -9,7 +9,7 @@ import {createPhoneState,validatePhone,discoverPhone,provisionAgent,placeCall,ch
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { createState, assessment, updateProfile, triggerIncident, simulate, prepare, confirm, toolsFor, demoPlan, demoReply } from './domain.mjs';
-import { defaultTemplate, ubot, voices, speech, transcribe } from './providers.mjs';
+import { defaultTemplate, ubot, verifyUbotConnection, voices, speech, transcribe } from './providers.mjs';
 import { testDataKey,prepareFuji,verifyFuji,fresh } from './avalanche.mjs';
 import { createLiveState,validateSettings,refreshLive,liveTools,liveReply } from './live-wallet.mjs';
 
@@ -55,7 +55,7 @@ async function readBody(req, max = 100000) {
 async function checkedConfig(p) {
   if (p.ubotTemplate !== undefined) {
     if (typeof p.ubotTemplate !== 'string' || p.ubotTemplate.length > 16000 || !p.ubotTemplate.includes('{{prompt}}')) throw new Error('Payload ต้องเป็น JSON และมี {{prompt}}');
-    JSON.parse(p.ubotTemplate);
+    try{JSON.parse(p.ubotTemplate);}catch{throw new Error('U-bot payload template ต้องเป็น JSON ที่ถูกต้อง');}
   }
   for (const k of ['ubotToken','elevenKey','avalancheKey','tokenomistKey','voiceId','ttsModel','sttModel']) if (p[k] !== undefined && (typeof p[k] !== 'string' || p[k].length > 10000)) throw new Error('ตั้งค่าไม่ถูกต้อง');
   for(const name of ['ubotToken','elevenKey','avalancheKey','tokenomistKey','voiceId','ttsModel','sttModel'])if(typeof p[name]==='string'&&/[\r\n']/.test(p[name]))throw new Error('Credential มีอักขระที่ไม่รองรับ');
@@ -173,6 +173,13 @@ const handler = async (req,res) => {
       if(pathname==='/api/phone/status'){const call=await checkCall(phone,p.id,config,persist);return json(res,200,{call,state:snapshot()});}
       if (pathname === '/api/integrations') { await checkedConfig(p); return json(res,200,status()); }
       if (pathname === '/api/disconnect') { config.ubotToken=''; config.elevenKey='';config.avalancheKey='';config.avalancheStatus='untested'; config.ubotStatus='untested'; config.elevenStatus='untested'; config.mode='demo';config.tokenomistKey='';config.tokenomistStatus='untested';clearTokenCache();live.supply=null;await saveConfig();await persist(); return json(res,200,status()); }
+      if (pathname === '/api/ubot/connect') {
+        const result=await verifyUbotConnection(config,p);
+        const previous={...config};
+        Object.assign(config,result.config);
+        try{await saveConfig();}catch(e){Object.assign(config,previous);throw e;}
+        return json(res,200,{text:result.text,status:status()});
+      }
       if (pathname === '/api/test/ubot') {
         const text = await ubot(config,'ตอบสั้น ๆ ว่า U-Guardian เชื่อมต่อสำเร็จ'); config.ubotStatus='verified'; return json(res,200,{text,status:status()});
       }

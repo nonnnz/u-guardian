@@ -20,7 +20,7 @@ const base=process.env.BASE_URL||'http://127.0.0.1:4180';
  await page.waitForTimeout(350);await page.screenshot({path:'.impeccable/review/chat-desktop.png',fullPage:true});await page.keyboard.press('Escape');
  await page.getByRole('button',{name:'ตั้งค่า',exact:true}).click();
  await page.locator('.provider summary').filter({hasText:'U-bot'}).first().click();
- await page.locator('#ubot-token').fill('fixture-not-a-real-key');
+ await page.locator('#ubot-manual>summary').click();await page.locator('#ubot-token').fill('fixture-not-a-real-key');
  await page.getByRole('button',{name:'บันทึกการเชื่อมต่อ',exact:true}).click();await page.locator('#integration-status').filter({hasText:'บันทึกการเชื่อมต่อแล้ว'}).waitFor();
  assert.equal(await page.locator('#ubot-token').inputValue(),'');
  await page.getByRole('button',{name:'บันทึกการเชื่อมต่อ',exact:true}).click();await page.waitForFunction(()=>document.querySelector('u-guardian').state.integration.ubotConfigured);

@@ -17,12 +17,18 @@ Live app: https://u-guardian.vercel.app
 Open **ตั้งค่า**. Settings stay in a dialog on the same page.
 
 1. Under **การเชื่อมต่อ**, enter U-bot Bearer token, Avalanche Data API key, Tokenomist API key and ElevenLabs key. Blank credential fields retain the saved value.
-2. Test the providers, load/select an ElevenLabs voice, choose U-bot agent mode, then save.
+2. Click **Connect U-bot** to verify its saved or newly supplied token and activate the U-bot agent. Test other providers, load/select an ElevenLabs voice, then save.
 3. Under **กระเป๋า**, choose Live, paste a public C-Chain address beginning with 0x, choose Mainnet or Fuji, then save. This reads public data; no private key or signature is needed.
 4. Optionally save your goals. For ERC-20 supply monitoring, use **จับคู่เหรียญกับ Tokenomist**, verify the project's contract yourself and confirm the match. Native Mainnet AVAX is mapped automatically.
 5. Close Settings and click the mascot. Ask for wallet health, what changed, or a watch.
 
 Demo uses explicit synthetic data and local example answers unless U-bot mode is selected. The demo event button lives inside Settings.
+
+**Connect U-bot is a saved-credential connection check, not OAuth.** It switches to the real agent only after a successful request; failed authentication leaves the prior configuration intact. The Open U-bot link opens the provider's site and does not import its browser session. An expired token must still be replaced under manual token settings. No documented third-party OAuth integration was found in the supplied guide or the public frontend/discovery documents inspected on 2026-10-15.
+
+U-bot's Casual mode maps to `fast`, Professional to `professional`; the supplied guide describes a reply-style difference. A small live evaluation on 2026-10-15 accepted valid JSON and an appropriate first tool for all four prompts in each mode (wallet health, changes, token research, watch draft). This is a smoke evaluation, not a general accuracy guarantee.
+
+For a full live Avalanche token research sequence, Casual completed `search_tokens → research_token → answer` in 21.5 seconds. Professional timed out on the third U-bot request in two attempts under the current per-request timeout. The default remains Casual. Allocations, fundraising and burns were available for the tested token; buybacks were unavailable. No transactions or notifications were sent during these evaluations.
 
 ## Boundaries
 

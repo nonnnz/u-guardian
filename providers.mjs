@@ -46,6 +46,20 @@ export async function ubot(config, prompt, timeout=60000) {
   if (!text.trim()) throw new Error('ยังอ่าน response ของ U-bot รูปแบบนี้ไม่ได้ ต้องปรับ adapter ตาม response จริง');
   return text.slice(0, 12000);
 }
+// Verify the supplied or stored credential before changing the active agent.
+// This is a credential check, not OAuth or a cross-site session import.
+export async function verifyUbotConnection(config, input={}, call=ubot) {
+  for(const key of Object.keys(input))if(!['ubotToken','ubotTemplate'].includes(key))throw new Error('พารามิเตอร์เชื่อมต่อ U-bot ไม่ถูกต้อง');
+  if(input.ubotToken!==undefined&&(typeof input.ubotToken!=='string'||input.ubotToken.length>10000||/[\r\n']/.test(input.ubotToken)))throw new Error('U-bot token ไม่ถูกต้อง');
+  const token=(input.ubotToken||'').trim().replace(/^Bearer\s+/i,'')||config.ubotToken;
+  if(!token)throw new Error('ยังไม่มี U-bot token ที่บันทึกไว้ เปิดตั้งค่า token ด้วยตนเองก่อน ขณะนี้ยังไม่รองรับการเชื่อมบัญชีผ่าน OAuth');
+  const template=input.ubotTemplate===undefined?config.ubotTemplate:input.ubotTemplate;
+  if(typeof template!=='string'||template.length>16000||!template.includes('{{prompt}}'))throw new Error('U-bot template ต้องมี {{prompt}}');
+  try{JSON.parse(template);}catch{throw new Error('U-bot template ต้องเป็น JSON ที่ถูกต้อง');}
+  const candidate={...config,ubotToken:token,ubotTemplate:template};
+  const text=await call(candidate,'ตอบสั้น ๆ ว่า U-Guardian เชื่อมต่อสำเร็จ',25000);
+  return {text,config:{...candidate,mode:'ubot',ubotStatus:'verified'}};
+}
 async function eleven(config, path, options = {}) {
   if (!config.elevenKey) throw new Error('ยังไม่ได้ตั้ง ElevenLabs API key');
   const res = await fetch(`https://api.elevenlabs.io${path}`, { ...options, redirect: 'error', headers: { ...options.headers, 'xi-api-key': config.elevenKey }, signal: AbortSignal.timeout(30000) });
