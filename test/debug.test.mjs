@@ -29,7 +29,7 @@ test('agent trace records invalid JSON retry, parsed plan, tool args, failure ev
   calls++;if(calls===1)return 'invalid JSON';if(calls===2)return '{"type":"tool","tool":"search_tokens","args":{"query":"AVAX"}}';
   assert.match(prompt,/Provider 403/);return '{"type":"answer","text":"No coverage"}';
  }}));
- assert.equal(result.text,'No coverage');
+ assert.match(result.text,/ยังดึงหลักฐาน/);assert.equal(calls,3);
  const types=log.events.map(e=>e.type);
  for(const type of ['model.start','model.result','agent.validation','agent.decision','tool.start','tool.error','agent.answer'])assert.ok(types.includes(type));
  assert.ok(types.indexOf('tool.error')<types.lastIndexOf('model.start'));

@@ -1,6 +1,6 @@
 # U-Guardian
 
-A Thai voice companion for understanding a crypto wallet. The app has one page: wallet status, a mascot perched on its edge, and a Settings button. Click the mascot to open chat; closing it returns to the wallet without discarding the conversation.
+An English-first, bilingual voice companion for understanding a crypto wallet. The app has one page: wallet status, a mascot perched on its edge, and a Settings button. Click the mascot to open chat; closing it returns to the wallet without discarding the conversation.
 
 Live app: https://u-guardian.vercel.app
 
@@ -8,8 +8,9 @@ Live app: https://u-guardian.vercel.app
 
 - Wallet health: Avalanche C-Chain balances, available recent transfers, concentration when priced coverage is complete, and goal-aware explanations.
 - Research: U-bot chooses tools in a bounded multi-step loop. Tokenomist supplies token identity, allocation, fundraising, buyback, burn and mapped wallet supply evidence when available.
-- Changes: compare quantities with the last acknowledged briefing. This is not price P&L or a complete transaction-cause investigation.
-- Tracking: draft a wallet-change, supply-event or review-date rule, then explicitly confirm it. View notifications and stop rules in chat.
+- Changes: compare quantities, observed USD unit quotes and available transfers with the last acknowledged briefing; check again on reopening. This is not price P&L or a complete transaction investigation.
+- Tracking: explicitly confirmed wallet-change, supply-event, review-date, activation-price percentage and transfer-USD threshold rules. New alerts can appear as simulated in-app calls; Answer opens chat and can read them aloud.
+- Market and advice: CoinGecko project descriptions, market metrics and search trends, plus attributed CoinDesk/Cointelegraph RSS headline matches. These are bounded sources, not forecasts or exhaustive news.
 - Voice: push-to-talk through ElevenLabs transcription, with optional spoken replies. Typing remains available.
 
 ## Set up from the main page
@@ -22,7 +23,7 @@ Open **ตั้งค่า**. Settings stay in a dialog on the same page.
 4. Optionally save your goals. For ERC-20 supply monitoring, use **จับคู่เหรียญกับ Tokenomist**, verify the project's contract yourself and confirm the match. Native Mainnet AVAX is mapped automatically.
 5. Close Settings and click the mascot. Ask for wallet health, what changed, or a watch.
 
-Demo uses explicit synthetic data and local example answers unless U-bot mode is selected. The demo event button lives inside Settings.
+Demo wallet data and local example answers are synthetic unless U-bot mode is selected for reasoning. Public market/news tools still return real sourced evidence. Settings provides synthetic price-drop and outgoing-transfer buttons. See [USER-TEST-GUIDE.md](USER-TEST-GUIDE.md) for the current three-pillar capability matrix, English prompts, limits and repeatable demo.
 
 **Connect U-bot is a saved-credential connection check, not OAuth.** It switches to the real agent only after a successful request; failed authentication leaves the prior configuration intact. The Open U-bot link opens the provider's site and does not import its browser session. An expired token must still be replaced under manual token settings. No documented third-party OAuth integration was found in the supplied guide or the public frontend/discovery documents inspected on 2026-10-15.
 
@@ -32,7 +33,7 @@ Planning and explanation use separate prompts. The planner returns validated JSO
 
 The agent allows at most five planning steps, one retry per invalid plan, a 40-second planning-call timeout, a 55-second explanation timeout, and a shared 170-second provider budget with time reserved for the answer. Avalanche/Tokenomist requests inherit the remaining budget. Existing evidence is preserved and a visible warning is returned if later planning or explanation fails. A provider failure before any evidence remains an error. Backend persistence/response overhead is outside the provider budget.
 
-Watch drafts require explicit user intent and matching supported scope. Known unsupported price/value/threshold and notification-channel requests return a capability explanation without creating a draft. Unknown tool arguments, impossible dates and common selected-token/threshold substitutions are rejected. This combines schema checks, conservative intent checks and prompting; it is not a guarantee of semantic accuracy for every possible wording. Confirmation is still required to activate a watch.
+Watch drafts require explicit user intent and matching supported scope. Unsupported portfolio-value, rolling-price, selected-transfer-filter and notification-channel requests return a capability explanation without creating a draft. Unknown tool arguments, impossible dates and common selected-token/threshold substitutions are rejected. This combines schema checks, conservative intent checks and prompting; it is not a guarantee of semantic accuracy for every possible wording. Confirmation is still required to activate a watch.
 
 ## Boundaries
 

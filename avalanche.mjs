@@ -53,13 +53,19 @@ function abiText(hex) {
     return bytes.toString('utf8').replace(/\0/g,'').replace(/[\x00-\x1f]/g,'').slice(0,32)||'ERC-20';
   } catch {return 'ERC-20';}
 }
+export function indexedUnitPrice(token) {
+ const quote=token?.price;
+ if(quote?.currencyCode?.toLowerCase()==='usd'&&Number.isFinite(Number(quote.value))&&Number(quote.value)>0)return Number(quote.value);
+ try{const units=Number(formatUnits(token.balance,Number(token.decimals??18))),value=token.balanceValue;if(value?.currencyCode?.toLowerCase()==='usd'&&units>0&&Number(value.value)>0){const price=Number(value.value)/units;return Number.isFinite(price)?price:null;}}catch{}
+ return null;
+}
 export function normalizeToken(t) {
   const decimals=Number(t.decimals);
   if(!Number.isInteger(decimals)||decimals<0||decimals>36||!/^\d{1,80}$/.test(String(t.balance)))throw new Error('Invalid token balance/decimals');
   const units=formatUnits(t.balance,decimals);
   const value=t.balanceValue?.currencyCode?.toLowerCase()==='usd'?Number(t.balanceValue.value):NaN;
   return {address:address(t.address),name:String(t.name||'Token').slice(0,100),symbol:String(t.symbol||'TOKEN').slice(0,32),decimals,rawBalance:String(t.balance),units,
-    usdValue:Number.isFinite(value)&&value>=0?value:null,priceSource:'Avalanche Data API indexed estimate',reputation:t.tokenReputation||'Unknown'};
+    usdValue:Number.isFinite(value)&&value>=0?value:null,priceUsd:indexedUnitPrice(t),priceSource:'Avalanche Data API indexed estimate',reputation:t.tokenReputation||'Unknown'};
 }
 export function normalizeTransfer(t,kind) {
   const native=t.nativeTransaction || t;
@@ -68,7 +74,7 @@ export function normalizeTransfer(t,kind) {
   const decimals=kind==='native'?18:Number(t.erc20Token?.decimals ?? t.token?.decimals ?? 18);
   let amount=null;try{amount=formatUnits(t.value || native.value || '0',decimals);}catch{}
   return {hash,from:t.from?.address||native.from?.address||t.from||native.from,to:t.to?.address||native.to?.address||t.to||native.to,amount,symbol:kind==='native'?'AVAX':String(t.erc20Token?.symbol || t.token?.symbol || 'ERC-20').slice(0,32),kind, status:native.txStatus??null,
-    timestamp:t.blockTimestamp||native.blockTimestamp||null};
+    assetId:kind==='native'?'native':String(t.erc20Token?.address||t.token?.address||'').toLowerCase(),logIndex:t.logIndex??null,timestamp:t.blockTimestamp||native.blockTimestamp||null};
 }
 export async function readWallet(settings,key,fetcher=fetch) {
   const chainId=chain(settings.chainId),wallet=address(settings.address);
@@ -86,7 +92,7 @@ export async function readWallet(settings,key,fetcher=fetch) {
     reserve={symbol:abiText(symbolHex),decimals,rawBalance:BigInt(balanceHex).toString(),units:formatUnits(balanceHex,decimals),contract:reserveContract};
   }
   const warnings=[],tokens=[],transfers=[];let tokensTruncated=false,historyTruncated=false,indexerStatus='not-configured';
-  let nativeValue=null;
+  let nativeValue=null,nativePrice=null;
   if(key){
     const root=`/v1/chains/${chainId}/addresses/${wallet}`;
     const results=await Promise.allSettled([
@@ -94,6 +100,7 @@ export async function readWallet(settings,key,fetcher=fetch) {
         const data=await dataApi(key,root+'/balances:listErc20?pageSize=100&filterSpamTokens=true&currency=usd'+(pageToken?'&pageToken='+encodeURIComponent(pageToken):''),fetcher);
         if(!Array.isArray(data.erc20TokenBalances))throw new Error(tr('รูปแบบ balances ของ Data API ไม่ตรงกับที่รองรับ'));
         for(const t of data.erc20TokenBalances){try{tokens.push(normalizeToken(t));}catch{warnings.push(tr('มี token metadata ที่อ่านไม่ได้ จึงไม่รวมรายการนั้น'));}}
+        nativePrice=indexedUnitPrice(data.nativeTokenBalance)??nativePrice;
         if(data.nativeTokenBalance?.balanceValue?.currencyCode?.toLowerCase()==='usd') {const v=Number(data.nativeTokenBalance.balanceValue.value);if(Number.isFinite(v)&&v>=0)nativeValue=v;}
         pageToken=data.nextPageToken;if(!pageToken)break;
       }tokensTruncated=!!pageToken;})(),
@@ -108,7 +115,7 @@ export async function readWallet(settings,key,fetcher=fetch) {
     results.forEach((r,i)=>{if(r.status==='rejected')warnings.push(`${['Token list','Native history','ERC-20 history'][i]}: ${r.reason.message}`);});
     indexerStatus=results.every(r=>r.status==='fulfilled')?'ok':results.every(r=>r.status==='rejected')?'error':'partial';
   }else warnings.push(tr('ยังไม่มี Data API key: อ่าน AVAX/สินทรัพย์สำรองผ่าน RPC ได้ แต่ไม่มีรายการ token และประวัติจาก indexer'));
-  const assets=[{address:'native',symbol:'AVAX',name:'Avalanche',decimals:18,rawBalance:BigInt(nativeRaw).toString(),units:formatUnits(nativeRaw),usdValue:chainId==='43113'?null:nativeValue,source:'RPC'},...tokens.map(t=>({...t,usdValue:chainId==='43113'?null:t.usdValue,source:'Data API'}))];
+  const assets=[{address:'native',symbol:'AVAX',name:'Avalanche',decimals:18,rawBalance:BigInt(nativeRaw).toString(),units:formatUnits(nativeRaw),usdValue:chainId==='43113'?null:nativeValue,priceUsd:chainId==='43113'?null:nativePrice,priceSource:'Avalanche Data API indexed estimate',source:'RPC'},...tokens.map(t=>({...t,priceUsd:chainId==='43113'?null:t.priceUsd,usdValue:chainId==='43113'?null:t.usdValue,source:'Data API'}))];
   if(reserveContract){const at=assets.findIndex(t=>t.address===reserveContract);const item={...(at>=0?assets[at]:{}),address:reserveContract,name:reserve.symbol,...reserve,source:'RPC'};if(at>=0)assets[at]=item;else assets.push(item);}
   const target=parseUnits(settings.target,reserve.decimals);if(target<=0n)throw new Error(tr('เป้าหมายต้องมากกว่า 0'));
   const balance=BigInt(reserve.rawBalance),gap=target>balance?target-balance:0n;

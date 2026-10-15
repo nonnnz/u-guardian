@@ -28,17 +28,17 @@ test('strict tool schemas reject ignored or malformed arguments and invalid date
  assert.deepEqual(parseAgentStep('{"type":"tool","tool":"search_tokens","args":{"query":" AVAX "}}').args,{query:'AVAX'});
 });
 test('watch intent cannot silently replace price/threshold/channel/token conditions',()=>{
- for(const text of ['เตือนเมื่อราคาลด 10%','notify me by SMS when my wallet changes','ติดตามมูลค่าพอร์ต','แจ้งเตือนตอนปิดเว็บ'])assert.ok(unsupportedWatchReason(text));
+ for(const text of ['เตือนเมื่อมูลค่าพอร์ตลด 10%','notify me by SMS when my wallet changes','ติดตามมูลค่าพอร์ต','แจ้งเตือนตอนปิดเว็บ'])assert.ok(unsupportedWatchReason(text));
  const wallet={kind:'wallet_change',label:'ติดตามยอดกระเป๋า'};
  for(const text of ['ช่วยตรวจสุขภาพกระเป๋า','อย่าติดตามยอดกระเป๋า','ติดตาม AVAX','ติดตามยอดลด 10 เหรียญ','ติดตามเมื่อปลดล็อกเหรียญในกระเป๋า'])assert.throws(()=>validateWatchIntent(wallet,text));
  assert.doesNotThrow(()=>validateWatchIntent(wallet,'ช่วยติดตามเมื่อจำนวนสินทรัพย์ในกระเป๋าเปลี่ยน'));
  assert.doesNotThrow(()=>validateWatchIntent({kind:'supply_event',label:'ติดตามอุปทาน'},'ช่วยติดตามเหตุการณ์ปลดล็อกของสินทรัพย์ในกระเป๋า'));
  assert.throws(()=>validateWatchIntent({kind:'review_date',label:'ทบทวน',date:'2027-01-01'},'เตือนให้ทบทวนพรุ่งนี้'));
 });
-test('unsupported price alert creates no draft or provider calls in real and demo agent modes',async()=>{
+test('unsupported portfolio-value alert creates no draft or provider calls in real and demo agent modes',async()=>{
  for(const mode of ['ubot','demo']){
   let calls=0;const guardian=createGuardian({config:{mode},live:createLiveState(),getDemo:createState,getMode:()=> 'demo',persist:async()=>{},refresh:async()=>{},call:async()=>{calls++;throw new Error('not expected');}});
-  const answer=await guardian.message('เตือนเมื่อราคาลด 10%');assert.match(answer.text,/ยังติดตามราคา/);assert.equal(guardian.agent.proposals.length,0);assert.equal(calls,0);
+  const answer=await guardian.message('เตือนเมื่อมูลค่าพอร์ตลด 10%');assert.match(answer.text,/ยังไม่รองรับ/);assert.equal(guardian.agent.proposals.length,0);assert.equal(calls,0);
   await assert.rejects(guardian.message('เตือนราคา'+ 'x'.repeat(2100)),/2,000/);
  }
 });

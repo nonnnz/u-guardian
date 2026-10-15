@@ -1,3 +1,4 @@
+import {say,extendedWatchKinds,validateExtendedWatch,validateExtendedIntent,extendedEvents,priceChanges} from './monitoring.mjs';
 import {t as tr,language} from './locale.mjs';
 import {withinBudget} from './agent-budget.mjs';
 import {planningPrompt,answerPrompt} from './agent-prompts.mjs';
@@ -7,13 +8,17 @@ import {ubot} from './providers.mjs';
 import {formatUnits} from './avalanche.mjs';
 
 export const AGENT_TOOLS={
+ get_market_overview:'Current search trends and 24h gainers/decliners among top 50 market-cap coins. Not investment recommendations.',
+ search_market_tokens:'Find CoinGecko project IDs. args.query required.',
+ inspect_market_token:'Read project description and market metrics for a discovered CoinGecko coinId.',
+ get_token_news:'Read attributed recent headline matches for a discovered CoinGecko coinId.',
  get_wallet:'Read current wallet balances and recent transfers. Refreshes live data.',
  assess_wallet:'Check concentration and coverage, with personal goal context. Not a security audit.',
- investigate_changes:'Compare current quantities and transactions to the last acknowledged briefing. Does not infer price movement.',
+ investigate_changes:'Compare current quantities, observed USD unit quotes and transfers to the last acknowledged briefing. No inferred profit or loss.',
  search_tokens:'Find Tokenomist identities. args.query is a name or symbol, required.',
  research_token:'Read allocations, fundraising, buybacks, burns. args.tokenId must come from search_tokens or known wallet mapping.',
  get_supply_events:'Read upcoming supply events of mapped wallet holdings.',
- propose_watch:'DRAFT ONLY. args.kind: wallet_change, supply_event, review_date. args.label required; args.date YYYY-MM-DD required for review_date. Requires explicit UI confirmation.',
+ propose_watch:'DRAFT ONLY. Kinds: wallet_change, supply_event, review_date, price_change, transfer_value. Exact arguments follow the tool schema. Requires explicit UI confirmation.',
  list_watches:'Read saved watch rules and their monitoring scope.'
 };
 export function createAgentState(){return {history:[],baseline:null,rules:[],proposals:[],notifications:[],seenEvents:[],goal:{purpose:tr('ยังไม่ได้ระบุ'),horizon:tr('ยังไม่ได้ระบุ'),risk:tr('ยังไม่ได้ระบุ')},lastChecked:null};}
@@ -27,18 +32,18 @@ export function walletChanges(before,after){
   if(delta!==0n)changes.push({symbol:a.symbol,before:old.units,after:a.units,delta:(delta<0n?'-':'+')+formatUnits(delta<0n?-delta:delta,a.decimals)});
  }
  const hashes=new Set((before.transfers||[]).map(t=>t.hash));
- return {status:'compared',from:before.fetchedAt,to:after.fetchedAt,changes,transfers:(after.transfers||[]).filter(t=>!hashes.has(t.hash)).slice(0,15),note:tr('เปรียบเทียบจำนวนเหรียญ ไม่ใช่กำไรขาดทุน รายการที่เพิ่งอ่านพบอาจเป็นรายการเก่าจาก indexer; สินทรัพย์ที่อ่านไม่พบไม่ถือว่ายอดเป็นศูนย์')};
+ return {status:'compared',priceChanges:priceChanges(before,after),from:before.fetchedAt,to:after.fetchedAt,changes,transfers:(after.transfers||[]).filter(t=>!hashes.has(t.hash)).slice(0,15),note:tr('เปรียบเทียบจำนวนเหรียญ ไม่ใช่กำไรขาดทุน รายการที่เพิ่งอ่านพบอาจเป็นรายการเก่าจาก indexer; สินทรัพย์ที่อ่านไม่พบไม่ถือว่ายอดเป็นศูนย์')};
 }
 export function assessWallet(wallet,goal){
  if(!wallet)return {status:'unavailable',note:tr('ยังไม่ได้เชื่อมกระเป๋า'),goal};
  const held=wallet.assets.filter(a=>BigInt(a.rawBalance)>0n),complete=held.length>0&&wallet.indexerStatus==='ok'&&!wallet.tokensTruncated&&held.every(a=>a.usdValue!=null);
  const total=complete?held.reduce((s,a)=>s+a.usdValue,0):null;
  const largest=total>0?[...held].sort((a,b)=>b.usdValue-a.usdValue)[0]:null;
- return {goal,network:wallet.network,fetchedAt:wallet.fetchedAt,assetCount:held.length,concentration:largest?{symbol:largest.symbol,percent:Math.round(largest.usdValue/total*100)}:null,coverage:complete?'priced holdings available':tr('partial: ไม่สรุปสัดส่วนเมื่อมูลค่าหรือรายการไม่ครบ'),warnings:wallet.warnings||[],note:tr('ไม่ได้ตรวจ approvals หรือ DeFi positions และไม่รับรองความปลอดภัย; เป้าหมายเก็บออมอาจไม่เหมาะกับคริปโตที่ผันผวน')};
+ return {goal,holdings:held.map(a=>({assetId:a.address,symbol:a.symbol,name:a.name,units:a.units,usdValue:a.usdValue,priceUsd:a.priceUsd,reputation:a.reputation||'Unknown'})),network:wallet.network,fetchedAt:wallet.fetchedAt,assetCount:held.length,concentration:largest?{symbol:largest.symbol,percent:Math.round(largest.usdValue/total*100)}:null,coverage:complete?'priced holdings available':tr('partial: ไม่สรุปสัดส่วนเมื่อมูลค่าหรือรายการไม่ครบ'),warnings:wallet.warnings||[],note:tr('ไม่ได้ตรวจ approvals หรือ DeFi positions และไม่รับรองความปลอดภัย; เป้าหมายเก็บออมอาจไม่เหมาะกับคริปโตที่ผันผวน')};
 }
 export function proposeWatch(agent,args,scope){
  args=validateToolArgs('propose_watch',args);
- const p={id:randomUUID(),kind:args.kind,label:args.label.trim(),date:args.kind==='review_date'?args.date:null,scope,createdAt:Date.now(),status:'draft'};
+ const p={...args,id:randomUUID(),kind:args.kind,label:args.label.trim(),date:args.kind==='review_date'?args.date:null,scope,createdAt:Date.now(),status:'draft'};
  agent.proposals=[p,...agent.proposals.filter(x=>x.status==='draft'&&Date.now()-x.createdAt<600000)].slice(0,8);return p;
 }
 export function confirmWatch(agent,id,scope){
@@ -51,7 +56,7 @@ export function confirmWatch(agent,id,scope){
 export function evaluateWatches(agent,wallet,supply,scope,now=Date.now()){
  const additions=[];
  for(const rule of agent.rules.filter(r=>r.active&&r.scope===scope)){
-  let events=[];
+  let events=extendedWatchKinds.includes(rule.kind)?extendedEvents(rule,wallet,now):[];
   if(rule.kind==='wallet_change'&&wallet){const d=walletChanges(rule.baseline,wallet);if(d.status==='compared'&&d.changes.length)events=[{key:wallet.fetchedAt,text:d.changes.map(c=>`${c.symbol}: ${c.before??'—'} → ${c.after}`).join(' · ')}];rule.baseline=structuredClone(wallet);}
   if(rule.kind==='supply_event'&&supply&&['ok','partial'].includes(supply.status))events=(supply.events||[]).map(e=>({key:e.id,messageKey:'{0} · กำหนดปลดล็อก {1} · ไม่ใช่การคาดการณ์ราคา',messageValues:[e.symbol,e.date.slice(0,10)]}));
   if(rule.kind==='review_date'&&now>=Date.parse(rule.date))events=[{key:rule.date,messageKey:'ถึงวันทบทวน: {0}',messageValues:[rule.label]}];
@@ -67,6 +72,9 @@ const plain=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
 function fields(value,allowed){if(Object.keys(value).some(k=>!allowed.includes(k)))invalid('Unexpected JSON fields');}
 export function validateToolArgs(tool,args){
  if(!Object.hasOwn(AGENT_TOOLS,tool)||!plain(args))invalid('Unknown tool or invalid args object');
+ if(tool==='propose_watch'&&extendedWatchKinds.includes(args.kind)){try{return validateExtendedWatch(args);}catch(e){invalid(e.message);}}
+ if(['inspect_market_token','get_token_news'].includes(tool)){fields(args,['coinId']);if(typeof args.coinId!=='string'||! /^[a-z0-9_-]{1,120}$/.test(args.coinId))invalid('coinId must be a discovered CoinGecko ID');return args;}
+ if(tool==='search_market_tokens')return validateToolArgs('search_tokens',args);
  const allowed=tool==='search_tokens'?['query']:tool==='research_token'?['tokenId']:tool==='propose_watch'?['kind','label','date']:[];
  fields(args,allowed);
  if(tool==='search_tokens'){if(typeof args.query!=='string'||!args.query.trim()||args.query.length>120)invalid('query must be 1–120 characters');return {query:args.query.trim()};}
@@ -81,16 +89,20 @@ export function validateToolArgs(tool,args){
  }
  return {};
 }
-const wantsWatch=text=>/ติดตาม|แจ้งเตือน|เตือน|watch|track|alert|notify|remind|monitor|text me/i.test(text);
+const wantsWatch=text=>/ติดตาม|แจ้งเตือน|เตือน|watch|track|alert|notify|remind|monitor|text me|(?:call|โทร).*?(?:when|if|เมื่อ|ถ้า)/i.test(text);
 export function unsupportedWatchReason(message){
  if(typeof message!=='string'||!wantsWatch(message))return null;
- if(/ราคา|กำไร|ขาดทุน|มูลค่า|price|profit|loss|valuation|portfolio value|worth|market.?cap|\b(?:below|above|over|under|at least|at most|more than|less than)\b|\d\s*%|เปอร์เซ็นต์|percent|threshold|เกิน|ต่ำกว่า|สูงกว่า|อย่างน้อย/i.test(message))return tr('ตอนนี้ยังติดตามราคา มูลค่าพอร์ต หรือเงื่อนไขตัวเลขไม่ได้ครับ จึงยังไม่ได้สร้างกฎให้ รองรับการเปลี่ยนจำนวนเหรียญทั้งกระเป๋า เหตุการณ์อุปทานของสินทรัพย์ที่จับคู่ไว้ และวันทบทวนเท่านั้น คุณต้องการติดตามแบบไหนครับ?');
- if(/sms|โทร|phone|call\b|email|อีเมล|line\b|telegram|push|ปิด(?:หน้า)?(?:เว็บ|แอป)|background|offline|(?:close[ds]?|shut).*?(?:page|app|browser)|text me|(?:app|page|browser).*?(?:closed|shut)/i.test(message))return tr('ตอนนี้กฎติดตามแจ้งในเว็บขณะเปิดหน้าไว้เท่านั้นครับ ยังส่ง SMS โทร อีเมล หรือแจ้งตอนปิดเว็บไม่ได้ จึงยังไม่ได้สร้างกฎแทนคำขอนี้');
+ const priceRequest=/price|ราคา/i.test(message)&&/\d+(?:\.\d+)?\s*(?:%|percent|เปอร์เซ็นต์)/i.test(message)&&/drop|fall|decreas|down|ris(?:e|es)|increas|up|ลด|ตก|ขึ้น|เพิ่ม/i.test(message);
+ const transferRequest=/transfer|transaction|โอน|ธุรกรรม/i.test(message)&&(/\$\s*[\d,]+/.test(message)||/[\d,]+\s*(?:USD|dollars?|ดอลลาร์)/i.test(message));
+ if(!priceRequest&&!transferRequest&&/ราคา|กำไร|ขาดทุน|มูลค่า|price|profit|loss|valuation|portfolio value|worth|market.?cap|\b(?:below|above|over|under|at least|at most|more than|less than)\b|\d\s*%|เปอร์เซ็นต์|percent|threshold|เกิน|ต่ำกว่า|สูงกว่า|อย่างน้อย/i.test(message))return tr('เงื่อนไขนี้ยังไม่รองรับ จึงไม่ได้สร้างกฎให้ รองรับจำนวนเหรียญทั้งกระเป๋า เหตุการณ์อุปทาน วันทบทวน ราคาเปลี่ยนเป็นเปอร์เซ็นต์จากตอนยืนยัน และรายการโอนเกินวงเงิน USD');
+ if(/sms|email|อีเมล|line\b|telegram|push|ปิด(?:หน้า)?(?:เว็บ|แอป)|background|offline|(?:close[ds]?|shut).*?(?:page|app|browser)|text me|(?:app|page|browser).*?(?:closed|shut)/i.test(message)||(/โทร|phone|call\b/i.test(message)&&!/fake|simulated|in.?app|in.?web|จำลอง|ในเว็บ/i.test(message)))return tr('ตอนนี้กฎติดตามแจ้งในเว็บขณะเปิดหน้าไว้เท่านั้นครับ ยังส่ง SMS โทร อีเมล หรือแจ้งตอนปิดเว็บไม่ได้ จึงยังไม่ได้สร้างกฎแทนคำขอนี้');
  return null;
 }
 export function validateWatchIntent(args,message){
- const unsupported=unsupportedWatchReason(message)||unsupportedWatchReason('watch '+args.label);if(unsupported)throw new Error(unsupported);
+ const unsupported=unsupportedWatchReason(message)||(!extendedWatchKinds.includes(args.kind)&&unsupportedWatchReason('watch '+args.label));if(unsupported)throw new Error(unsupported);
  if(!wantsWatch(message)||/(?:ไม่ต้อง|อย่า|ไม่อยาก|do not|don.t|never)\s*(?:ช่วย|ให้|create|set|ติดตาม|เตือน|watch|track|notify|remind|alert|monitor)/i.test(message))throw new Error(tr('ยังไม่มีคำขอให้สร้างการติดตามอย่างชัดเจน กรุณาถามผู้ใช้ก่อน'));
+ if(extendedWatchKinds.includes(args.kind)){validateExtendedIntent(args,message);return;}
+ if(/price|ราคา|\$|\d\s*%/i.test(message))throw new Error('A price or USD request cannot become a quantity watch.');
  if((/เฉพาะ|เท่านั้น|เหรียญนี้|ตัวนี้|only|just|\b[A-Z][A-Z0-9]{1,9}\b/.test(message)||/\d/.test(message))&&args.kind!=='review_date')throw new Error(tr('กฎนี้ติดตามทั้งกระเป๋าหรือทุกสินทรัพย์ที่จับคู่ ยังจำกัดเฉพาะเหรียญหรือกรองเหตุการณ์ไม่ได้ กรุณายืนยันขอบเขตก่อน'));
  if(args.kind==='wallet_change'&&!/ยอด|จำนวน|กระเป๋า|สินทรัพย์|wallet|balance|holdings|assets/i.test(message))throw new Error(tr('กรุณาระบุว่าต้องการติดตามจำนวนเหรียญทั้งกระเป๋า'));
  if(args.kind==='wallet_change'&&/ปลดล็อก|อุปทาน|unlock|supply|emission/i.test(message))throw new Error(tr('เงื่อนไขอุปทานไม่ใช่เงื่อนไขยอดกระเป๋าเปลี่ยน'));
@@ -157,9 +169,11 @@ export async function runAgent({message,config,agent,tools,context,call=ubot,max
     if(step.tool==='propose_watch')proposals.push(result);
    }catch(e){result={status:'unavailable',error:e.message};debugEvent('agent.tool-error','Tool unavailable',{tool:step.tool,error:e.message});}
    evidence.push({tool:step.tool,result});trace.push({name:step.tool,source:context.dataMode==='demo'?tr('ข้อมูลจำลอง'):tr('ข้อมูลจากเครื่องมือ'),detail:JSON.stringify(result)});
-   if(step.finishAfterTool&&step.tool!=='search_tokens'){needsExplanation=true;break;}
+   if(step.finishAfterTool&&!['search_tokens','search_market_tokens'].includes(step.tool)){needsExplanation=true;break;}
    if(i===maxSteps-1){warn(tr('ถึงจำนวนขั้นตอนสูงสุดของรอบนี้'));needsExplanation=true;}
   }
+  const searchOnly=evidence.some(e=>['search_tokens','search_market_tokens'].includes(e.tool))&&evidence.every(e=>['search_tokens','search_market_tokens'].includes(e.tool)||e.result?.status==='unavailable');
+  if(!text&&searchOnly){const candidates=evidence.flatMap(e=>e.result?.tokens||[]).slice(0,5).map(x=>`${x.name||x.id} (${x.symbol||x.id})`);text=say('I could not retrieve the project or news evidence needed for this answer. '+(candidates.length?'The search found: '+candidates.join(', ')+'. Ask about one exact project to continue.':'No matching project data was available. Try the project name or ticker alone.')+' I have not established current facts or an investment recommendation.','ยังดึงหลักฐานโครงการหรือข่าวที่จำเป็นสำหรับคำตอบนี้ไม่ได้ '+(candidates.length?'ผลค้นหาพบ '+candidates.join(', ')+' กรุณาระบุโครงการที่ต้องการ':'ยังไม่พบข้อมูลที่ตรง ลองใช้ชื่อโครงการหรือสัญลักษณ์อย่างเดียว')+' จึงยังไม่สรุปข้อเท็จจริงล่าสุดหรือคำแนะนำลงทุน');}
   if(!text&&(needsExplanation||evidence.length)){
    const prompt=answerPrompt({message,context:{...ctx,warnings},history:agent.history,evidence});
    try{if(Date.now()>=deadline)throw new Error(tr('หมดเวลาประมวลผล'));text=narrative(await debugStep('model','U-bot Professional · final explanation',{prompt},()=>call(config,prompt,Math.max(1,Math.min(answerTimeoutMs,deadline-Date.now())))));}

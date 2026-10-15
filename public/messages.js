@@ -1,6 +1,19 @@
 // Thai source keys preserve existing saved goal values. Only authored copy is translated;
 // user messages, provider evidence, addresses and token identities remain untouched.
 export const messages = {
+ 'เงื่อนไขนี้ยังไม่รองรับ จึงไม่ได้สร้างกฎให้ รองรับจำนวนเหรียญทั้งกระเป๋า เหตุการณ์อุปทาน วันทบทวน ราคาเปลี่ยนเป็นเปอร์เซ็นต์จากตอนยืนยัน และรายการโอนเกินวงเงิน USD':'That exact condition is not supported, so no watch was created. Supported: wallet quantity changes, supply events, review dates, percentage price moves from activation, and transfers over a USD threshold.',
+ 'ตลาดและคำแนะนำ':'Market & advice',
+ 'เหรียญไหนกำลังได้รับความสนใจ และอะไรต้องระวังก่อนลงทุน':'Which coins are getting attention, and what should I consider before investing?',
+ 'ภาพรวมตลาด':'Market overview','ค้นหาโครงการ':'Project search','ข้อมูลโครงการและราคา':'Project and market data','ข่าวพร้อมแหล่งอ้างอิง':'Sourced headlines',
+ 'สายเรียกเข้าจำลองในเว็บ':'Simulated in-app call','Guardian มีเรื่องอัปเดต':'Guardian has an update','รับฟัง':'Answer','ปิดการแจ้งนี้':'Dismiss',
+ 'แสดงสายเรียกเข้าจำลองเมื่อมีแจ้งเตือน':'Show simulated calls for alerts','ไม่มีการโทรออกจริง กดรับเพื่อดูรายละเอียดหรือฟังด้วยเสียง':'No real phone call. Answer to view the update or hear it aloud.',
+ 'ราคาต่อเหรียญ USD':'USD unit price','ราคาเปลี่ยน {0}% {1} จากราคาตอนยืนยัน · {2}':'Price moves {0}% {1} from the quote at confirmation · {2}',
+ 'ลดลง':'down','เพิ่มขึ้น':'up','โอนเกิน ${0} · {1} · มูลค่าโดยประมาณตามราคาล่าสุด ไม่ใช่ผลตรวจโกง':'Transfers over ${0} · {1} · Estimated at the latest price, not a fraud verdict',
+ 'เข้า':'incoming','ออก':'outgoing','ทั้งเข้าและออก':'incoming and outgoing',
+ 'จำลองราคา AVAX ลด 12%':'Simulate AVAX price −12%',
+ 'จำลองราคาลดแล้ว ตรวจการแจ้งเตือนจาก Guardian':'Price drop simulated. Check Guardian for alerts.',
+ 'แหล่งข้อมูล':'Source','รายงานล่าสุด':'Latest briefing',
+
  'คำขอซ้อนกัน กรุณาลองอีกครั้ง':'Another request is updating this session. Please try again shortly.',
  'U-Guardian · กระเป๋าของคุณ':'U-Guardian · Your wallet',
  'ตั้งค่า':'Settings','กระเป๋าของคุณ':'Your wallet','กำลังอ่าน…':'Loading…','สินทรัพย์':'Asset','จำนวนที่ถือ':'Quantity','รีเฟรชกระเป๋า':'Refresh wallet',

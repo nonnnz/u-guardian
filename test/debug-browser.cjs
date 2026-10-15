@@ -6,7 +6,7 @@ const base=process.env.BASE_URL||'http://127.0.0.1:4184';
  page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>localStorage.setItem('guardian-language','th'));
  await page.goto(base);await page.waitForFunction(()=>document.querySelector('u-guardian').state);
- await page.getByRole('button',{name:'เปิดแชตกับ Guardian',exact:true}).click();
+ await page.waitForFunction(()=>!document.querySelector('u-guardian').busy);await page.locator('u-guardian #launcher').click();
  assert.equal(await page.locator('u-guardian #agent-tabs').isVisible(),false);
  await page.getByRole('checkbox',{name:'Debug',exact:true}).check();
  assert.equal(await page.getByRole('tab',{name:'Debug',exact:true}).getAttribute('aria-selected'),'true');

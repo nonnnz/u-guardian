@@ -181,3 +181,8 @@ Chat opens with focus in the composer; close and Escape return focus to the masc
 - Don't promote compact diagnostic typography into primary reading text.
 - Don't reuse dormant welcome, launcher or multi-column styles as current design guidance.
 
+
+
+### Simulated call alerts
+
+A bounded, scrolling alert card uses existing paper/forest colors, 16px corners and primary/quiet actions. It sits bottom right on desktop and within 16px mobile gutters. Written copy identifies it as a simulated in-app call, with no real telephone action. Answer opens chat; speech requires that user action. Existing modal dialogs take focus priority. Dismiss preserves the read state locally.

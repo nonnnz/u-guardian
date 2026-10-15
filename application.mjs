@@ -131,6 +131,7 @@ const coreHandler = async (req,res) => {
       if(pathname==='/api/agent/watch/confirm')return json(res,200,await guardian.confirm(p.id));
       if(pathname==='/api/agent/watch/remove')return json(res,200,await guardian.remove(p.id));
       if(pathname==='/api/agent/goal')return json(res,200,await guardian.goal(p));
+      if(pathname==='/api/agent/demo-price'){requireDemo();state.assets.find(a=>a.symbol==='AVAX').price*=0.88;await guardian.check({refreshWallet:false});return json(res,200,snapshot());}
       if(pathname==='/api/agent/demo-event'){requireDemo();state.assets.find(a=>a.symbol==='USDC').units-=25;state.history.unshift({id:crypto.randomUUID(),kind:'agent-demo',at:new Date().toISOString()});await guardian.check({refreshWallet:false});return json(res,200,snapshot());}
       if (pathname === '/api/profile') { requireDemo();updateProfile(state,p); return json(res,200,snapshot()); }
       if (pathname === '/api/trigger') {requireDemo();return json(res,200,{...triggerIncident(state), state:snapshot()});}

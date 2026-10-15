@@ -39,3 +39,30 @@ English browser acceptance covers default language, saved preference, English/Th
 
 
 Final checks: 75 unit/integration tests and build passed. English/Thai browser voice tests, the bilingual acceptance test, and existing Thai UI/Debug regressions passed with no page errors. A targeted live rerun after prompt changes explained the USDC change without inventing a cause (9.1 s). The watch rerun omitted the internal ID and retained its draft; the model attempted to repeat the tool call, which the guard blocked and surfaced as a partial-completion warning (13.7 s). This reinforces that valid English flow is tested, not that model behavior is infallible.
+
+
+## Expanded three pillars — 2026-10-16 (Asia/Bangkok)
+
+This release supersedes the earlier unsupported-price-alert rows: activation-price percentage watches and new-transfer USD threshold watches are now implemented. It does not add rolling 24h/peak price rules, fiat FX, whole-portfolio price rules, news/sentiment monitors or closed-page delivery.
+
+| Live Professional request | Observed tools | Result |
+| --- | --- | --- |
+| Trending and declining coins (English) | get_market_overview | Search interest separated from top-50 sample 24h movers; 13.3s. |
+| Explain AVAX using current evidence (English) | search_market_tokens → inspect_market_token | After search correction, project/market evidence retrieved; 18.1s. |
+| Recent AVAX news (English) | search_market_tokens → get_token_news | After RSS correction, both feeds accessible but no matching recent AVAX headlines; answer disclosed coverage limit; 13.3s. |
+| AVAX price down 10%, simulated in-app call (English) | get_wallet → propose_watch | Draft only, exact threshold/direction; 11.0s. |
+| Outgoing transfers over $20 (English) | get_wallet → propose_watch | Draft only, outgoing and USD threshold preserved; 9.4s. |
+| AVAX price down 10% (Thai) | get_wallet → propose_watch | Thai answer, correct draft; 15.4s. |
+| AVAX vs BTC, two-year horizon (English) | search_market_tokens → inspect_market_token for each | Retrieved both projects; no automatic trading or guaranteed return; 23.6s. |
+
+Wallet/watch cases used synthetic wallet data, while CoinGecko and RSS requests were real. No rules were activated in live-model evaluations. No funded Mainnet transfer or real-market threshold crossing was triggered for this release; threshold logic is covered with deterministic fixtures and the browser Demo. A local Mainnet smoke attempt was skipped because no public wallet was configured in the inspected local state. Previous provider tests remain recorded above.
+
+The first project/news attempts searched a combined name and ticker, found no results and stopped early; an explanation used training knowledge despite lacking project evidence. Search now retries individual terms, both search tools must continue before factual explanation, and a search-only failed research path returns a deterministic evidence limitation. Regression coverage checks that no model explanation is requested for that case. A CoinDesk trailing-slash redirect was corrected to the canonical endpoint; both feeds then responded.
+
+Model limitations remain visible: some answers exceed the requested prose length, the Thai watch answer used a near-equivalent button name, and the comparison included general relative-risk interpretations beyond measured market fields. Prompt guidance now distinguishes period returns from volatility and market cap/volume from measured liquidity or drawdown. This is not a statistical accuracy evaluation or proof that prompting eliminates unsupported claims. Evidence remains inspectable.
+
+Verification: **86 unit/integration tests passed**, including strict numeric arguments, exact user thresholds/directions, unsupported filters/channels, Fuji/quote/staleness guards, exact threshold rounding, deduplication/rearming, successful post-activation transfer identity, public feed partial failures and bounded source evidence. English/Thai UI regression and both-language synthetic microphone/STT/agent/TTS control flows passed. Expanded browser acceptance passed price/transfer confirmation, demo triggers, simulated-call answer/dismiss, reopen-change detection and deduplication with desktop/mobile screenshots inspected. Browser voice tests mock audio providers and do not use a physical microphone.
+
+Configured Tokenomist project research now works independently of Demo wallet mode; only wallet-specific Demo supply events remain synthetic. An additional regression checks provider calls and identity use in that mode. Debug browser acceptance also passed after adapting its launcher selector to unread-alert labels.
+
+Live follow-up: with a Demo wallet and configured Tokenomist key, U-bot called search_tokens → research_token and returned allocation/fundraising evidence in 18.4s; it disclosed the buyback endpoint HTTP 403. No wallet funding or live wallet connection was needed for that project-research flow.
