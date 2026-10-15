@@ -4,6 +4,8 @@ A Thai-first financial assistant: Avalanche wallet evidence → personal reserve
 
 ## Vercel demo
 
+Live demo: https://u-guardian.vercel.app · Source: https://github.com/Wayu650610806/u-guardian (private repository). Pushes to `main` deploy automatically through the connected Vercel GitHub integration.
+
 The hosted app requires no login. Open **Connections** to enter your own U-bot, Avalanche Data, Tokenomist and ElevenLabs credentials. The deployment ships with no provider credentials. Each browser receives a random HttpOnly/Secure/SameSite session cookie; one wallet and its settings belong to that browser session. Other visitors start with an empty configuration.
 
 Session configuration, keys and records are encrypted using AES-256-GCM and persisted in a **private Vercel Blob store**. The encryption key is derived from the store token: rotating that token requires migrating encrypted records or starting new sessions. Provider keys never enter browser storage, API state responses or the repository. Clearing cookies loses access to the previous session; clear API keys in Connections before clearing cookies if you want them removed from that record. This is a hackathon demo, not a multi-user financial service.
@@ -105,6 +107,9 @@ npm test
 Unit tests cover original demo behavior, token precision, partial failures, identity spoofing, supply aggregation, stale evidence, persistence, phone opt-in/quiet hours/caps, unknown-call dedupe, callback authorization and Fuji transaction identity.
 
 Verified on 2026-10-15:
+
+- 35 unit tests pass, including encrypted cloud persistence, browser isolation, worker contention and compressed-ETag regression coverage.
+- Production Vercel checks passed: no-login access, settings persistence across requests/reload, separate browser configurations, key redaction and clearing, demo conversation/action/goal flow, mobile overflow and real Avalanche RPC reads without an indexer key. Local `.env` is excluded and returns 404 on the deployed site.
 
 - Real Avalanche RPC + Data API reads succeeded for a public example wallet (`indexerStatus: ok`).
 - Tokenomist v5 catalog, cliff and daily-emission reads succeeded. Coverage is partial because unrelated ERC-20 contracts were intentionally left unmapped.

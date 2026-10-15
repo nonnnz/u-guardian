@@ -20,6 +20,11 @@ test('cloud storage isolates browsers and prevents concurrent mutation across in
 test('two workers racing to create a session cannot both acquire the lease',async()=>{
  const sessions=privateSessions(fakeBlob(),'secret');const result=await Promise.allSettled([sessions.workspace('race',true),sessions.workspace('race',true)]);assert.equal(result.filter(r=>r.status==='fulfilled').length,1);assert.equal(result.filter(r=>r.status==='rejected').length,1);
 });
+test('compressed legacy Blob reads preserve conditional writes after weak ETag normalization',async()=>{
+ const blob=fakeBlob(),originalGet=blob.get;blob.get=async path=>{const r=await originalGet(path);if(r)r.blob.etag='W/'+r.blob.etag;return r;};
+ const sessions=privateSessions(blob,'secret');let w=await sessions.workspace('legacy',true);await w.saveConfig({key:'fixture'});await w.release();
+ w=await sessions.workspace('legacy',true);await w.saveConfig({key:''});await w.release();assert.equal((await sessions.workspace('legacy',false)).record.config.key,'');
+});
 test('serverless app survives recreation, redacts credentials and rejects background auto calls',async()=>{
  const sessions=privateSessions(fakeBlob(),'secret'),path=sessionPath('browser');let w=await sessions.workspace(path,true);
  let app=await createApplication({cloud:true,host:'guardian.vercel.app',env:{},store:w.store,config:w.record.config,saveConfig:w.saveConfig});
