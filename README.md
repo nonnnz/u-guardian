@@ -36,6 +36,14 @@ The public Vercel app checks active watch rules every minute while the page is v
 
 The old dashboard and separate Settings page have been removed. Old /settings.html and /embed-example.html links redirect home. Embedding examples, transport API and embedding documentation are removed from the current scope. The custom element is an internal UI module, not a released integration SDK. Legacy phone/Fuji/backend routes remain for compatibility, but their old screens are no longer part of the app.
 
+## Debug the agent
+
+Open the mascot chat and enable **Debug** in its header. The adjacent **แชต / Debug** tabs switch between the conversation and diagnostics. Send a message, request a briefing or use voice in the chat tab, then inspect each expandable event in Debug.
+
+Each request records timestamps and duration, the input, U-bot prompts and expanded payload (including the selected mode), raw provider response, validated JSON decision, tool arguments/results, provider calls/cache results, retries, errors, session saves and final answer. Local demo rules and briefings are explicitly identified as not calling U-bot. Voice requests record STT text and TTS metadata, not audio bytes in the log.
+
+Logs arrive **after each request completes**, not as a live stream. Debug retains the latest four requests in browser memory only; clearing logs, disabling Debug or reloading removes them. Logs are not written to chat history, Blob records or server console. Credentials are redacted before delivery, but messages and public wallet data remain visible. Long payloads are explicitly truncated (40,000 characters per event; bounded request total/event count). These are operational request/response logs, not the model's private reasoning. Network/platform failures before the application responds may have no backend trace.
+
 ## Run locally
 
 Requires Node.js 24.
@@ -62,6 +70,7 @@ npm test
 npm run build
 node test/guardian-browser-smoke.cjs
 node test/guardian-voice-smoke.cjs
+node test/debug-browser.cjs
 ```
 
 Browser tests use Playwright with Edge; set PLAYWRIGHT_MODULE to its installed module location when needed. Run an isolated server at port 4180 (or set BASE_URL), with GUARDIAN_IGNORE_SUPPLIED_KEYS=1, a separate GUARDIAN_ENV_FILE and GUARDIAN_STATE_DIR. The settings test writes a dummy credential to that isolated environment file. Never run it against a server using your actual credentials.

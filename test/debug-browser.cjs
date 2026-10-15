@@ -1,0 +1,48 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const base=process.env.BASE_URL||'http://127.0.0.1:4184';
+(async()=>{const browser=await chromium.launch({headless:true,channel:'msedge'});try{
+ const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(base);await page.waitForFunction(()=>document.querySelector('u-guardian').state);
+ await page.getByRole('button',{name:'เปิดแชตกับ Guardian',exact:true}).click();
+ assert.equal(await page.locator('u-guardian #agent-tabs').isVisible(),false);
+ await page.getByRole('checkbox',{name:'Debug',exact:true}).check();
+ assert.equal(await page.getByRole('tab',{name:'Debug',exact:true}).getAttribute('aria-selected'),'true');
+ await page.getByRole('tab',{name:'แชต',exact:true}).click();
+ let release;const gate=new Promise(r=>{release=r;});
+ await page.route('**/api/agent/chat',async route=>{await gate;await route.continue();});
+ await page.getByRole('button',{name:'ตรวจสุขภาพกระเป๋า',exact:true}).click();
+ await page.getByRole('tab',{name:'Debug',exact:true}).click();
+ await page.locator('u-guardian #debug-status').filter({hasText:'กำลังทำงาน'}).waitFor();
+ assert.equal(await page.getByRole('button',{name:'ล้าง log',exact:true}).isDisabled(),true);
+ release();await page.waitForFunction(()=>!document.querySelector('u-guardian').busy);
+ assert.equal(await page.locator('u-guardian .debug-run').count(),1);
+ await page.locator('u-guardian .debug-event').filter({hasText:'Local demo rules'}).locator('summary').click();
+ await page.locator('u-guardian .debug-event[data-type="tool.result"]>summary').click();
+ assert.match(await page.locator('u-guardian #debug-log').textContent(),/assess_wallet/);
+ assert.match(await page.locator('u-guardian #debug-log').textContent(),/Request finished/);
+ fs.mkdirSync('.impeccable/review',{recursive:true});
+ await page.screenshot({path:'.impeccable/review/debug-desktop.png',fullPage:true});
+ await page.setViewportSize({width:390,height:844});
+ await page.screenshot({path:'.impeccable/review/debug-mobile.png',fullPage:true});
+ assert.ok(await page.locator('u-guardian #chat-dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+ assert.ok(await page.locator('u-guardian #debug-panel').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+ // Backend validation errors are visible in the same log, without a successful answer.
+ await page.evaluate(async()=>{try{await document.querySelector('u-guardian').request('agent/chat',{message:''});}catch{}});
+ await page.locator('u-guardian .debug-run[data-status="error"]').waitFor();
+ assert.match(await page.locator('u-guardian .debug-run').first().textContent(),/Request finished/);
+ // Untrusted provider output must remain text.
+ await page.evaluate(()=>{const w=document.querySelector('u-guardian');w.debugRuns[0].trace.events.push({seq:99,label:'<img src=x onerror=alert(1)>',type:'fixture',elapsedMs:0,data:{text:'<script>bad()</script>'}});w.renderDebug();});
+ assert.equal(await page.locator('u-guardian #debug-log img,u-guardian #debug-log script').count(),0);
+ await page.getByRole('tab',{name:'Debug',exact:true}).focus();await page.keyboard.press('ArrowLeft');
+ assert.equal(await page.getByRole('tab',{name:'แชต',exact:true}).getAttribute('aria-selected'),'true');
+ await page.getByRole('tab',{name:'Debug',exact:true}).click();await page.getByRole('button',{name:'ล้าง log',exact:true}).click();
+ assert.equal(await page.locator('u-guardian .debug-run').count(),0);
+ await page.getByRole('checkbox',{name:'Debug',exact:true}).uncheck();
+ assert.equal(await page.locator('u-guardian #agent-tabs').isVisible(),false);
+ await page.getByRole('button',{name:'ตรวจสุขภาพกระเป๋า',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('u-guardian').busy);
+ assert.equal(await page.evaluate(()=>document.querySelector('u-guardian').debugRuns.length),0);
+ await page.keyboard.press('Escape');assert.equal(await page.locator('u-guardian #launcher').evaluate(e=>e===e.getRootNode().activeElement),true);
+ assert.deepEqual(errors,[]);console.log('PASS: debug opt-in, pending/completed/error logs, tool data, safe text, keyboard tabs, clear/off, desktop/mobile layout');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1);});

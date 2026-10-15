@@ -1,3 +1,4 @@
+import {createDebug,debugEvent} from './debug.mjs';
 import {planWithUbot} from './planner.mjs';
 import {createGuardian} from './guardian-service.mjs';
 import http from 'node:http';
@@ -96,7 +97,7 @@ async function chat(message) {
   return { text: reply, verifiedSummary, trace, mode, dataMode, simulation: plan.tool === 'simulate_reserve_topup' ? result : null, state: snapshot() };
 }
 
-const handler = async (req,res) => {
+const coreHandler = async (req,res) => {
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','no-referrer');
   res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
@@ -114,11 +115,13 @@ const handler = async (req,res) => {
       busy = true; locked = true;
       if (pathname === '/api/transcribe') {
         const bytes = await readBody(req, cloud?4000000:8000000);
+        debugEvent('request.input','Audio input',{bytes:bytes.length,mime:req.headers['content-type']});
         const text = await transcribe(config, bytes, req.headers['content-type'] || 'audio/webm');
         return json(res,200,{text});
       }
       if (!(req.headers['content-type'] || '').includes('application/json')) throw new Error('Expected JSON');
       const p = JSON.parse((await readBody(req)).toString() || '{}');
+      debugEvent('request.input','Request input',p);
       if(pathname==='/api/agent/chat')return json(res,200,{...await guardian.message(p.message),state:snapshot()});
       if(pathname==='/api/agent/brief')return json(res,200,{...await guardian.brief(),state:snapshot()});
       if(pathname==='/api/agent/ack')return json(res,200,await guardian.acknowledge());
@@ -188,7 +191,7 @@ const handler = async (req,res) => {
       }
       if (pathname === '/api/speech') {
         if (typeof p.text !== 'string' || !p.text.trim()) throw new Error('ไม่มีข้อความให้อ่าน');
-        const bytes=await speech(config,p.text); res.writeHead(200,{'Content-Type':'audio/mpeg','Cache-Control':'no-store'}); return res.end(bytes);
+        const bytes=await speech(config,p.text); if(req.headers['x-guardian-debug']==='1')return json(res,200,{audio:bytes.toString('base64'),mime:'audio/mpeg'});res.writeHead(200,{'Content-Type':'audio/mpeg','Cache-Control':'no-store'}); return res.end(bytes);
       }
       return json(res,404,{error:'Unknown API route'});
     }
@@ -205,6 +208,20 @@ const handler = async (req,res) => {
     if (pathname === '/api/test/tokenomist') config.tokenomistStatus='error';
     json(res,400,{error:e.name === 'TimeoutError' ? 'Provider ตอบช้าเกินเวลาที่กำหนด กรุณาลองใหม่' : e.message});
   } finally { if (locked) busy=false; }
+};
+// Use the same buffered JSON response locally and on Vercel. A trace belongs only
+// to this request and is returned after it completes, including handled failures.
+const handler=async(req,res)=>{
+ const path=new URL(req.url,'http://localhost').pathname;
+ if(req.headers['x-guardian-debug']!=='1'||req.method!=='POST'||!(/^\/api\/agent\/(chat|brief|ack|check|watch\/confirm|watch\/remove)$/.test(path)||['/api/transcribe','/api/speech'].includes(path)))return coreHandler(req,res);
+ const log=createDebug({...config,phoneSecret});let status=200;
+ const output={setHeader:(key,value)=>res.setHeader(key,value),writeHead:(code,headers)=>{status=code;res.writeHead(code,headers);},end:body=>{
+  let result;try{result=JSON.parse(body);}catch{return res.end(body);}
+  log.add(status>=400?'request.error':'request.complete','Request finished',{status,error:result.error,text:result.text,audioBytes:result.audio?Math.floor(result.audio.length*3/4):undefined});
+  return res.end(JSON.stringify({...result,debug:log.finish(status>=400?'error':'complete')}));
+ }};
+ res.setHeader('Cache-Control','private, no-store');
+ return log.run(async()=>{log.add('request.start','Request started',{path,mode:config.mode,dataMode});await coreHandler(req,output);});
 };
 const callback=async(req,res)=>{
   if(req.url!=='/phone/tool'||req.method!=='POST')return json(res,404,{error:'Not found'});

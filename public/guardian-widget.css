@@ -4,3 +4,28 @@
 dialog{color:#203d34;background:var(--paper);width:min(620px,calc(100vw - 28px));max-height:90dvh;margin:auto;padding:0;border:0;border-radius:16px;box-shadow:0 24px 70px #17362933;scrollbar-width:thin;scrollbar-color:#99ad88 transparent}dialog::backdrop{background:#203d3466}.guardian{padding:22px 26px;min-width:0}.stage,.has-chat .stage{display:grid;grid-template-columns:70px 1fr;text-align:left;align-items:center;padding:10px 0}.stage .creature,.has-chat .stage .creature{transform:scale(.38);transform-origin:top left;width:162px;height:186px;margin:0 -92px -115px 0;grid-row:1/3}.stage .welcome{display:none}.stage .phase{margin:6px 0;font-size:13px}.stage .report{justify-self:start;background:none;padding:4px 0;min-height:36px;font-size:13px}.suggestions,.has-chat .suggestions{margin:16px 0}.conversation{max-height:34dvh}.quiet{min-width:44px;min-height:44px}.report span{display:none}.launcher{position:relative;display:block;width:150px;height:144px;padding:0;border:0;border-radius:12px;background:transparent;box-shadow:none;color:#285946}.launcher:hover{filter:none}.perched{display:block;position:absolute;inset:0;pointer-events:none}.perched .creature{display:block;transform:scale(.65);transform-origin:top center;width:162px;height:186px;margin:0 0 0 -6px;transition:transform .25s}.launcher:hover .creature{transform:translateY(-4px) rotate(-4deg) scale(.65)}.launcher-label{position:absolute;top:120px;left:0;right:0;font-size:12px;font-weight:500}.alert-dot{position:absolute;right:24px;top:25px;width:12px;height:12px;background:#a55032;border:2px solid #fffefa;border-radius:50%}.guardian header{position:sticky;top:0;background:var(--paper);z-index:3;padding:0 0 4px}.watch-area{font-size:13px}
 @media(max-width:520px){dialog{max-height:92dvh}.guardian{padding:16px}.conversation{max-height:32dvh}.stage .phase{font-size:12px}.voice-row{gap:8px}.read-setting{margin-left:0}.suggestions button{flex:1}.perched .creature{transform:scale(.65);margin:0 0 0 -6px}.launcher:hover .creature{transform:scale(.65)}}
 .launcher{height:152px}.launcher-label{top:128px;line-height:1.5}
+
+/* Request diagnostics extend the existing chat; off by default. */
+.debug-switch{display:flex;align-items:center;gap:7px;margin-left:auto;font-size:12px;color:var(--muted,#647168);cursor:pointer}
+.debug-switch input{accent-color:#245a43;width:16px;height:16px}
+.agent-tabs{display:flex;gap:20px;border-bottom:1px solid #dce3d9;margin:8px 0 16px}
+.agent-tabs[hidden],#chat-panel[hidden],#debug-panel[hidden]{display:none}
+.agent-tabs button{font:inherit;font-size:14px;background:none;border:0;border-bottom:2px solid transparent;padding:12px 4px;color:#647168;cursor:pointer}
+.agent-tabs button[aria-selected=true]{color:#245a43;border-bottom-color:#245a43;font-weight:600}
+.debug-panel{min-width:0;min-height:280px;max-height:65dvh;overflow-y:auto;overscroll-behavior:contain;padding-right:4px}
+.debug-toolbar{display:flex;align-items:start;gap:12px;justify-content:space-between}
+.debug-toolbar p{margin:0;font-size:13px;line-height:1.6}
+.debug-toolbar button{flex-shrink:0}
+.debug-note,.debug-meta{font-size:11px;line-height:1.6;color:#647168;overflow-wrap:anywhere}
+.debug-note{margin:10px 0 18px}
+.debug-empty{font-size:14px;line-height:1.8;color:#647168;padding:20px 0}
+.debug-run{border-top:1px solid #dce3d9;padding:14px 0;font-size:12px;overflow-wrap:anywhere}
+.debug-run>summary{font-size:13px;font-weight:600;cursor:pointer;line-height:1.7}
+.debug-run[data-status=error]>summary{color:#934d36}
+.debug-meta{display:block;margin:7px 0}
+.debug-event{border-left:1px solid #ccd8c8;padding:8px 0 8px 12px;margin:8px 0}
+.debug-event>summary{cursor:pointer;line-height:1.65}
+.debug-event[data-type$="error"]{border-color:#b65b3e}
+.debug-event pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;max-height:340px;overflow:auto;overscroll-behavior:contain;background:#edf0e8;color:#243b2c;padding:12px;border-radius:6px;font:11px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}
+.agent-tabs button:focus-visible,.debug-panel:focus-visible,.debug-event>summary:focus-visible,.debug-run>summary:focus-visible{outline:2px solid #245a43;outline-offset:3px}
+@media(max-width:480px){.debug-panel{max-height:62dvh}.debug-event{padding-left:8px}.debug-switch{font-size:11px}.debug-event pre{padding:8px}}

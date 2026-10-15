@@ -1,3 +1,4 @@
+import {debugEvent,debugStep} from './debug.mjs';
 import {createAgentState,walletChanges,assessWallet,proposeWatch,confirmWatch,evaluateWatches,runAgent} from './agent.mjs';
 import {tokenCatalog,tokenApi} from './tokenomist.mjs';
 import {parseUnits} from './avalanche.mjs';
@@ -11,19 +12,21 @@ export function createGuardian({saved,config,live,getDemo,getMode,refresh,persis
  const current=()=>getMode()==='demo'?demoWallet():live.snapshot;
  const summary=()=>({goal:agent.goal,rules:agent.rules.filter(r=>r.scope===scope()),notifications:agent.notifications.filter(n=>n.scope===scope()),lastChecked:agent.lastChecked,monitoring:monitoring(),history:agent.history,baselineAt:agent.baseline?.address===current()?.address?agent.baseline?.fetchedAt:null});
  async function check({refreshWallet=true}={}){
-  if(getMode()==='live'&&refreshWallet){if(!live.settings.address)throw new Error('เชื่อม public wallet ในการตั้งค่าก่อน');await refresh();}
-  const newNotifications=evaluateWatches(agent,current(),getMode()==='live'?live.supply:null,scope());await persist();return {...summary(),newNotifications};
+  if(getMode()==='live'&&refreshWallet){if(!live.settings.address)throw new Error('เชื่อม public wallet ในการตั้งค่าก่อน');await debugStep('process','Refresh wallet and supply',{},refresh);}
+  debugEvent('process.start','Evaluate watches',{scope:scope(),refreshWallet});
+  const newNotifications=evaluateWatches(agent,current(),getMode()==='live'?live.supply:null,scope());debugEvent('process.result','Evaluate watches',{newNotifications});await debugStep('process','Save session',{},persist);return {...summary(),newNotifications};
  }
- async function brief(){await check();const wallet=current(),changes=walletChanges(agent.baseline,wallet);const health=assessWallet(wallet,agent.goal);
+ async function brief(){debugEvent('agent.start','Local briefing (no U-bot call)',{dataMode:getMode()});await check();const wallet=current(),changes=walletChanges(agent.baseline,wallet);const health=assessWallet(wallet,agent.goal);
   const text=changes.status==='baseline-needed'?'ยินดีที่ได้รู้จักครับ นี่คือข้อมูลกระเป๋าที่อ่านได้ครั้งแรก เริ่มจากตรวจสุขภาพ ถามเรื่องเหรียญที่สนใจ หรือฝากผมติดตามได้เลย':changes.changes.length?`พบจำนวนเหรียญเปลี่ยนไป ${changes.changes.length} รายการครับ เปิดดูหลักฐานด้านล่าง หรือถามผมให้เจาะรายการที่สนใจได้เลย`:'จากสินทรัพย์ที่อ่านได้ จำนวนเหรียญยังเท่าเดิมเมื่อเทียบกับรายงานครั้งก่อนครับ ถ้าต้องการดูรายละเอียด ถามผมต่อได้เลย';
   const result={text:(getMode()==='demo'?'นี่เป็นการสาธิตด้วยข้อมูลจำลองครับ ':'')+text,evidence:[{tool:'investigate_changes',result:changes},{tool:'assess_wallet',result:health}],proposals:[],trace:[],mode:'briefing',dataMode:getMode()};
+  debugEvent('tool.result','investigate_changes',{result:changes});debugEvent('tool.result','assess_wallet',{result:health});debugEvent('agent.answer','Local briefing',{text:result.text});
   // Acknowledge only the snapshot actually included in this returned briefing.
-  agent.pendingBrief={wallet,at:now()};await persist();return result;
+  agent.pendingBrief={wallet,at:now()};await debugStep('process','Save session',{},persist);return result;
  }
- async function acknowledge(){if(agent.pendingBrief){agent.baseline=agent.pendingBrief.wallet;agent.pendingBrief=null;await persist();}return summary();}
+ async function acknowledge(){if(agent.pendingBrief){agent.baseline=agent.pendingBrief.wallet;agent.pendingBrief=null;await debugStep('process','Save session',{},persist);}return summary();}
  async function message(message){
   let refreshed=false;const known=new Set(getMode()==='live'?(live.supply?.coverage||[]).map(x=>x.tokenId).filter(Boolean):['avalanche-2','usd-coin']);
-  const wallet=async()=>{if(!refreshed){if(getMode()==='live'){if(!live.settings.address)throw new Error('ยังไม่ได้เชื่อม public wallet');await refresh();}refreshed=true;}return current();};
+  const wallet=async()=>{if(!refreshed){if(getMode()==='live'){if(!live.settings.address)throw new Error('ยังไม่ได้เชื่อม public wallet');await debugStep('process','Refresh wallet and supply',{},refresh);}refreshed=true;}return current();};
   const tools={
    get_wallet:wallet,
    assess_wallet:async()=>assessWallet(await wallet(),agent.goal),
@@ -42,12 +45,14 @@ export function createGuardian({saved,config,live,getDemo,getMode,refresh,persis
   else{
    if(typeof message!=='string'||!message.trim()||message.length>2000)throw new Error('ระบุข้อความไม่เกิน 2,000 ตัวอักษร');
    const tool=/ติดตาม|เตือน|watch/i.test(message)?'propose_watch':/เปลี่ยน|เกิดอะไร|change/i.test(message)?'investigate_changes':/ซื้อ|ขาย|เก็บออม|ถือ|ลงทุน/i.test(message)?null:'assess_wallet';
-   const evidence=tool?[{tool,result:await tools[tool](tool==='propose_watch'?{kind:'wallet_change',label:'แจ้งเมื่อจำนวนสินทรัพย์ในกระเป๋าเปลี่ยน'}:{})}]:[];
+   debugEvent('agent.decision','Local demo rules (no U-bot call)',{tool,dataMode:getMode()});
+   const evidence=tool?[{tool,result:await debugStep('tool',tool,tool==='propose_watch'?{kind:'wallet_change',label:'แจ้งเมื่อจำนวนสินทรัพย์ในกระเป๋าเปลี่ยน'}:{},()=>tools[tool](tool==='propose_watch'?{kind:'wallet_change',label:'แจ้งเมื่อจำนวนสินทรัพย์ในกระเป๋าเปลี่ยน'}:{}))}]:[];
    result={text:tool==='propose_watch'?'ผมเตรียมเงื่อนไขติดตามไว้แล้วครับ ตรวจขอบเขตด้านล่างก่อนกดบันทึก':tool==='investigate_changes'?'เทียบจำนวนเหรียญกับรายงานที่รับทราบครั้งก่อนแล้วครับ ดูรายการด้านล่างได้เลย':tool?'ตรวจข้อมูลที่มีให้แล้วครับ การตรวจนี้ยังไม่ครอบคลุมสิทธิ์ใช้เหรียญและสถานะ DeFi':'คุณตั้งใจถือประมาณนานแค่ไหน และเงินส่วนนี้ต้องใช้เมื่อไรครับ? เปิด U-bot ในการตั้งค่าเพื่อคุยและค้นข้อมูล Tokenomist จริง โหมดตัวอย่างนี้ไม่แนะนำเหรียญหรือจังหวะซื้อขาย',evidence,proposals:tool==='propose_watch'?[evidence[0].result]:[],trace:evidence.map(e=>({name:e.tool,source:'Local rules · '+getMode(),detail:JSON.stringify(e.result)})),mode:'demo',dataMode:getMode()};
+   debugEvent('agent.answer','Local answer',{text:result.text});
    agent.history.push({role:'user',text:message},{role:'assistant',text:result.text});agent.history=agent.history.slice(-12);
   }
   // A failed refresh must not generate alerts from the retained, stale snapshot.
-  if(getMode()==='demo'||!live.error)await check({refreshWallet:false});await persist();return result;
+  if(getMode()==='demo'||!live.error)await check({refreshWallet:false});await debugStep('process','Save session',{},persist);return result;
  }
- return {agent,summary,current,check,brief,acknowledge,message,async confirm(id){const r=confirmWatch(agent,id,scope());r.baseline=current()?structuredClone(current()):null;await persist();return summary();},async remove(id){const r=agent.rules.find(r=>r.id===id&&r.scope===scope());if(!r)throw new Error('ไม่พบเงื่อนไข');r.active=false;await persist();return summary();},async goal(p){for(const k of ['purpose','horizon','risk']){if(typeof p[k]!=='string'||p[k].length>180)throw new Error('ข้อมูลเป้าหมายไม่ถูกต้อง');}agent.goal={purpose:p.purpose,horizon:p.horizon,risk:p.risk};await persist();return summary();}};
+ return {agent,summary,current,check,brief,acknowledge,message,async confirm(id){const r=confirmWatch(agent,id,scope());r.baseline=current()?structuredClone(current()):null;await debugStep('process','Save session',{},persist);return summary();},async remove(id){const r=agent.rules.find(r=>r.id===id&&r.scope===scope());if(!r)throw new Error('ไม่พบเงื่อนไข');r.active=false;await debugStep('process','Save session',{},persist);return summary();},async goal(p){for(const k of ['purpose','horizon','risk']){if(typeof p[k]!=='string'||p[k].length>180)throw new Error('ข้อมูลเป้าหมายไม่ถูกต้อง');}agent.goal={purpose:p.purpose,horizon:p.horizon,risk:p.risk};await debugStep('process','Save session',{},persist);return summary();}};
 }

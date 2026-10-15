@@ -1,3 +1,4 @@
+import {debugEvent,debugStep} from './debug.mjs';
 import { randomUUID } from 'node:crypto';
 const integrationGuard = 'IMPORTANT U-GUARDIAN CONTRACT: When asked for a tool plan, return ONLY the requested JSON. When asked for an explanation, use concise Thai WITHOUT NUMBERS OR CURRENCY NAMES. The UI shows verified tool numbers separately. coverage is a percentage; remaining is the shortfall to goal, not wallet balance. Respect the evidence data mode: simulated or live read-only. Never call simulated data live, or live data simulated. Only a prepared action draft needs UI confirmation; assessment and simulation do not execute actions. Never claim a real transfer.\n';
 const guardedPrompt = integrationGuard + '\n{{prompt}}\n\nTool plan = JSON only. Explanation = Thai, no numbers, no currency names; respect data provenance.';
@@ -38,11 +39,12 @@ export async function ubot(config, prompt, timeout=60000) {
   let template;
   try { template = JSON.parse(config.ubotTemplate); } catch { throw new Error('U-bot payload template ไม่ใช่ JSON'); }
   if (!config.ubotTemplate.includes('{{prompt}}')) throw new Error('Payload ต้องมี {{prompt}} ในตำแหน่งข้อความ');
-  const res = await fetch('https://u.bot/api/chat', { method: 'POST', redirect: 'error',
+  const payload=fill(template,prompt,randomUUID());
+  const res = await debugStep('provider','U-bot HTTP',{url:'https://u.bot/api/chat',method:'POST',payload},()=>fetch('https://u.bot/api/chat', { method: 'POST', redirect: 'error',
     headers: { Authorization: `Bearer ${config.ubotToken}`, 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' },
-    body: JSON.stringify(fill(template, prompt, randomUUID())), signal: AbortSignal.timeout(timeout) });
+    body: JSON.stringify(payload), signal: AbortSignal.timeout(timeout) }).then(async res=>({ok:res.ok,status:res.status,contentType:res.headers.get('content-type')||'',body:await res.text()})));
   if (!res.ok) throw new Error(`U-bot HTTP ${res.status}: ตรวจ token และ payload จากเว็บอีกครั้ง`);
-  const text = parseReply(await res.text(), res.headers.get('content-type') || '');
+  const text = parseReply(res.body, res.contentType);
   if (!text.trim()) throw new Error('ยังอ่าน response ของ U-bot รูปแบบนี้ไม่ได้ ต้องปรับ adapter ตาม response จริง');
   return text.slice(0, 12000);
 }
@@ -62,7 +64,9 @@ export async function verifyUbotConnection(config, input={}, call=ubot) {
 }
 async function eleven(config, path, options = {}) {
   if (!config.elevenKey) throw new Error('ยังไม่ได้ตั้ง ElevenLabs API key');
+  debugEvent('provider.request','ElevenLabs HTTP',{path,method:options.method||'GET',body:typeof options.body==='string'?options.body:options.body instanceof FormData?{model:options.body.get('model_id'),audioBytes:options.body.get('file')?.size}:undefined});
   const res = await fetch(`https://api.elevenlabs.io${path}`, { ...options, redirect: 'error', headers: { ...options.headers, 'xi-api-key': config.elevenKey }, signal: AbortSignal.timeout(30000) });
+  debugEvent('provider.response','ElevenLabs HTTP',{path,status:res.status});
   if (!res.ok) throw new Error(`ElevenLabs HTTP ${res.status}: ตรวจ API key, สิทธิ์, voice/model และเครดิต`);
   return res;
 }
@@ -76,12 +80,12 @@ export async function speech(config, text) {
   const res = await eleven(config, `/v1/text-to-speech/${encodeURIComponent(config.voiceId)}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
     body: JSON.stringify({ text: text.slice(0, 2500), model_id: config.ttsModel }) });
-  return Buffer.from(await res.arrayBuffer());
+  const bytes=Buffer.from(await res.arrayBuffer());debugEvent('voice.result','Speech generated',{bytes:bytes.length,mime:'audio/mpeg'});return bytes;
 }
 export async function transcribe(config, bytes, mime) {
   const form = new FormData();
   form.append('model_id', config.sttModel);
   form.append('file', new Blob([bytes], { type: mime }), mime.includes('mp4') ? 'voice.mp4' : 'voice.webm');
   const res = await eleven(config, '/v1/speech-to-text', { method: 'POST', body: form });
-  return (await res.json()).text;
+  const result=await res.json();debugEvent('voice.result','Speech transcribed',result);return result.text;
 }

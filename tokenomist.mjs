@@ -1,8 +1,10 @@
+import {debugStep} from './debug.mjs';
 import {createHash} from 'node:crypto';
 const cache=new Map();
 const num=value=>value!=null&&Number.isFinite(Number(value))&&Number(value)>=0?Number(value):null;
 export function clearTokenCache(){cache.clear();}
-export async function tokenApi(key,path,fetcher=fetch,ttl=300000,objectData=false){
+export async function tokenApi(key,path,fetcher=fetch,ttl=300000,objectData=false){return debugStep('provider','Tokenomist',{method:'GET',path},()=>readTokenApi(key,path,fetcher,ttl,objectData));}
+async function readTokenApi(key,path,fetcher,ttl,objectData){
  if(!key)throw new Error('ยังไม่ได้ตั้ง Tokenomist API key');
  const id=createHash('sha256').update(key).digest('hex')+path,prior=cache.get(id);
  if(prior&&Date.now()-prior.at<ttl)return {...prior.value,cached:true};

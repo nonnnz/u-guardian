@@ -2,19 +2,60 @@ const sheet=new URL('./guardian-widget.css',import.meta.url).href;
 const icon=(name)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${({mic:'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/>',send:'<path d="m5 12 7-7 7 7M12 5v15"/>',sound:'<path d="m11 5-6 5H2v4h3l6 5V5Zm4 3a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',close:'<path d="m6 6 12 12M6 18 18 6"/>'})[name]||''}</svg>`;
 const el=(tag,text,cls)=>{const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;};
 export class GuardianWidget extends HTMLElement{
- constructor(){super();this.attachShadow({mode:'open'});this.busy=false;this.audio=null;this.phase='idle';this.controllers=new Set();}
+ constructor(){super();this.attachShadow({mode:'open'});this.busy=false;this.audio=null;this.phase='idle';this.controllers=new Set();this.debugEnabled=false;this.debugRuns=[];}
  connectedCallback(){if(this.booted)return;this.booted=true;this.busy=false;this.render();this.initialize();this.timer=setInterval(()=>this.poll(),60000);}
  disconnectedCallback(){clearInterval(this.timer);this.stopVoice();this.controllers.forEach(c=>c.abort());this.booted=false;}
  async request(route,body,options={}){
   const url=new URL('/api/'+route,location.href);
   const controller=new AbortController();this.controllers.add(controller);
   const timeout=setTimeout(()=>controller.abort(),210000);
-  try{const r=await fetch(url,{method:body===undefined?'GET':'POST',credentials:'same-origin',headers:body===undefined?{}:{'x-guardian-client':'local-poc','Content-Type':options.raw?options.mime:'application/json'},body:body===undefined?undefined:options.raw?body:JSON.stringify(body),signal:controller.signal});if(!r.ok){const e=await r.json().catch(()=>({error:'เชื่อมต่อไม่สำเร็จ'}));throw new Error(e.error||'เชื่อมต่อไม่สำเร็จ');}return options.audio?r.blob():r.json();}finally{clearTimeout(timeout);this.controllers.delete(controller);}
+  const debug=this.debugEnabled&&body!==undefined&&(/^(agent\/(chat|brief|ack|check|watch\/confirm|watch\/remove)|transcribe|speech)$/.test(route));
+  const run=debug?{route,startedAt:Date.now(),status:'pending'}:null;
+  if(run){this.debugRuns.unshift(run);this.debugRuns=this.debugRuns.slice(0,4);this.renderDebug();}
+  try{
+   const r=await fetch(url,{method:body===undefined?'GET':'POST',credentials:'same-origin',headers:body===undefined?{}:{'x-guardian-client':'local-poc','Content-Type':options.raw?options.mime:'application/json',...(debug?{'x-guardian-debug':'1'}:{})},body:body===undefined?undefined:options.raw?body:JSON.stringify(body),signal:controller.signal});
+   const isJson=(r.headers.get('content-type')||'').includes('application/json');
+   const data=isJson?await r.json():null;
+   if(run){run.status=r.ok?'complete':'error';run.durationMs=Date.now()-run.startedAt;run.trace=data?.debug;run.error=data?.error;this.renderDebug();}
+   if(!r.ok)throw new Error(data?.error||'เชื่อมต่อไม่สำเร็จ');
+   if(options.audio){if(data?.audio){const bytes=Uint8Array.from(atob(data.audio),c=>c.charCodeAt(0));return new Blob([bytes],{type:data.mime||'audio/mpeg'});}return r.blob();}
+   return data??r.json();
+  }catch(e){if(run){run.status='error';run.durationMs=Date.now()-run.startedAt;run.error=e.name==='AbortError'?'คำขอหมดเวลาหรือถูกยกเลิก':e.message;this.renderDebug();}throw e;}
+  finally{clearTimeout(timeout);this.controllers.delete(controller);}
  }
+ selectTab(name){
+  for(const tab of ['chat','debug']){const active=tab===name;this.$(tab+'-tab').setAttribute('aria-selected',String(active));this.$(tab+'-tab').tabIndex=active?0:-1;this.$(tab+'-panel').hidden=!active;}
+ }
+ renderDebug(){
+  const list=this.$('debug-log');if(!list)return;list.replaceChildren();
+  const pending=this.debugRuns.some(r=>r.status==='pending');this.$('debug-status').textContent=pending?'กำลังทำงาน · log จะปรากฏเมื่อคำขอจบ':this.debugRuns.length?`แสดง ${this.debugRuns.length} คำขอล่าสุด · เก็บเฉพาะหน้านี้`:'เปิดแล้ว · ลองส่งข้อความหรือใช้เสียงในแท็บแชต';
+  this.$('clear-debug').disabled=pending||!this.debugRuns.length;
+  if(!this.debugRuns.length){list.append(el('p','แต่ละคำขอจะแสดง prompt, คำตอบ U-bot, tool และผลลัพธ์ตามลำดับเวลา รวมถึงข้อผิดพลาด','debug-empty'));return;}
+  for(const [index,run] of this.debugRuns.entries()){
+   const group=el('details',null,'debug-run');group.open=index===0;
+   const state=run.status==='pending'?'กำลังทำงาน':run.status==='error'?'ผิดพลาด':'เสร็จแล้ว';
+   group.dataset.status=run.status;group.append(el('summary',`${run.route} · ${state}${run.durationMs!=null?' · '+(run.durationMs/1000).toFixed(1)+'s':''}`));
+   group.append(el('small',new Date(run.startedAt).toLocaleTimeString('th-TH')+(run.trace?' · '+run.trace.id:''),'debug-meta'));
+   if(run.error)group.append(el('p',run.error,'error'));
+   if(!run.trace)group.append(el('p',run.status==='pending'?'รอผลจากเซิร์ฟเวอร์…':'ไม่มี backend log สำหรับคำขอนี้'));
+   if(run.trace?.limited)group.append(el('p','Log ยาวเกินขอบเขต จึงแสดงข้อมูลบางส่วน'));
+   for(const event of run.trace?.events||[]){
+    const item=el('details',null,'debug-event');item.dataset.type=event.type;
+    const kind={start:'เริ่ม',result:'ผลลัพธ์',error:'ผิดพลาด',request:'ส่งคำขอ',response:'รับคำตอบ'}[event.type.split('.').at(-1)];
+    item.append(el('summary',`${event.seq}. ${event.label}${kind?' · '+kind:''} · +${(event.elapsedMs/1000).toFixed(2)}s`));
+    item.append(el('small',event.type+(event.truncated?' · ข้อมูลถูกตัดให้สั้นลง':''),'debug-meta'),el('pre',JSON.stringify(event.data,null,2)));
+    group.append(item);
+   }
+   list.append(group);
+  }
+ }
+
  emit(name,detail){this.dispatchEvent(new CustomEvent('guardian:'+name,{detail,bubbles:true,composed:true}));}
  $(id){return this.shadowRoot.getElementById(id);}
  render(){this.shadowRoot.innerHTML=`<link rel="stylesheet" href="${sheet}"><dialog id="chat-dialog" aria-label="แชตกับ Guardian"><section class="guardian" aria-label="ผู้ช่วย U-Guardian">
-  <header><span class="wordmark">Guardian<span class="status-dot"></span></span><button id="collapse" class="quiet" aria-label="ย่อผู้ช่วย">${icon('close')}</button></header>
+  <header><span class="wordmark">Guardian<span class="status-dot"></span></span><label class="debug-switch"><input id="debug-enabled" type="checkbox"> Debug</label><button id="collapse" class="quiet" aria-label="ย่อผู้ช่วย">${icon('close')}</button></header>
+  <div id="agent-tabs" class="agent-tabs" role="tablist" aria-label="มุมมองผู้ช่วย" hidden><button id="chat-tab" role="tab" aria-controls="chat-panel" aria-selected="true">แชต</button><button id="debug-tab" role="tab" aria-controls="debug-panel" aria-selected="false" tabindex="-1">Debug</button></div>
+  <div id="chat-panel" role="tabpanel" aria-labelledby="chat-tab">
   <div class="stage" id="stage"><button class="creature" id="mascot" aria-label="ให้ Guardian รายงาน" title="ฟังรายงานของคุณ"><span class="antenna"></span><span class="body"><span class="visor"><i class="eye"></i><i class="eye"></i><span class="mouth"></span></span><span class="cheek left"></span><span class="cheek right"></span><span class="belly"></span></span><span class="hand left"></span><span class="hand right"></span><span class="foot left"></span><span class="foot right"></span></button>
   <div class="welcome"><h1>มีผมอยู่ตรงนี้ครับ</h1><p>เรื่องคริปโตที่สงสัย ถามได้เลย<br>ผมจะช่วยดูจากข้อมูลที่ตรวจสอบได้</p></div>
   <p id="phase" role="status" class="phase">กำลังเชื่อมต่อ…</p><button id="brief" class="report">เล่าให้ฟังว่ามีอะไรใหม่ <span aria-hidden="true">↗</span></button></div>
@@ -22,7 +63,11 @@ export class GuardianWidget extends HTMLElement{
   <div class="suggestions" id="suggestions"><button data-prompt="ช่วยตรวจสุขภาพกระเป๋าให้หน่อย">ตรวจสุขภาพกระเป๋า</button><button data-prompt="ตั้งแต่รายงานครั้งก่อนมีอะไรเปลี่ยนไปบ้าง">มีอะไรเปลี่ยนไป</button><button data-prompt="ช่วยติดตามเมื่อจำนวนสินทรัพย์ในกระเป๋าเปลี่ยน">ฝากติดตาม</button></div>
   <div class="composer-area"><p id="error" class="error" role="alert" hidden></p><form id="composer"><label class="sr" for="input">ถาม Guardian</label><textarea id="input" rows="1" maxlength="2000" placeholder="ถามได้ เช่น อยากเริ่มถือระยะยาว ควรดูอะไร?"></textarea><button id="send" aria-label="ส่งข้อความ">${icon('send')}</button></form><div class="voice-row"><button id="mic" class="voice">${icon('mic')}<span>กดเพื่อพูด</span></button><button id="stop" class="quiet" hidden>${icon('stop')} หยุดเสียง</button><label class="read-setting"><input id="auto-read" type="checkbox"> อ่านคำตอบให้ฟัง</label></div><small id="provenance" class="provenance">U-bot · Avalanche · Tokenomist · ElevenLabs</small></div>
   <details class="watch-area"><summary>เรื่องที่ฝากติดตาม <span id="watch-count">0</span></summary><p id="monitoring"></p><div id="watches"></div><div id="alerts"></div></details>
+  </div><section id="debug-panel" class="debug-panel" role="tabpanel" aria-labelledby="debug-tab" tabindex="0" hidden><div class="debug-toolbar"><p id="debug-status" role="status"></p><button id="clear-debug" class="text-button">ล้าง log</button></div><p class="debug-note">ซ่อน API keys และ token · log มีข้อความสนทนาและข้อมูลกระเป๋า · ไม่ใช่ความคิดภายในของโมเดล</p><div id="debug-log"></div></section>
   </section></dialog><button id="launcher" class="launcher" aria-label="เปิดแชตกับ Guardian" aria-haspopup="dialog" aria-expanded="false"><span class="perched" aria-hidden="true"></span><span class="launcher-label">คุยกับผม</span><span id="alert-dot" class="alert-dot" hidden></span></button>`;
+  this.$('debug-enabled').onchange=e=>{this.debugEnabled=e.target.checked;this.$('agent-tabs').hidden=!this.debugEnabled;if(!this.debugEnabled)this.debugRuns=[];this.selectTab(this.debugEnabled?'debug':'chat');this.renderDebug();};
+  this.$('clear-debug').onclick=()=>{this.debugRuns=[];this.renderDebug();};
+  for(const name of ['chat','debug']){this.$(name+'-tab').onclick=()=>this.selectTab(name);this.$(name+'-tab').onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const target=e.key==='Home'?'chat':e.key==='End'?'debug':name==='chat'?'debug':'chat';this.selectTab(target);this.$(target+'-tab').focus();}};}
   const figure=this.$('mascot').cloneNode(true);figure.removeAttribute('id');figure.removeAttribute('aria-label');figure.removeAttribute('title');figure.tabIndex=-1;
   const drawing=document.createElement('span');drawing.className='creature';drawing.innerHTML=figure.innerHTML;this.shadowRoot.querySelector('.perched').append(drawing);
   this.$('composer').onsubmit=e=>{e.preventDefault();this.send(this.$('input').value);};
@@ -42,7 +87,7 @@ export class GuardianWidget extends HTMLElement{
  setBusy(value){this.busy=value;for(const id of ['send','brief','mascot','mic'])this.$(id).disabled=value;this.shadowRoot.querySelectorAll('[data-prompt]').forEach(b=>b.disabled=value);this.$('input').disabled=value;}
  fail(e){this.$('error').hidden=false;this.$('error').textContent=e.name==='AbortError'?'คำขอใช้เวลานานเกินไป กรุณาลองอีกครั้ง':e.message;this.setPhase('error');this.emit('error',{message:this.$('error').textContent});}
  clearError(){this.$('error').hidden=true;}
- open(){if(this.settingsBusy)return;this.shadowRoot.querySelector('.guardian').hidden=false;if(!this.$('chat-dialog').open)this.$('chat-dialog').showModal();this.$('launcher').setAttribute('aria-expanded','true');this.$('launcher').setAttribute('aria-label','เปิดแชตกับ Guardian');this.$('alert-dot').hidden=true;this.$('input').focus();this.setAttribute('open','');this.emit('visibility',{open:true});}
+ open(){if(this.settingsBusy)return;this.shadowRoot.querySelector('.guardian').hidden=false;if(!this.$('chat-dialog').open)this.$('chat-dialog').showModal();this.$('launcher').setAttribute('aria-expanded','true');this.$('launcher').setAttribute('aria-label','เปิดแชตกับ Guardian');this.$('alert-dot').hidden=true;(this.$('chat-panel').hidden?this.$('debug-panel'):this.$('input')).focus();this.setAttribute('open','');this.emit('visibility',{open:true});}
  close(){this.stopVoice();this.shadowRoot.querySelector('.guardian').hidden=true;this.$('chat-dialog').close();}
  addMessage(role,text){this.shadowRoot.querySelector('.guardian').classList.add('has-chat');const row=el('article',null,'message '+role);row.append(el('small',role==='user'?'คุณ':'Guardian'),el('p',text));this.$('conversation').append(row);while(this.$('conversation').children.length>24)this.$('conversation').firstChild.remove();this.$('conversation').scrollTop=this.$('conversation').scrollHeight;return row;}
  async send(text){if(this.settingsBusy||this.busy||!text?.trim())return;this.stopVoice();this.setBusy(true);this.clearError();this.addMessage('user',text.trim());this.$('input').value='';this.setPhase('thinking');try{const r=await (async()=>{await this.pollPromise;return this.request('agent/chat',{message:text.trim()});})();this.acceptState(r.state);this.showResult(r);this.setPhase('idle');if(this.$('auto-read').checked)await this.speak(r.text);}catch(e){this.fail(e);}finally{this.setBusy(false);}}

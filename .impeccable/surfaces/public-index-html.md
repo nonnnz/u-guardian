@@ -25,3 +25,5 @@ Build path: code-led refinement of the existing warm ivory/forest/sage identity.
 
 The final implementation corrections separate the launcher label from its feet, keep the Settings heading sticky, and lock page scrolling while chat is open. No unresolved visual direction decisions remain for this documentation pass.
 
+
+Debug is an opt-in checkbox in the chat header. Enabling it reveals adjacent Chat / Debug tabs within the same dialog, keeping the incumbent colors, typography and spacing. The diagnostic panel uses expandable requests and timestamped events, with wrapped monospace JSON, visible pending/error/empty states and a clear action. It retains the latest four requests only in browser memory and presents logs after each request completes. Tabs support arrow keys, Home/End and explicit selected state. Disabling Debug clears its logs and returns to Chat. Desktop/mobile captures are debug-desktop.png and debug-mobile.png under the ignored review directory; the browser test covers timing, errors, keyboard navigation, safe text rendering and overflow.
