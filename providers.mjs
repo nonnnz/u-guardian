@@ -1,8 +1,14 @@
+import {providerSignal} from './agent-budget.mjs';
 import {debugEvent,debugStep} from './debug.mjs';
 import { randomUUID } from 'node:crypto';
-const integrationGuard = 'IMPORTANT U-GUARDIAN CONTRACT: When asked for a tool plan, return ONLY the requested JSON. When asked for an explanation, use concise Thai WITHOUT NUMBERS OR CURRENCY NAMES. The UI shows verified tool numbers separately. coverage is a percentage; remaining is the shortfall to goal, not wallet balance. Respect the evidence data mode: simulated or live read-only. Never call simulated data live, or live data simulated. Only a prepared action draft needs UI confirmation; assessment and simulation do not execute actions. Never claim a real transfer.\n';
-const guardedPrompt = integrationGuard + '\n{{prompt}}\n\nTool plan = JSON only. Explanation = Thai, no numbers, no currency names; respect data provenance.';
-export const defaultTemplate = JSON.stringify({ mode: 'fast', sessionId: '{{sessionId}}', messages: [{ role: 'user', content: guardedPrompt }], userText: guardedPrompt });
+const legacyIntegrationGuard = 'IMPORTANT U-GUARDIAN CONTRACT: When asked for a tool plan, return ONLY the requested JSON. When asked for an explanation, use concise Thai WITHOUT NUMBERS OR CURRENCY NAMES. The UI shows verified tool numbers separately. coverage is a percentage; remaining is the shortfall to goal, not wallet balance. Respect the evidence data mode: simulated or live read-only. Never call simulated data live, or live data simulated. Only a prepared action draft needs UI confirmation; assessment and simulation do not execute actions. Never claim a real transfer.\n';
+export const defaultTemplate = JSON.stringify({mode:'professional',sessionId:'{{sessionId}}',messages:[{role:'user',content:'{{prompt}}'}],userText:'{{prompt}}'});
+export function normalizeUbotTemplate(raw=defaultTemplate){
+ let value;try{value=JSON.parse(raw);}catch{return raw;}
+ if(!value||typeof value!=='object'||Array.isArray(value))return raw;
+ const clean=v=>typeof v==='string'?v.replaceAll(legacyIntegrationGuard,'').replaceAll('Tool plan = JSON only. Explanation = Thai, no numbers, no currency names; respect data provenance.','').trim():Array.isArray(v)?v.map(clean):v&&typeof v==='object'?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,clean(x)])):v;
+ return JSON.stringify({...clean(value),mode:'professional'});
+}
 
 function fill(value, prompt, sessionId) {
   if (typeof value === 'string') return value.replaceAll('{{sessionId}}', sessionId).replaceAll('{{prompt}}', prompt);
@@ -21,7 +27,7 @@ export function parseReply(body, contentType = '') {
   if (body.includes('[DEGENERATE]')) throw new Error('U-bot แจ้งว่าคำตอบผิดรูปแบบ กรุณาลองอีกครั้ง');
   body = body.replace(/\[STATUS:\w+\]/g, '').trim();
   if (contentType.includes('text/html') || /^\s*<!doctype html|^\s*<html/i.test(body)) return '';
-  if (contentType.includes('json') && !contentType.includes('event-stream')) return textFrom(JSON.parse(body));
+  if (contentType.includes('json') && !contentType.includes('event-stream')) {const value=JSON.parse(body);return ['tool','answer'].includes(value?.type)?JSON.stringify(value):textFrom(value);}
   if (/^data:/m.test(body) || /^0:/m.test(body)) {
     return body.split(/\r?\n/).map(line => {
       const value = line.startsWith('data:') ? line.slice(5).trim() : line.startsWith('0:') ? line.slice(2) : '';
@@ -37,12 +43,12 @@ export function parseReply(body, contentType = '') {
 export async function ubot(config, prompt, timeout=60000) {
   if (!config.ubotToken) throw new Error('ยังไม่ได้ตั้ง U-bot Bearer token');
   let template;
-  try { template = JSON.parse(config.ubotTemplate); } catch { throw new Error('U-bot payload template ไม่ใช่ JSON'); }
+  try { template = JSON.parse(normalizeUbotTemplate(config.ubotTemplate)); } catch { throw new Error('U-bot payload template ไม่ใช่ JSON'); }
   if (!config.ubotTemplate.includes('{{prompt}}')) throw new Error('Payload ต้องมี {{prompt}} ในตำแหน่งข้อความ');
   const payload=fill(template,prompt,randomUUID());
   const res = await debugStep('provider','U-bot HTTP',{url:'https://u.bot/api/chat',method:'POST',payload},()=>fetch('https://u.bot/api/chat', { method: 'POST', redirect: 'error',
     headers: { Authorization: `Bearer ${config.ubotToken}`, 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' },
-    body: JSON.stringify(payload), signal: AbortSignal.timeout(timeout) }).then(async res=>({ok:res.ok,status:res.status,contentType:res.headers.get('content-type')||'',body:await res.text()})));
+    body: JSON.stringify(payload), signal: providerSignal(timeout) }).then(async res=>({ok:res.ok,status:res.status,contentType:res.headers.get('content-type')||'',body:await res.text()})));
   if (!res.ok) throw new Error(`U-bot HTTP ${res.status}: ตรวจ token และ payload จากเว็บอีกครั้ง`);
   const text = parseReply(res.body, res.contentType);
   if (!text.trim()) throw new Error('ยังอ่าน response ของ U-bot รูปแบบนี้ไม่ได้ ต้องปรับ adapter ตาม response จริง');
@@ -58,14 +64,14 @@ export async function verifyUbotConnection(config, input={}, call=ubot) {
   const template=input.ubotTemplate===undefined?config.ubotTemplate:input.ubotTemplate;
   if(typeof template!=='string'||template.length>16000||!template.includes('{{prompt}}'))throw new Error('U-bot template ต้องมี {{prompt}}');
   try{JSON.parse(template);}catch{throw new Error('U-bot template ต้องเป็น JSON ที่ถูกต้อง');}
-  const candidate={...config,ubotToken:token,ubotTemplate:template};
-  const text=await call(candidate,'ตอบสั้น ๆ ว่า U-Guardian เชื่อมต่อสำเร็จ',25000);
+  const candidate={...config,ubotToken:token,ubotTemplate:normalizeUbotTemplate(template)};
+  const text=await call(candidate,'ตอบสั้น ๆ ว่า U-Guardian เชื่อมต่อสำเร็จ',45000);
   return {text,config:{...candidate,mode:'ubot',ubotStatus:'verified'}};
 }
 async function eleven(config, path, options = {}) {
   if (!config.elevenKey) throw new Error('ยังไม่ได้ตั้ง ElevenLabs API key');
   debugEvent('provider.request','ElevenLabs HTTP',{path,method:options.method||'GET',body:typeof options.body==='string'?options.body:options.body instanceof FormData?{model:options.body.get('model_id'),audioBytes:options.body.get('file')?.size}:undefined});
-  const res = await fetch(`https://api.elevenlabs.io${path}`, { ...options, redirect: 'error', headers: { ...options.headers, 'xi-api-key': config.elevenKey }, signal: AbortSignal.timeout(30000) });
+  const res = await fetch(`https://api.elevenlabs.io${path}`, { ...options, redirect: 'error', headers: { ...options.headers, 'xi-api-key': config.elevenKey }, signal: providerSignal(30000) });
   debugEvent('provider.response','ElevenLabs HTTP',{path,status:res.status});
   if (!res.ok) throw new Error(`ElevenLabs HTTP ${res.status}: ตรวจ API key, สิทธิ์, voice/model และเครดิต`);
   return res;

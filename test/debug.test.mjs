@@ -43,7 +43,7 @@ test('U-bot transport records actual expanded template and raw response without 
  const log=createDebug({ubotToken:'secret-token'});
  await log.run(()=>ubot({ubotToken:'secret-token',ubotTemplate:defaultTemplate},'question'));
  const start=log.events.find(e=>e.type==='provider.start');
- assert.equal(start.data.input.payload.mode,'fast');assert.match(start.data.input.payload.userText,/question/);
+ assert.equal(start.data.input.payload.mode,'professional');assert.match(start.data.input.payload.userText,/question/);
  assert.ok(!start.data.input.payload.userText.includes('{{prompt}}'));
  assert.equal(log.events.find(e=>e.type==='provider.result').data.result.status,200);
  assert.ok(!JSON.stringify(log.events).includes('secret-token'));

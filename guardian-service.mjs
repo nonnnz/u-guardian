@@ -1,5 +1,5 @@
 import {debugEvent,debugStep} from './debug.mjs';
-import {createAgentState,walletChanges,assessWallet,proposeWatch,confirmWatch,evaluateWatches,runAgent} from './agent.mjs';
+import {createAgentState,walletChanges,assessWallet,proposeWatch,confirmWatch,evaluateWatches,runAgent,unsupportedWatchReason,validateWatchIntent} from './agent.mjs';
 import {tokenCatalog,tokenApi} from './tokenomist.mjs';
 import {parseUnits} from './avalanche.mjs';
 
@@ -25,6 +25,7 @@ export function createGuardian({saved,config,live,getDemo,getMode,refresh,persis
  }
  async function acknowledge(){if(agent.pendingBrief){agent.baseline=agent.pendingBrief.wallet;agent.pendingBrief=null;await debugStep('process','Save session',{},persist);}return summary();}
  async function message(message){
+  if(typeof message!=='string'||!message.trim()||message.length>2000)throw new Error('ข้อความต้องมี 1–2,000 ตัวอักษร');
   let refreshed=false;const known=new Set(getMode()==='live'?(live.supply?.coverage||[]).map(x=>x.tokenId).filter(Boolean):['avalanche-2','usd-coin']);
   const wallet=async()=>{if(!refreshed){if(getMode()==='live'){if(!live.settings.address)throw new Error('ยังไม่ได้เชื่อม public wallet');await debugStep('process','Refresh wallet and supply',{},refresh);}refreshed=true;}return current();};
   const tools={
@@ -37,11 +38,13 @@ export function createGuardian({saved,config,live,getDemo,getMode,refresh,persis
     const paths={allocations:`/v5/allocations/${tokenId}`,fundraising:`/v5/fundraising/token/${tokenId}`,buybacks:`/v5/buyback/${tokenId}`,burns:`/v5/burn/${tokenId}`};
     const rows=await Promise.allSettled(Object.entries(paths).map(async([name,path])=>({name,...await tokenApi(config.tokenomistKey,path,fetch,300000,true)})));
     return {source:'Tokenomist v5',tokenId,sourceUrl:'https://tokenomist.ai/'+encodeURIComponent(tokenId),datasets:rows.map((r,i)=>r.status==='fulfilled'?{name:r.value.name,fetchedAt:r.value.fetchedAt,data:r.value.data}:{name:Object.keys(paths)[i],status:'unavailable',error:r.reason.message}),note:'สิทธิ์และความครอบคลุมต่างกันตามชุดข้อมูล; buyback ไม่เท่ากับ burn; allocations ไม่ใช่รายชื่อผู้ถือปัจจุบัน; ไม่มีข้อมูลตลาดเพียงพอสำหรับจังหวะซื้อขาย'};},
-   propose_watch:args=>{if(getMode()==='live'&&!live.settings.address&&args.kind!=='review_date')throw new Error('เชื่อมกระเป๋าก่อนตั้งเงื่อนไขติดตามกระเป๋าหรือ supply');return {...proposeWatch(agent,args,scope()),monitoring:monitoring()};},
+   propose_watch:args=>{validateWatchIntent(args,message);if(getMode()==='live'&&!live.settings.address&&args.kind!=='review_date')throw new Error('เชื่อมกระเป๋าก่อนตั้งเงื่อนไขติดตามกระเป๋าหรือ supply');return {...proposeWatch(agent,args,scope()),monitoring:monitoring()};},
    list_watches:()=>summary()
   };
   let result;
-  if(config.mode==='ubot')result=await runAgent({message,config,agent,tools,context:{dataMode:getMode(),goal:agent.goal,wallet:live.settings.address||null,monitoring:monitoring()},maxSteps:5,...(call?{call}:{})});
+  const unsupported=unsupportedWatchReason(message);
+  if(unsupported){result={text:unsupported,trace:[],evidence:[],proposals:[],mode:'capability-check',dataMode:getMode()};debugEvent('agent.guard','Unsupported watch condition',{message});agent.history.push({role:'user',text:message},{role:'assistant',text:unsupported});agent.history=agent.history.slice(-12);}
+  else if(config.mode==='ubot')result=await runAgent({message,config,agent,tools,context:{dataMode:getMode(),goal:agent.goal,wallet:live.settings.address||null,monitoring:monitoring()},maxSteps:5,...(call?{call}:{})});
   else{
    if(typeof message!=='string'||!message.trim()||message.length>2000)throw new Error('ระบุข้อความไม่เกิน 2,000 ตัวอักษร');
    const tool=/ติดตาม|เตือน|watch/i.test(message)?'propose_watch':/เปลี่ยน|เกิดอะไร|change/i.test(message)?'investigate_changes':/ซื้อ|ขาย|เก็บออม|ถือ|ลงทุน/i.test(message)?null:'assess_wallet';

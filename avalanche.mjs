@@ -1,3 +1,4 @@
+import {providerSignal} from './agent-budget.mjs';
 import {debugStep} from './debug.mjs';
 import { randomUUID } from 'node:crypto';
 
@@ -25,7 +26,7 @@ export function formatUnits(value, decimals=18) {
 export async function rpc(chainId,method,params=[],fetcher=fetch){return debugStep('provider','Avalanche RPC',{chainId,method,params},()=>readRpc(chainId,method,params,fetcher));}
 async function readRpc(chainId, method, params, fetcher) {
   const id=chain(chainId);
-  const res=await fetcher(CHAINS[id].rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(15000),redirect:'error'});
+  const res=await fetcher(CHAINS[id].rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:providerSignal(15000),redirect:'error'});
   if(!res.ok)throw new Error(`Avalanche RPC HTTP ${res.status}`);
   const data=await res.json();
   if(data.error || data.result===undefined)throw new Error(`Avalanche RPC ${method} ไม่สำเร็จ${data.error?.code?' ('+data.error.code+')':''}`);
@@ -34,7 +35,7 @@ async function readRpc(chainId, method, params, fetcher) {
 export async function dataApi(key,path,fetcher=fetch){return debugStep('provider','Avalanche Data API',{method:'GET',path},()=>readDataApi(key,path,fetcher));}
 async function readDataApi(key,path,fetcher) {
   if(!key)throw new Error('ยังไม่มี Avalanche Data API key');
-  const res=await fetcher('https://data-api.avax.network'+path,{headers:{Accept:'application/json','x-glacier-api-key':key},signal:AbortSignal.timeout(15000),redirect:'error'});
+  const res=await fetcher('https://data-api.avax.network'+path,{headers:{Accept:'application/json','x-glacier-api-key':key},signal:providerSignal(15000),redirect:'error'});
   if(!res.ok)throw new Error(`Avalanche Data API HTTP ${res.status}${res.status===429?' — เกิน quota ให้รอก่อนรีเฟรช':''}`);
   return res.json();
 }
