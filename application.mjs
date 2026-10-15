@@ -1,4 +1,5 @@
 import {planWithUbot} from './planner.mjs';
+import {createGuardian} from './guardian-service.mjs';
 import http from 'node:http';
 import {join} from 'node:path';
 import {loadEnv,saveProviderEnv,localStore} from './storage.mjs';
@@ -31,12 +32,13 @@ const config={ubotToken:env.UBOT_TOKEN||'',ubotTemplate:env.UBOT_TEMPLATE_BASE64
  ttsModel:env.ELEVENLABS_TTS_MODEL||'eleven_v3',sttModel:env.ELEVENLABS_STT_MODEL||'scribe_v2',mode:env.GUARDIAN_AGENT_MODE==='ubot'?'ubot':'demo',
  ubotStatus:'untested',elevenStatus:'untested',avalancheStatus:'untested',tokenomistStatus:'untested',...options.config};
 let busy=false;
-const persist=()=>store.save({version:1,dataMode,live,phone,...(cloud?{demo:state}:{})});
+const persist=()=>store.save({version:2,dataMode,live,phone,agent:guardian.agent,...(cloud?{demo:state}:{})});
 const saveConfig=()=>options.saveConfig?options.saveConfig(config):saveProviderEnv(envPath,config);
 const status=()=>({ubotConfigured:!!config.ubotToken,ubotStatus:config.ubotStatus,elevenConfigured:!!config.elevenKey,elevenStatus:config.elevenStatus,
  avalancheConfigured:!!config.avalancheKey,avalancheStatus:config.avalancheStatus,tokenomistConfigured:!!config.tokenomistKey,tokenomistStatus:config.tokenomistStatus,
  voiceId:config.voiceId,ubotTemplate:config.ubotTemplate,mode:config.mode,ttsModel:config.ttsModel,sttModel:config.sttModel,storage:cloud?'private-session':'.env',deployment:cloud?'vercel':'local'});
-const snapshot=()=>({...state,assessment:assessment(state),integration:status(),dataMode,live:{...live,stale:!fresh(live.snapshot),risk:personalizedRisk(live)},phone:publicPhone(phone,config)});
+const guardian=createGuardian({saved:saved?.agent,config,live,getDemo:()=>state,getMode:()=>dataMode,refresh:()=>refreshAll(),persist,cloud});
+const snapshot=()=>({...state,assessment:assessment(state),integration:status(),dataMode,live:{...live,stale:!fresh(live.snapshot),risk:personalizedRisk(live)},phone:publicPhone(phone,config),guardian:guardian.summary()});
 async function refreshSupply(){
  if(!live.snapshot)throw new Error('อ่าน wallet ก่อน');
  try{live.supply=await readSupply(live.snapshot,config.tokenomistKey,live.settings,live.mappings);if(['ok','partial'].includes(live.supply.status))config.tokenomistStatus='verified';}
@@ -117,6 +119,14 @@ const handler = async (req,res) => {
       }
       if (!(req.headers['content-type'] || '').includes('application/json')) throw new Error('Expected JSON');
       const p = JSON.parse((await readBody(req)).toString() || '{}');
+      if(pathname==='/api/agent/chat')return json(res,200,{...await guardian.message(p.message),state:snapshot()});
+      if(pathname==='/api/agent/brief')return json(res,200,{...await guardian.brief(),state:snapshot()});
+      if(pathname==='/api/agent/ack')return json(res,200,await guardian.acknowledge());
+      if(pathname==='/api/agent/check')return json(res,200,await guardian.check());
+      if(pathname==='/api/agent/watch/confirm')return json(res,200,await guardian.confirm(p.id));
+      if(pathname==='/api/agent/watch/remove')return json(res,200,await guardian.remove(p.id));
+      if(pathname==='/api/agent/goal')return json(res,200,await guardian.goal(p));
+      if(pathname==='/api/agent/demo-event'){requireDemo();state.assets.find(a=>a.symbol==='USDC').units-=25;state.history.unshift({id:crypto.randomUUID(),kind:'agent-demo',at:new Date().toISOString()});await guardian.check({refreshWallet:false});return json(res,200,snapshot());}
       if (pathname === '/api/profile') { requireDemo();updateProfile(state,p); return json(res,200,snapshot()); }
       if (pathname === '/api/trigger') {requireDemo();return json(res,200,{...triggerIncident(state), state:snapshot()});}
       if (pathname === '/api/reset') { requireDemo();state = createState(); return json(res,200,snapshot()); }
@@ -175,7 +185,7 @@ const handler = async (req,res) => {
       }
       return json(res,404,{error:'Unknown API route'});
     }
-    const files = { '/':'index.html', '/app.js':'app.js', '/live-ui.js':'live-ui.js', '/system-ui.js':'system-ui.js', '/style.css':'style.css' };
+    const files = { '/':'index.html','/index.html':'index.html','/settings.html':'settings.html','/embed-example.html':'embed-example.html','/guardian-widget.js':'guardian-widget.js','/guardian-widget.css':'guardian-widget.css','/shell.js':'shell.js','/shell.css':'shell.css', '/app.js':'app.js', '/live-ui.js':'live-ui.js', '/system-ui.js':'system-ui.js', '/style.css':'style.css' };
     if (req.method !== 'GET' || !files[pathname]) return json(res,404,{error:'Not found'});
     const file = files[pathname];
     const bytes = await readFile(fileURLToPath(new URL(`./public/${file}`,import.meta.url)));
@@ -194,6 +204,6 @@ const callback=async(req,res)=>{
   if(busy)return json(res,409,{error:'Guardian is refreshing. Ask again shortly.'});
   busy=true;try{const body=JSON.parse((await readBody(req,10000)).toString());const result=await chat(body.message);return json(res,200,{answer:result.text,verifiedSummary:result.verifiedSummary,evidence:result.trace,action:'No funds moved. Review any proposal in the web app.'});}catch(e){return json(res,400,{error:e.message});}finally{busy=false;}
 };
-return {handler,callback,persist,config,monitor(){setInterval(async()=>{if(busy||dataMode!=='live'||!live.settings.monitor||!live.settings.address)return;busy=true;try{await refreshAll();const block=callBlock(phone,live,config);phone.error=phone.settings.enabled?block:null;if(!block)await placeCall(phone,live,config,persist);await persist();}catch(e){phone.error=e.message;await persist().catch(()=>{});}finally{busy=false;}},60000).unref();
+return {handler,callback,persist,config,monitor(){setInterval(async()=>{if(busy||dataMode!=='live'||!(live.settings.monitor||guardian.agent.rules.some(r=>r.active))||!live.settings.address)return;busy=true;try{await guardian.check();const block=callBlock(phone,live,config);phone.error=phone.settings.enabled?block:null;if(!block)await placeCall(phone,live,config,persist);await persist();}catch(e){phone.error=e.message;await persist().catch(()=>{});}finally{busy=false;}},60000).unref();
 }};
 }

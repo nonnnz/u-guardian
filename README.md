@@ -1,3 +1,12 @@
+# U-Guardian embedded companion
+
+The current landing page is a mascot-led, voice-enabled agent widget with a minimal wallet host. See [EMBEDDING.md](EMBEDDING.md) for installation, transport/authentication boundaries, events, endpoints, and current monitoring limitations. Try `/embed-example.html` for the same component in a separate host. Existing integrations and advanced tools live at `/settings.html`.
+
+The agent can inspect wallet health, investigate quantity changes since the last acknowledged briefing, research Tokenomist datasets, and draft watch rules for explicit user confirmation. U-bot selects multiple tools based on prior results; ElevenLabs handles push-to-talk and spoken answers. The public demo does not yet deliver SMS/Web Push or monitor continuously while closed. No automated trading, approvals audit or DeFi analysis is claimed.
+
+The earlier POC details below document the preserved advanced tools.
+
+---
 # U-Guardian — wallet risk assistant
 
 A Thai-first financial assistant: Avalanche wallet evidence → personal reserve rules → Tokenomist context → U-bot explanation → ElevenLabs voice → explicit user review. Runs locally or on Vercel with Node.js 24.

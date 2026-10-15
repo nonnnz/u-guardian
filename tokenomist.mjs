@@ -2,13 +2,13 @@ import {createHash} from 'node:crypto';
 const cache=new Map();
 const num=value=>value!=null&&Number.isFinite(Number(value))&&Number(value)>=0?Number(value):null;
 export function clearTokenCache(){cache.clear();}
-export async function tokenApi(key,path,fetcher=fetch,ttl=300000){
+export async function tokenApi(key,path,fetcher=fetch,ttl=300000,objectData=false){
  if(!key)throw new Error('ยังไม่ได้ตั้ง Tokenomist API key');
  const id=createHash('sha256').update(key).digest('hex')+path,prior=cache.get(id);
  if(prior&&Date.now()-prior.at<ttl)return {...prior.value,cached:true};
  const res=await fetcher('https://api.tokenomist.ai'+path,{headers:{'x-api-key':key,Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(20000)});
  if(!res.ok)throw new Error(`Tokenomist HTTP ${res.status}${res.status===429?' · เกิน rate limit/credits':res.status===403?' · ตรวจสิทธิ์ข้อมูลในแพ็กเกจ':''}`);
- const body=await res.json();if(body.status!==true||!Array.isArray(body.data))throw new Error('Tokenomist คืนข้อมูลที่ไม่ตรง schema หรือไม่มีสิทธิ์ใช้งาน');
+ const body=await res.json();if(body.status!==true||!(objectData?body.data&&typeof body.data==='object'&&!Array.isArray(body.data):Array.isArray(body.data)))throw new Error('Tokenomist คืนข้อมูลที่ไม่ตรง schema หรือไม่มีสิทธิ์ใช้งาน');
  const value={data:body.data,metadata:body.metadata||{},fetchedAt:new Date().toISOString(),cached:false};cache.set(id,{at:Date.now(),value});if(cache.size>150)cache.delete(cache.keys().next().value);return value;
 }
 export async function tokenCatalog(key,fetcher=fetch){const result=await tokenApi(key,'/v5/token/list',fetcher,3600000);return {...result,data:result.data.filter(t=>typeof t.id==='string'&&/^[a-zA-Z0-9_-]{1,120}$/.test(t.id)).map(t=>({id:t.id,name:String(t.name||t.id).slice(0,100),symbol:String(t.symbol||'').slice(0,32),circulatingSupply:num(t.circulatingSupply),listedMethod:t.listedMethod||'unknown',updatedAt:t.lastUpdatedDate||null}))};}

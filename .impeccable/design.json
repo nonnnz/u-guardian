@@ -1,0 +1,359 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-15T15:19:01.837Z",
+  "title": "Design System: U-Guardian",
+  "extensions": {
+    "colorMeta": {
+      "forest-ink": {
+        "displayName": "Forest Ink",
+        "role": "primary",
+        "tonalRamp": [
+          "oklch(15.00% 0.0388 171.89)",
+          "oklch(26.43% 0.0388 171.89)",
+          "oklch(37.86% 0.0388 171.89)",
+          "oklch(49.29% 0.0388 171.89)",
+          "oklch(60.71% 0.0388 171.89)",
+          "oklch(72.14% 0.0388 171.89)",
+          "oklch(83.57% 0.0388 171.89)",
+          "oklch(95.00% 0.0388 171.89)"
+        ]
+      },
+      "forest-action": {
+        "displayName": "Forest Action",
+        "role": "primary",
+        "tonalRamp": [
+          "oklch(15.00% 0.0626 165.78)",
+          "oklch(26.43% 0.0626 165.78)",
+          "oklch(37.86% 0.0626 165.78)",
+          "oklch(49.29% 0.0626 165.78)",
+          "oklch(60.71% 0.0626 165.78)",
+          "oklch(72.14% 0.0626 165.78)",
+          "oklch(83.57% 0.0626 165.78)",
+          "oklch(95.00% 0.0626 165.78)"
+        ]
+      },
+      "muted-ink": {
+        "displayName": "Muted Ink",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0231 159.13)",
+          "oklch(26.43% 0.0231 159.13)",
+          "oklch(37.86% 0.0231 159.13)",
+          "oklch(49.29% 0.0231 159.13)",
+          "oklch(60.71% 0.0231 159.13)",
+          "oklch(72.14% 0.0231 159.13)",
+          "oklch(83.57% 0.0231 159.13)",
+          "oklch(95.00% 0.0231 159.13)"
+        ]
+      },
+      "shell-ivory": {
+        "displayName": "Shell Ivory",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0133 111.27)",
+          "oklch(26.43% 0.0133 111.27)",
+          "oklch(37.86% 0.0133 111.27)",
+          "oklch(49.29% 0.0133 111.27)",
+          "oklch(60.71% 0.0133 111.27)",
+          "oklch(72.14% 0.0133 111.27)",
+          "oklch(83.57% 0.0133 111.27)",
+          "oklch(95.00% 0.0133 111.27)"
+        ]
+      },
+      "paper": {
+        "displayName": "Paper",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0054 95.10)",
+          "oklch(26.43% 0.0054 95.10)",
+          "oklch(37.86% 0.0054 95.10)",
+          "oklch(49.29% 0.0054 95.10)",
+          "oklch(60.71% 0.0054 95.10)",
+          "oklch(72.14% 0.0054 95.10)",
+          "oklch(83.57% 0.0054 95.10)",
+          "oklch(95.00% 0.0054 95.10)"
+        ]
+      },
+      "settings-paper": {
+        "displayName": "Settings Paper",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0079 106.55)",
+          "oklch(26.43% 0.0079 106.55)",
+          "oklch(37.86% 0.0079 106.55)",
+          "oklch(49.29% 0.0079 106.55)",
+          "oklch(60.71% 0.0079 106.55)",
+          "oklch(72.14% 0.0079 106.55)",
+          "oklch(83.57% 0.0079 106.55)",
+          "oklch(95.00% 0.0079 106.55)"
+        ]
+      },
+      "sage": {
+        "displayName": "Sage",
+        "role": "secondary",
+        "tonalRamp": [
+          "oklch(15.00% 0.0184 127.15)",
+          "oklch(26.43% 0.0184 127.15)",
+          "oklch(37.86% 0.0184 127.15)",
+          "oklch(49.29% 0.0184 127.15)",
+          "oklch(60.71% 0.0184 127.15)",
+          "oklch(72.14% 0.0184 127.15)",
+          "oklch(83.57% 0.0184 127.15)",
+          "oklch(95.00% 0.0184 127.15)"
+        ]
+      },
+      "sage-action": {
+        "displayName": "Sage Action",
+        "role": "secondary",
+        "tonalRamp": [
+          "oklch(15.00% 0.0190 119.75)",
+          "oklch(26.43% 0.0190 119.75)",
+          "oklch(37.86% 0.0190 119.75)",
+          "oklch(49.29% 0.0190 119.75)",
+          "oklch(60.71% 0.0190 119.75)",
+          "oklch(72.14% 0.0190 119.75)",
+          "oklch(83.57% 0.0190 119.75)",
+          "oklch(95.00% 0.0190 119.75)"
+        ]
+      },
+      "field": {
+        "displayName": "Field",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0106 112.37)",
+          "oklch(26.43% 0.0106 112.37)",
+          "oklch(37.86% 0.0106 112.37)",
+          "oklch(49.29% 0.0106 112.37)",
+          "oklch(60.71% 0.0106 112.37)",
+          "oklch(72.14% 0.0106 112.37)",
+          "oklch(83.57% 0.0106 112.37)",
+          "oklch(95.00% 0.0106 112.37)"
+        ]
+      },
+      "divider": {
+        "displayName": "Divider",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0140 124.56)",
+          "oklch(26.43% 0.0140 124.56)",
+          "oklch(37.86% 0.0140 124.56)",
+          "oklch(49.29% 0.0140 124.56)",
+          "oklch(60.71% 0.0140 124.56)",
+          "oklch(72.14% 0.0140 124.56)",
+          "oklch(83.57% 0.0140 124.56)",
+          "oklch(95.00% 0.0140 124.56)"
+        ]
+      },
+      "leaf": {
+        "displayName": "Leaf",
+        "role": "secondary",
+        "tonalRamp": [
+          "oklch(15.00% 0.0718 121.48)",
+          "oklch(26.43% 0.0718 121.48)",
+          "oklch(37.86% 0.0718 121.48)",
+          "oklch(49.29% 0.0718 121.48)",
+          "oklch(60.71% 0.0718 121.48)",
+          "oklch(72.14% 0.0718 121.48)",
+          "oklch(83.57% 0.0718 121.48)",
+          "oklch(95.00% 0.0718 121.48)"
+        ]
+      },
+      "visor": {
+        "displayName": "Visor",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0478 168.23)",
+          "oklch(26.43% 0.0478 168.23)",
+          "oklch(37.86% 0.0478 168.23)",
+          "oklch(49.29% 0.0478 168.23)",
+          "oklch(60.71% 0.0478 168.23)",
+          "oklch(72.14% 0.0478 168.23)",
+          "oklch(83.57% 0.0478 168.23)",
+          "oklch(95.00% 0.0478 168.23)"
+        ]
+      },
+      "face-light": {
+        "displayName": "Face Light",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0236 104.24)",
+          "oklch(26.43% 0.0236 104.24)",
+          "oklch(37.86% 0.0236 104.24)",
+          "oklch(49.29% 0.0236 104.24)",
+          "oklch(60.71% 0.0236 104.24)",
+          "oklch(72.14% 0.0236 104.24)",
+          "oklch(83.57% 0.0236 104.24)",
+          "oklch(95.00% 0.0236 104.24)"
+        ]
+      },
+      "focus": {
+        "displayName": "Focus",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.1016 45.67)",
+          "oklch(26.43% 0.1016 45.67)",
+          "oklch(37.86% 0.1016 45.67)",
+          "oklch(49.29% 0.1016 45.67)",
+          "oklch(60.71% 0.1016 45.67)",
+          "oklch(72.14% 0.1016 45.67)",
+          "oklch(83.57% 0.1016 45.67)",
+          "oklch(95.00% 0.1016 45.67)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "wordmark": {
+        "displayName": "Serif wordmark",
+        "purpose": "Compact Guardian identity."
+      },
+      "headline": {
+        "displayName": "Thai welcome",
+        "purpose": "First-view greeting, hidden during conversation."
+      }
+    },
+    "shadows": [
+      {
+        "name": "mascot-body",
+        "value": "inset -7px -8px 0 #b8cf95,0 14px 23px -14px #49634950",
+        "purpose": "Character shading and soft contact shadow."
+      },
+      {
+        "name": "launcher",
+        "value": "0 8px 20px #203d3422",
+        "purpose": "Collapsed launcher only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "button-transition",
+        "value": "background .18s,color .18s",
+        "purpose": "Interaction feedback."
+      },
+      {
+        "name": "blink",
+        "value": "7s infinite",
+        "purpose": "Idle robot eyes."
+      },
+      {
+        "name": "thinking",
+        "value": "1s infinite alternate",
+        "purpose": "Lateral eye motion."
+      },
+      {
+        "name": "speaking",
+        "value": ".25s infinite alternate",
+        "purpose": "Mouth motion."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation:none!important;transition:none!important",
+        "purpose": "Widget reduced-motion preference."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "host-intermediate",
+        "value": "800px"
+      },
+      {
+        "name": "host-mobile",
+        "value": "620px"
+      },
+      {
+        "name": "widget-compact",
+        "value": "520px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Voice button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Observed action styling from the shipped companion and host.",
+      "html": "<button class=\"ds-control ds-button\">กดเพื่อพูด</button>",
+      "css": ".ds-button{font-family:\"Leelawadee UI\",Tahoma,sans-serif;background:var(--guardian-accent,#285946);color:#fffefa;border:0;border-radius:9px;padding:11px 16px;cursor:pointer;transition:background .18s,color .18s}.ds-button:hover{filter:brightness(.96)}.ds-control:focus-visible{outline:3px solid #9a5635;outline-offset:4px}.ds-control:disabled{opacity:.55;cursor:wait}"
+    },
+    {
+      "name": "Report button",
+      "kind": "button",
+      "refersTo": "button-report",
+      "description": "Observed action styling from the shipped companion and host.",
+      "html": "<button class=\"ds-control ds-button\">เล่าให้ฟังว่ามีอะไรใหม่</button>",
+      "css": ".ds-button{font-family:\"Leelawadee UI\",Tahoma,sans-serif;background:#edf1e3;color:#28513e;border:0;border-radius:9px;padding:10px 16px;font-size:13px;cursor:pointer;transition:background .18s,color .18s}.ds-button:hover{filter:brightness(.96)}.ds-control:focus-visible{outline:3px solid #9a5635;outline-offset:4px}.ds-control:disabled{opacity:.55;cursor:wait}"
+    },
+    {
+      "name": "Outline button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Observed action styling from the shipped companion and host.",
+      "html": "<button class=\"ds-control ds-button\">รีเฟรชกระเป๋า</button>",
+      "css": ".ds-button{font-family:\"Leelawadee UI\",Tahoma,sans-serif;background:transparent;color:#28513e;border:1px solid #bcc8af;border-radius:8px;padding:9px 13px;font-size:12px;cursor:pointer;transition:background .18s,color .18s}.ds-button:hover{background:#e4ead7}.ds-control:focus-visible{outline:3px solid #9a5635;outline-offset:4px}.ds-control:disabled{opacity:.55;cursor:wait}"
+    },
+    {
+      "name": "Composer",
+      "kind": "input",
+      "refersTo": "composer",
+      "description": "Labeled text alternative to voice.",
+      "html": "<label class=\"ds-label\" for=\"ds-question\">ถาม Guardian</label><div class=\"ds-composer\"><textarea class=\"ds-control ds-input\" id=\"ds-question\" rows=\"1\" placeholder=\"ถาม Guardian\"></textarea><button class=\"ds-control ds-send\" aria-label=\"ส่งข้อความ\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m5 12 7-7 7 7M12 5v15\"/></svg></button></div>",
+      "css": ".ds-label{font-family:\"Leelawadee UI\",Tahoma,sans-serif;font-size:12px;color:#59685f}.ds-composer{display:flex;align-items:center;gap:10px;background:#f3f4ec;border-radius:12px;padding:9px 10px 9px 16px}.ds-input{font-family:\"Leelawadee UI\",Tahoma,sans-serif;resize:vertical;min-height:28px;max-height:120px;flex:1;min-width:0;border:0;background:transparent;color:#203d34;font-size:16px}.ds-send{background:var(--guardian-accent,#285946);color:#fffefa;border:0;border-radius:8px;width:37px;height:37px;cursor:pointer}.ds-send svg{width:21px;height:21px}.ds-send:hover{filter:brightness(.96)}.ds-control:focus-visible{outline:3px solid #9a5635;outline-offset:4px}.ds-control:disabled{opacity:.55;cursor:wait}"
+    },
+    {
+      "name": "Host navigation",
+      "kind": "nav",
+      "description": "Quiet text links to embedding and retained tools.",
+      "html": "<nav class=\"ds-nav\"><a href=\"/embed-example.html\">ลองแบบฝังในแอป</a><a href=\"/settings.html\">การเชื่อมต่อและเครื่องมือ</a></nav>",
+      "css": ".ds-nav{font-family:\"Leelawadee UI\",Tahoma,sans-serif;display:flex;gap:26px;font-size:12px;color:#203d34}.ds-nav a{color:inherit;text-decoration:none;text-underline-offset:4px}.ds-nav a:hover{text-decoration:underline}.ds-nav a:focus-visible{outline:3px solid #9a5635;outline-offset:4px}"
+    },
+    {
+      "name": "Data mode tag",
+      "kind": "chip",
+      "description": "Explicit demo or live mode beside wallet heading.",
+      "html": "<span class=\"ds-tag\">DEMO</span>",
+      "css": ".ds-tag{font-family:\"Leelawadee UI\",Tahoma,sans-serif;display:inline-block;font-size:10px;color:#203d34;border:1px solid #b7c6a9;border-radius:5px;padding:3px 6px}"
+    },
+    {
+      "name": "Companion panel",
+      "kind": "card",
+      "refersTo": "companion-panel",
+      "description": "Unshadowed paper surface for the companion.",
+      "html": "<section class=\"ds-panel\"><span class=\"ds-wordmark\">Guardian</span><p class=\"ds-copy\">เรื่องคริปโตที่สงสัย ถามได้เลย</p></section>",
+      "css": ".ds-panel{font-family:\"Leelawadee UI\",Tahoma,sans-serif;background:var(--guardian-surface,#fffefa);color:var(--guardian-ink,#203d34);border-radius:16px;padding:24px 30px 20px}.ds-wordmark{font:600 19px/1.4 Georgia,serif;letter-spacing:-.02em}.ds-copy{font-size:14px;color:#59685f;line-height:1.65}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The companion beside your wallet",
+    "overview": "An approachable geometric robot sits within a calm daylight workspace. Warm ivory, forest ink and sage preserve the established identity; quiet space gives the mascot a recognizable presence while Thai explanations and evidence remain easy to read. This is descriptive language for the shipped world, not a separately approved concept.\n\nThe welcoming mascot becomes a small operational companion once a conversation begins. The existing connection and financial tools retain their denser field-journal layout at `settings.html`.",
+    "keyCharacteristics": [
+      "Warm ivory surfaces with forest controls and sage emphasis.",
+      "Thai-first interface text with restrained serif wordmarks.",
+      "A geometric robot whose expression accompanies written status.",
+      "Quiet dividers, expandable evidence and explicit review actions."
+    ],
+    "rules": [
+      {
+        "name": "The Written State Rule",
+        "body": "Operational state is expressed in text alongside mascot changes; color and expression do not carry the message alone.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Surface Rule",
+        "body": "Preserve tonal separation for the companion panel; reserve the observed shadows for the character and collapsed launcher.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve warm ivory, forest and sage across host and companion surfaces.",
+      "Do pair mascot state with readable operational status.",
+      "Do keep voice user initiated and preserve the text alternative.",
+      "Do keep evidence and monitoring limits near the relevant action.",
+      "Do keep the mobile companion before the demo wallet."
+    ],
+    "donts": [
+      "Don't use the mascot's expression as a claim that a wallet is safe.",
+      "Don't turn demo data, missing evidence or unavailable monitoring into certainty.",
+      "Don't replace the Shadow DOM boundary with host-dependent styling.",
+      "Don't promote compact diagnostic typography into primary reading text."
+    ]
+  }
+}

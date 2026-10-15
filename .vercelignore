@@ -5,3 +5,4 @@ artifacts/
 test/
 node_modules/
 *.log
+.impeccable/
