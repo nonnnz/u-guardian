@@ -6,7 +6,7 @@ const now=()=>new Date().toISOString();
 export function createGuardian({saved,config,live,getDemo,getMode,refresh,persist,cloud,call}){
  const agent=Object.assign(createAgentState(),saved||{});
  const scope=()=>getMode()==='demo'?'demo':`${live.settings.chainId}:${live.settings.address}`;
- const monitoring=()=>cloud?'ตรวจเมื่อเปิดแอปหรือเมื่อแอปเจ้าบ้านเรียก check; ยังไม่ส่ง SMS/Push ตอนปิดเว็บ':'ตรวจทุกนาทีเมื่อ local server ทำงาน; แจ้งเตือนในแอป';
+ const monitoring=()=>cloud?'ตรวจทุกนาทีขณะเปิดหน้าเว็บ; ยังไม่ส่ง SMS/Push ตอนปิดเว็บ':'ตรวจทุกนาทีเมื่อ local server ทำงาน; แจ้งเตือนในแอป';
  function demoWallet(){const s=getDemo();return {address:'demo',chainId:'demo',network:'กระเป๋าจำลอง',fetchedAt:now(),indexerStatus:'ok',warnings:['ข้อมูลจำลองทั้งหมด ไม่ใช่ตลาดจริง'],assets:s.assets.map(a=>({address:a.symbol,symbol:a.symbol,name:a.name,decimals:6,units:String(a.units),rawBalance:parseUnits(String(a.units),6).toString(),usdValue:a.units*a.price})),transfers:s.history.filter(x=>x.kind==='agent-demo').map(x=>({hash:x.id,from:'demo',to:'demo-recipient',amount:'25',symbol:'USDC',timestamp:x.at}))};}
  const current=()=>getMode()==='demo'?demoWallet():live.snapshot;
  const summary=()=>({goal:agent.goal,rules:agent.rules.filter(r=>r.scope===scope()),notifications:agent.notifications.filter(n=>n.scope===scope()),lastChecked:agent.lastChecked,monitoring:monitoring(),history:agent.history,baselineAt:agent.baseline?.address===current()?.address?agent.baseline?.fetchedAt:null});

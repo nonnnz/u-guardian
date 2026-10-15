@@ -4,6 +4,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "public",
   "functions": { "api/index.mjs": { "maxDuration": 300, "includeFiles": "public/**" } },
+  "redirects": [
+    { "source": "/settings.html", "destination": "/", "permanent": false },
+    { "source": "/embed-example.html", "destination": "/", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api" },
     { "source": "/phone/tool", "destination": "/api" }

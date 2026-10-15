@@ -185,7 +185,8 @@ const handler = async (req,res) => {
       }
       return json(res,404,{error:'Unknown API route'});
     }
-    const files = { '/':'index.html','/index.html':'index.html','/settings.html':'settings.html','/embed-example.html':'embed-example.html','/guardian-widget.js':'guardian-widget.js','/guardian-widget.css':'guardian-widget.css','/shell.js':'shell.js','/shell.css':'shell.css', '/app.js':'app.js', '/live-ui.js':'live-ui.js', '/system-ui.js':'system-ui.js', '/style.css':'style.css' };
+    if(req.method==='GET'&&['/settings.html','/embed-example.html'].includes(pathname)){res.writeHead(302,{Location:'/'});return res.end();}
+    const files = {'/':'index.html','/index.html':'index.html','/guardian-widget.js':'guardian-widget.js','/guardian-widget.css':'guardian-widget.css','/shell.js':'shell.js','/shell.css':'shell.css'};
     if (req.method !== 'GET' || !files[pathname]) return json(res,404,{error:'Not found'});
     const file = files[pathname];
     const bytes = await readFile(fileURLToPath(new URL(`./public/${file}`,import.meta.url)));

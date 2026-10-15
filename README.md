@@ -1,138 +1,63 @@
-# U-Guardian embedded companion
+# U-Guardian
 
-The current landing page is a mascot-led, voice-enabled agent widget with a minimal wallet host. See [EMBEDDING.md](EMBEDDING.md) for installation, transport/authentication boundaries, events, endpoints, and current monitoring limitations. Try `/embed-example.html` for the same component in a separate host. Existing integrations and advanced tools live at `/settings.html`.
+A Thai voice companion for understanding a crypto wallet. The app has one page: wallet status, a mascot perched on its edge, and a Settings button. Click the mascot to open chat; closing it returns to the wallet without discarding the conversation.
 
-The agent can inspect wallet health, investigate quantity changes since the last acknowledged briefing, research Tokenomist datasets, and draft watch rules for explicit user confirmation. U-bot selects multiple tools based on prior results; ElevenLabs handles push-to-talk and spoken answers. The public demo does not yet deliver SMS/Web Push or monitor continuously while closed. No automated trading, approvals audit or DeFi analysis is claimed.
+Live app: https://u-guardian.vercel.app
 
-The earlier POC details below document the preserved advanced tools.
+## What works
 
----
-# U-Guardian — wallet risk assistant
+- Wallet health: Avalanche C-Chain balances, available recent transfers, concentration when priced coverage is complete, and goal-aware explanations.
+- Research: U-bot chooses tools in a bounded multi-step loop. Tokenomist supplies token identity, allocation, fundraising, buyback, burn and mapped wallet supply evidence when available.
+- Changes: compare quantities with the last acknowledged briefing. This is not price P&L or a complete transaction-cause investigation.
+- Tracking: draft a wallet-change, supply-event or review-date rule, then explicitly confirm it. View notifications and stop rules in chat.
+- Voice: push-to-talk through ElevenLabs transcription, with optional spoken replies. Typing remains available.
 
-A Thai-first financial assistant: Avalanche wallet evidence → personal reserve rules → Tokenomist context → U-bot explanation → ElevenLabs voice → explicit user review. Runs locally or on Vercel with Node.js 24.
+## Set up from the main page
 
-## Vercel demo
+Open **ตั้งค่า**. Settings stay in a dialog on the same page.
 
-Live demo: https://u-guardian.vercel.app · Source: https://github.com/Wayu650610806/u-guardian (private repository). Pushes to `main` deploy automatically through the connected Vercel GitHub integration.
+1. Under **การเชื่อมต่อ**, enter U-bot Bearer token, Avalanche Data API key, Tokenomist API key and ElevenLabs key. Blank credential fields retain the saved value.
+2. Test the providers, load/select an ElevenLabs voice, choose U-bot agent mode, then save.
+3. Under **กระเป๋า**, choose Live, paste a public C-Chain address beginning with 0x, choose Mainnet or Fuji, then save. This reads public data; no private key or signature is needed.
+4. Optionally save your goals. For ERC-20 supply monitoring, use **จับคู่เหรียญกับ Tokenomist**, verify the project's contract yourself and confirm the match. Native Mainnet AVAX is mapped automatically.
+5. Close Settings and click the mascot. Ask for wallet health, what changed, or a watch.
 
-The hosted app requires no login. Open **Connections** to enter your own U-bot, Avalanche Data, Tokenomist and ElevenLabs credentials. The deployment ships with no provider credentials. Each browser receives a random HttpOnly/Secure/SameSite session cookie; one wallet and its settings belong to that browser session. Other visitors start with an empty configuration.
+Demo uses explicit synthetic data and local example answers unless U-bot mode is selected. The demo event button lives inside Settings.
 
-Session configuration, keys and records are encrypted using AES-256-GCM and persisted in a **private Vercel Blob store**. The encryption key is derived from the store token: rotating that token requires migrating encrypted records or starting new sessions. Provider keys never enter browser storage, API state responses or the repository. Clearing cookies loses access to the previous session; clear API keys in Connections before clearing cookies if you want them removed from that record. This is a hackathon demo, not a multi-user financial service.
+## Boundaries
 
-- Live monitoring refreshes every 60 seconds **while the page is visible**. Background automatic calls are available only in the local server runtime.
-- Manual phone calls and authenticated `/phone/tool` callbacks are supported when the user supplies working ElevenLabs/telephony configuration. Set the public callback origin to the deployed site's HTTPS origin, then update the Guardian agent. Real delivery still requires a compatible carrier account.
-- Conditional Blob writes and a six-minute lease serialize mutations across serverless workers. Persisted call intent prevents an uncertain outbound request from being automatically repeated. An interrupted request can temporarily block writes until its lease expires.
-- Audio uploads are limited to 4 MB on the cloud route. Voice is push-to-talk STT and TTS; continuous WebRTC conversation is not implemented.
+The public Vercel app checks active watch rules every minute while the page is visible. Closing chat does not stop those checks; closing the page does. There is no provisioned background scheduler, SMS or Web Push. Voice is not continuous listening. The app does not trade, audit approvals, analyze DeFi positions, verify scam safety or predict buy/sell timing.
 
-To deploy your own copy: import this repository in Vercel, use its root directory, create/connect a **private Blob store** with `BLOB_READ_WRITE_TOKEN`, and deploy. `vercel.json` configures static assets and a Node function. Do not add your local provider `.env` to the deployment; enter keys through the app instead. GitHub/Vercel deployment access is separate from the app's anonymous browser session.
+The old dashboard and separate Settings page have been removed. Old /settings.html and /embed-example.html links redirect home. Embedding examples, transport API and embedding documentation are removed from the current scope. The custom element is an internal UI module, not a released integration SDK. Legacy phone/Fuji/backend routes remain for compatibility, but their old screens are no longer part of the app.
 
-## Run
+## Run locally
+
+Requires Node.js 24.
 
 ```powershell
-cd C:\githubProject\u-hackathon\guardian-poc
 npm ci
 npm start
 ```
 
-Open http://127.0.0.1:4173. The dashboard binds only to loopback. A separate authenticated phone-tool listener binds to 127.0.0.1:4175. This remains a single-user local MVP, not a publicly deployed multi-user service.
+Open http://127.0.0.1:4173. Settings writes local provider credentials to .env; saved wallet/agent state stays in .local. Both are ignored by Git. See .env.example for environment names. Never commit credentials.
 
-## Configuration and persistence
+## Deployment and storage
 
-- Provider keys and voice/model/agent-mode configuration are in **`.env`**. Connections saves changes there atomically; blank key inputs preserve the saved key. Credentials are never returned in `/api/state`, printed in logs, or saved to browser storage. The supplied `env.txt` was migrated and removed after verifying all four keys.
-- Wallet settings, identity mappings, snapshots, phone settings, managed Agent ID, incidents, transfer state and call attempts persist in **`.local/state.json`**. The phone callback secret is in **`.local/phone-secret`**. Both locations are ignored by Git. Phone sessions and recipient details are local private state, not public API response fields except the recipient's own settings.
-- Restarting preserves configuration and unresolved transactions/call attempts. A submitting call restored after interruption is `unknown`, never retried automatically.
-- `.env.example` contains names only. Copy it only when setting up a new installation. Use Connections to rotate individual keys. **ล้าง credentials** clears all four provider keys from memory and `.env`.
-- Optional Twilio carrier credentials (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`) also live in `.env`; Connections preserves them. Run `npm run phone:connect` with the app running to verify an owned Voice number, import/reuse it in ElevenLabs, and select it locally. This never places a call or enables automatic calls. Rotate carrier credentials in both `.env` and an existing ElevenLabs phone import.
+Vercel serves public assets and a Node function. Connect a **private Vercel Blob store** using BLOB_READ_WRITE_TOKEN. Provider credentials are supplied through Settings, not bundled into the deployment.
 
-## Use the complete flow
+The hosted demo has no login. A random HttpOnly/Secure/SameSite session cookie identifies one wallet and settings for each browser session. Records and credentials are encrypted with AES-256-GCM in private Blob storage; provider keys are not returned in state responses or kept in browser storage. Clearing cookies loses access to that session. The encryption key is derived from the Blob token, so rotating that token requires data migration or new sessions. This is a hackathon demo, not a multi-user financial service.
 
-1. Open Connections and test Avalanche, Tokenomist and U-bot. Load ElevenLabs voices and choose a voice.
-2. Click **ตั้งค่า wallet จริง**. Enter a public address, network, reserve asset, token-unit target, purpose and due date. Watching an address does not prove ownership.
-3. Read the source panel: network, RPC block/time, indexer status and coverage warnings. Mainnet is read-only; Fuji supports test AVAX actions.
-4. Review **What matters to your goal** and **On your horizon**. Native AVAX maps to Tokenomist `avalanche-2` on Mainnet. Other assets require an explicit chain + contract identity match. Matching symbols is never sufficient. Fuji does not inherit Mainnet supply events.
-5. Ask Guardian to assess the reserve, explain unlocks, or simulate a top-up. Numeric summaries come from deterministic tools. The U-bot explanation is separate. Tool plans are allowlisted, validated, and get at most one format retry. Invalid plans execute nothing.
-6. Use the microphone to transcribe Thai, review the text, then send. **ฟังคำตอบ** uses ElevenLabs TTS; browser speech fallback is explicitly labeled. This web flow is STT → tools → TTS, not continuous realtime audio.
-7. Enable wallet monitoring to refresh every 60 seconds while the server runs in Live mode. The page polls state every 15 seconds while visible. A reserve shortfall creates a deduplicated incident. Supply events are contextual watch signals, not predictions of a price drop.
-8. Configure **Phone alerts** if real calls are needed. See [PHONE-SETUP.md](PHONE-SETUP.md). A test call requires a separate review and confirmation. No phone number has been imported into ElevenLabs yet; therefore no real call has been placed.
-
-## Provider responsibilities
-
-| Provider | Used for | Limits and provenance |
-|---|---|---|
-| Avalanche public RPC | Native AVAX and selected ERC-20 reserve at one block; Fuji gas/nonce checks and receipts | Exact integer token math; goals are token units, not stable fiat purchasing power |
-| Avalanche Data API | Token discovery, indexed USD estimates, native/ERC-20 transfers | Up to 3 × 100 tokens and 20 transfers per type; capped/partial data is shown; unknown price is not zero |
-| Tokenomist v5 | Catalog, cliff unlocks and daily emission for held mapped assets | Catalog cached 1 hour, data 5 minutes; up to 5 identities and 3 × 100 rows per dataset; future-data access depends on key scope |
-| U-bot `/api/chat` | Tool selection and Thai evidence explanation | Web-client API contract; Bearer can expire; no assumed native tool-calling capability |
-| ElevenLabs | STT/TTS, Thai phone agent, outbound Twilio/SIP requests, conversation status | Requires a connected outbound number for real calls; API success means submitted, not answered |
-
-Tokenomist event precision, allocation, source and update time are retained. Daily emission includes cliff amounts; the UI does not add those datasets together. Partial coverage or stale evidence is never presented as “safe.” Concentration only triggers a whole-wallet watch rule when all discovered positive-balance assets have indexed prices and the token list is complete. Otherwise the priced subset is labeled explicitly.
-
-## Fuji action
-
-Watch a Fuji destination address, connect a different source wallet in an extension-enabled browser, enter test AVAX and review full addresses/amount/gas. The user explicitly opens the wallet and signs. The backend checks EOA destination, available test AVAX and estimated gas. Drafts expire after five minutes and bind the source's pending nonce at authorization.
-
-Receipt verification checks chain, source, destination, value, empty calldata and nonce. Pending/uncertain sends block another draft. A user-rejected signature cancels the attempt. If a wallet returns an uncertain result, inspect its history and provide the transaction hash. No agent or phone tool can execute transfers, change phone settings or sign transactions. Voice preparation creates a web review proposal only.
-
-## Phone architecture
-
-```mermaid
-flowchart LR
-  RPC[Avalanche wallet] --> Rules[Reserve rules and incidents]
-  TM[Tokenomist supply] --> Rules
-  Rules --> UI[Web review and U-bot]
-  Rules --> Gate[Opt-in / quiet hours / limits / durable dedupe]
-  Gate --> EL[ElevenLabs Agent]
-  EL --> Carrier[Twilio or SIP]
-  Carrier --> User[User phone]
-  EL --> Callback[Authenticated callback :4175]
-  Callback --> UB[U-bot and allowlisted tools]
-  UB --> UI
-  UI --> Sign[Explicit Fuji wallet signature]
-```
-
-Phone calls default off. Automatic calls require Live mode, monitoring enabled, a fresh successful reserve snapshot, an open reserve incident, recipient consent and complete telephony settings. Default quiet hours are 22:00–08:00 Asia/Bangkok; defaults allow at most two attempts/day with 60 minutes between calls. Manual tests bypass quiet hours only. A call intent is saved before the external request; timeouts/ambiguous failures are not silently retried. Supply-only watch signals do not automatically call.
-
-The phone agent can explain the supplied snapshot without a public callback. With an HTTPS callback configured, a webhook tool forwards spoken questions to U-bot and live tools. Each request requires a server secret and a short-lived per-call session bound to the wallet settings. Only `/phone/tool` exists on the separate listener. Never tunnel the dashboard port. The callback cannot send funds, place another call, read credentials or change settings.
-
-## Source layout
-
-- `application.mjs`: shared application routes, provider configuration and monitoring
-- `server.mjs`: local server and callback listeners
-- `api/index.mjs`, `cloud-store.mjs`: Vercel adapter, private encrypted sessions and conditional-write leases
-- `avalanche.mjs`: chain reads, exact token math, Fuji draft/receipt verification
-- `tokenomist.mjs`: v5 API, cache, paging, identity coverage and supply normalization
-- `live-wallet.mjs`, `risk.mjs`: live rules, incidents, personal context and tool results
-- `planner.mjs`, `providers.mjs`: U-bot planning/stream parser, ElevenLabs audio
-- `phone.mjs`: agent provisioning, outbound call policy, durable call intent and session authentication
-- `storage.mjs`: atomic `.env` and local-state persistence
-- `public/`: existing visual system, live data, risk, mapping and phone setup UI
+Conditional writes and a lease serialize serverless mutations; an interrupted request may temporarily block another operation. Audio uploads are capped at 4 MB. GitHub/Vercel access is separate from an app visitor's session.
 
 ## Verification
 
 ```powershell
 npm test
+npm run build
+node test/guardian-browser-smoke.cjs
+node test/guardian-voice-smoke.cjs
 ```
 
-Unit tests cover original demo behavior, token precision, partial failures, identity spoofing, supply aggregation, stale evidence, persistence, phone opt-in/quiet hours/caps, unknown-call dedupe, callback authorization and Fuji transaction identity.
+Browser tests use Playwright with Edge; set PLAYWRIGHT_MODULE to its installed module location when needed. Run an isolated server at port 4180 (or set BASE_URL), with GUARDIAN_IGNORE_SUPPLIED_KEYS=1, a separate GUARDIAN_ENV_FILE and GUARDIAN_STATE_DIR. The settings test writes a dummy credential to that isolated environment file. Never run it against a server using your actual credentials.
 
-Verified on 2026-10-15:
-
-- 35 unit tests pass, including encrypted cloud persistence, browser isolation, worker contention and compressed-ETag regression coverage.
-- Production Vercel checks passed: no-login access, settings persistence across requests/reload, separate browser configurations, key redaction and clearing, demo conversation/action/goal flow, mobile overflow and real Avalanche RPC reads without an indexer key. Local `.env` is excluded and returns 404 on the deployed site.
-
-- Real Avalanche RPC + Data API reads succeeded for a public example wallet (`indexerStatus: ok`).
-- Tokenomist v5 catalog, cliff and daily-emission reads succeeded. Coverage is partial because unrelated ERC-20 contracts were intentionally left unmapped.
-- Updated U-bot token completed live assessment and supply-event tool flows; format validation/retry was added for occasional prose replies.
-- Real ElevenLabs Thai TTS produced 98,263 bytes and STT successfully transcribed that generated audio.
-- A Thai `eleven_v3_conversational` phone agent was created. `eleven_flash_v2_5` was rejected for Thai by the provider and is not used for the phone agent.
-- Desktop/mobile integration checks passed without JavaScript errors or horizontal overflow. An unauthenticated callback returned 403.
-- Phone transport/policy and wallet signing are fixture-tested. **Zero real telephone calls or funded Fuji transactions were sent.** Real phone delivery still needs a Twilio/SIP caller number; live tool access during a call also needs a reachable HTTPS callback.
-
-Optional browser tests use Playwright with Edge; set `PLAYWRIGHT_MODULE` and `BASE_URL`. `system-browser-smoke.cjs` is an opt-in live API test and uses a public example wallet. Isolate test environment/state with `GUARDIAN_ENV_FILE`, `GUARDIAN_STATE_DIR`, `PORT` and `PHONE_PORT`. Never run fixture configuration tests against the user's primary `.env`.
-
-## Official references
-
-- [Tokenomist v5 unlock events](https://docs.tokenomist.ai/api-documents/unlock-events/v5)
-- [Tokenomist v5 daily emission](https://docs.tokenomist.ai/api-documents/daily-emission/v5)
-- [ElevenLabs Twilio native integration](https://elevenlabs.io/docs/eleven-agents/phone-numbers/twilio-integration/native-integration/)
-- [ElevenLabs outbound API](https://elevenlabs.io/docs/api-reference/integrations/twilio/outbound-call)
+The browser smoke test covers collapsed chat, focus/Escape, reports, watch confirmation, settings persistence, mobile layout, and controlled wallet/mapping fixtures. The voice smoke uses a synthetic microphone and mocked speech APIs; it does not test a physical microphone or incur provider charges.

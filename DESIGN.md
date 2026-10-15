@@ -7,11 +7,10 @@ colors:
   muted-ink: "#59685f"
   shell-ivory: "#f2f3e9"
   paper: "#fffefa"
-  settings-paper: "#f6f6f0"
-  sage: "#eaf0e3"
   sage-action: "#edf1e3"
   field: "#f3f4ec"
   divider: "#e3e7dd"
+  shell-divider: "#dce1d1"
   leaf: "#d8e8b3"
   visor: "#24483b"
   face-light: "#fcfbe9"
@@ -23,12 +22,10 @@ typography:
     fontWeight: 600
     lineHeight: 1.4
     letterSpacing: "-0.02em"
-  headline:
+  title:
     fontFamily: "Leelawadee UI, Tahoma, sans-serif"
-    fontSize: "27px"
+    fontSize: "24px"
     fontWeight: 500
-    lineHeight: 1.45
-    letterSpacing: "-0.025em"
   body:
     fontFamily: "Leelawadee UI, Tahoma, sans-serif"
     fontSize: "15px"
@@ -55,15 +52,15 @@ components:
     rounded: "{rounded.action}"
     padding: "11px 16px"
   button-report:
-    backgroundColor: "{colors.sage-action}"
+    backgroundColor: "transparent"
     textColor: "#28513e"
     rounded: "{rounded.action}"
-    padding: "10px 16px"
+    padding: "4px 0"
   button-outline:
     backgroundColor: "transparent"
     textColor: "#28513e"
     rounded: "{rounded.control}"
-    padding: "9px 13px"
+    padding: "10px 14px"
   composer:
     backgroundColor: "{colors.field}"
     textColor: "{colors.forest-ink}"
@@ -73,7 +70,12 @@ components:
     backgroundColor: "{colors.paper}"
     textColor: "{colors.forest-ink}"
     rounded: "{rounded.panel}"
-    padding: "24px 30px 20px"
+    padding: "22px 26px"
+  wallet-card:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.forest-ink}"
+    rounded: "{rounded.panel}"
+    padding: "36px"
 ---
 
 # Design System: U-Guardian
@@ -84,7 +86,7 @@ components:
 
 An approachable geometric robot sits within a calm daylight workspace. Warm ivory, forest ink and sage preserve the established identity; quiet space gives the mascot a recognizable presence while Thai explanations and evidence remain easy to read. This is descriptive language for the shipped world, not a separately approved concept.
 
-The welcoming mascot becomes a small operational companion once a conversation begins. The existing connection and financial tools retain their denser field-journal layout at `settings.html`.
+The wallet is a quiet paper surface, while chat and settings use focused dialogs. The mascot lends personality to the entry point and pairs its expression with written operational status inside chat. Reusable visual decisions are recorded here; the single-page composition and interaction contract live in the surface brief.
 
 **Key Characteristics:**
 - Warm ivory surfaces with forest controls and sage emphasis.
@@ -92,85 +94,90 @@ The welcoming mascot becomes a small operational companion once a conversation b
 - A geometric robot whose expression accompanies written status.
 - Quiet dividers, expandable evidence and explicit review actions.
 
-Recorded from the shipped index, shell and widget sources, embed example, retained settings stylesheet, and review screenshots. This code-led build has no approved image comp. Route strategy lives in the companion surface brief.
+Recorded from the shipped index, shell and widget sources. This code-led refinement preserves the existing identity and uses no generated assets or approved image comp.
 
 ## Colors
 
-The restrained palette carries continuity between minimal host and embedded companion.
+The restrained palette connects the wallet, companion and settings.
 
 ### Primary
 
-Forest action marks voice, send and confirmation. Forest ink carries copy; the visor supports light eyes and mouth. Hosts can override widget ink, accent and surface through `--guardian-ink`, `--guardian-accent` and `--guardian-surface`.
+Forest action marks voice, send and confirmation. Forest ink carries copy; the visor supports light eyes and mouth. The custom element retains internal ink, accent and paper variables, without establishing a released integration theme API.
 
 ### Secondary
 
-Sage supports report actions, proposals and notifications. Leaf models the mascot, rather than implying a success or risk score.
+Sage action supports proposals and notifications. Leaf models the mascot rather than implying a success or risk score.
 
 ### Neutral
 
-Shell ivory surrounds the paper panel. Field tint groups the composer and raw evidence; dividers separate messages and watch information. Muted ink carries support copy. Settings paper preserves the tools-page ground. Terracotta focus outlines and text-backed error surfaces communicate interaction and failure.
+Shell ivory surrounds paper cards and dialogs. Field tint groups the composer and raw evidence. Shell dividers separate holdings and settings sections; the lighter widget divider separates conversation and watch content. Muted ink carries support copy. Terracotta focus outlines and text-backed error surfaces communicate interaction and failure.
 
 **The Written State Rule.** Operational state is expressed in text alongside mascot changes; color and expression do not carry the message alone.
 
 ## Typography
 
-Georgia supplies Latin wordmarks; Leelawadee UI with Tahoma and sans-serif fallbacks carries Thai interface text. The retained settings stack also includes Noto Sans Thai. There is no font-download dependency.
+Georgia supplies Latin wordmarks; Leelawadee UI with Tahoma and sans-serif fallbacks carries Thai interface text. There is no font-download dependency.
 
-The widget headline steps from (27px) to (24px) on small screens; body is (15px), welcome support (14px), and task labels (12px). Message paragraphs use line spacing (1.8). Compact provenance and tool traces are secondary metadata, not a model for essential instructions. The mobile composer is (16px). Host wordmark sizes are (26px), then (23px) on mobile; the widget wordmark is the smaller frontmatter role.
+Wallet and settings titles use the title role. The wallet title becomes (21px) on small screens; settings section titles are (18px). Chat body uses the body role with message line height (1.8). Supporting text is generally (13–14px); task labels use the label role. The host wordmark is (26px), becoming (23px) on mobile; the chat wordmark uses the frontmatter role. Asset quantities use tabular numerals, (18px) on desktop and (16px) on mobile. Settings inputs are (16px), as is the mobile composer.
+
+Compact provenance and tool traces remain secondary metadata. The dormant welcome headline styles are not part of the visible hierarchy.
 
 ## Layout
 
-The demo workspace has a centered maximum width (1080px), wallet column (280px), flexible companion and gap (68px). At the host breakpoint (800px), the wallet narrows to (220px) and gap to (25px). At (620px), the companion comes first, wallet second; holdings form a horizontally scrollable row and the explanatory side note disappears.
+Paper surfaces use generous internal spacing; lists use repeated divider-separated rows rather than independent tiles. Dialogs bound long workflows with internal scrolling and keep their close controls in sticky headings. Chat and settings lock background page scrolling while open.
 
-Widget panel padding changes to (20px 17px 16px) at (520px). Suggestions and voice controls wrap. Conversation compacts the mascot stage into an (80px) leading column and hides the welcome headline. Conversation height is bounded at (390px), or (42vh) on small screens, with internal scrolling.
+The current wallet surface uses a centered container with maximum width (740px), desktop horizontal inset (28px), and card padding (36px). At the shell breakpoint (620px), the inset becomes (16px) and card padding (24px 20px); the refresh action stacks below the freshness note. See the surface brief for the mascot's edge placement.
 
-The embed example pairs host explanation with a companion column (440px), stacking at (800px). The custom element is a document-flow panel with a collapsed launcher; hosts decide placement. A wallet sidebar is a demo composition, not a rule for every host.
+Chat has maximum width (620px), height (90dvh), and content padding from the companion-panel token. At the widget breakpoint (520px), padding becomes (16px) and height (92dvh). The compact status stage uses a (70px) character column from the first opening. Conversation scroll height is capped at (34dvh), becoming (32dvh) on small screens. Suggestions and voice controls wrap.
+
+Settings has maximum width (600px), height (88dvh), and padding (28px), becoming (92dvh) and (22px) at the shell mobile breakpoint. Its sticky heading compensates for that padding. Both dialogs retain a (28px) total minimum viewport gutter.
 
 ## Elevation & Depth
 
-Depth comes mainly from tonal surfaces and whitespace. The panel is unshadowed. The robot uses inset shading and a soft ground shadow; the launcher uses an ambient shadow. Exact shadows and motion are in `.impeccable/design.json`.
+Depth comes from tonal surfaces, fine borders and whitespace at rest. The wallet is unshadowed. Modal dialogs add a diffuse shadow and translucent forest backdrop; the robot uses inset shading and a soft contact shadow. The perched launcher is transparent and unshadowed. Exact shadows and motion are in `.impeccable/design.json`.
 
-**The Quiet Surface Rule.** Preserve tonal separation for the companion panel; reserve the observed shadows for the character and collapsed launcher.
+**The Quiet Surface Rule.** Keep the wallet flat; use modal elevation for focused work and local shading for the character.
 
 ## Shapes
 
-Controls have gently rounded corners, fields and proposals a broader curve, and the companion a single soft panel. The CSS robot has a rounded body, visor, two eyes, mouth, leaf antenna, hands and feet. It uses no raster asset. Authored outline SVG icons accompany voice, send, stop and close.
+Controls have gently rounded corners, fields and proposals a broader curve, and cards and dialogs use the panel radius. Settings inputs use a small (7px) radius. The CSS robot has a rounded body, visor, two eyes, mouth, leaf antenna, hands and feet. It uses no raster asset. Authored outline SVG icons accompany voice, send, stop and close.
 
 ## Components
 
 ### Buttons and composer
 
-Forest filled voice and send controls carry immediate actions; sage report buttons are quieter. Suggestions and host refresh controls use thin borders. Widget hover applies brightness (.96); host outline hover uses sage. Widget and host focus outlines are terracotta (3px), offset (4px). Disabled controls reduce opacity and show a waiting cursor.
+Forest filled voice and send controls carry immediate actions. Report is a quiet text action within the compact status stage. Suggestions and shell controls use thin borders. Hover generally applies brightness (.96); shell outline hover also uses sage. Focus outlines are terracotta (3px), offset (4px). Disabled controls reduce opacity and show a waiting cursor.
 
-The composer places a labeled, vertically resizable textarea beside send. Mobile suggestions have minimum height (42px), voice (46px), and quiet icon buttons a minimum square (44px). Preserve the text alternative to voice.
+The composer places a labeled, vertically resizable textarea beside send. Settings controls and shell buttons have a minimum height (44px). Mobile suggestions have minimum height (42px), voice (46px), and quiet icon buttons a minimum square (44px). Preserve the text alternative to voice.
+
+### Wallet and settings
+
+Holdings use divider-separated rows with asset name at left and exact quantities aligned right. Written DEMO/LIVE status sits beside the wallet heading; freshness and error text accompany refresh. Settings uses labeled controls, section dividers and provider disclosures. Goals and asset identity matching are additional disclosures in the same dialog.
 
 ### Companion and voice
 
-The mascot button and report action request a briefing. Idle eyes blink, thinking eyes move laterally, listening raises a hand and widens eyes, speaking animates the mouth, and error narrows eyes. Loading and transcribing have distinct status text without extra character animations. Reduced-motion preference disables widget animation and transitions.
+The perched mascot is a button that opens chat. Inside chat, the smaller mascot and report action request a briefing. Idle eyes blink; thinking eyes move laterally, listening raises a hand and widens eyes, speaking animates the mouth, and error narrows eyes. Loading and transcribing have distinct status text. Reduced-motion preference disables widget animation and transitions.
 
-Voice is push-to-talk: click to start, then click to stop and send, with automatic recording limit (25 seconds). Permission, configuration, transcription and playback failures have visible errors. Users can request playback, stop it, or enable automatic reading; successful voice transcription enables read-aloud. It does not listen continuously.
+Voice is push-to-talk: click to start, then click to stop and send, with automatic recording limit (25 seconds). Permission, configuration, transcription and playback failures have visible errors. Users can request playback, stop it, or enable automatic reading; successful voice transcription enables read-aloud. Closing chat stops voice and preserves its conversation.
 
 ### Conversation and watch review
 
-Messages are divided rows with indented user text. Responses may expose expandable evidence, raw data and a playback action. Watch proposals show criteria, monitoring scope and explicit confirmation. Rules and alerts sit under a count-bearing disclosure with removal and acknowledgement controls.
+Messages are divided rows with indented user text. Responses may expose expandable evidence, raw data and a playback action. Watch proposals show criteria, monitoring scope and explicit confirmation. Rules and alerts sit under a count-bearing disclosure with a stop/remove action for rules. A briefing automatically acknowledges the snapshot; opening chat clears the unread launcher dot. The dot is also represented in the launcher's accessible name.
 
-Monitoring limits remain in the watch disclosure and proposal. Public-demo checks depend on an active visible browser document or host invocation; there is no provisioned background scheduler, SMS or Web Push. Collapse leaves the widget mounted and does not guarantee checks stop. Background polling preserves voice and typing controls; chat and briefings wait for any current check.
-
-### Navigation and retained settings
-
-Small host links lead to the embed example and `settings.html`. The latter preserves connection setup, source evidence, token matching, phone configuration and Fuji tools in the established field-journal surface. Preserve readable addresses and exact quantities, explicit demo/live labels, named dialogs, and review before consequential actions. Settings capability does not imply provisioned public-demo background monitoring.
+Chat opens with focus in the composer; close and Escape return focus to the mascot launcher. Settings returns focus to its opening button. Native modal dialogs retain focus and block background interactions.
 
 ## Do's and Don'ts
 
 ### Do:
-- Do preserve warm ivory, forest and sage across host and companion surfaces.
+- Do preserve warm ivory, forest and sage across wallet, chat and settings.
 - Do pair mascot state with readable operational status.
 - Do keep voice user initiated and preserve the text alternative.
 - Do keep evidence and monitoring limits near the relevant action.
-- Do keep the mobile companion before the demo wallet.
+- Do keep close controls available while dialog content scrolls.
 
 ### Don't:
 - Don't use the mascot's expression as a claim that a wallet is safe.
 - Don't turn demo data, missing evidence or unavailable monitoring into certainty.
-- Don't replace the Shadow DOM boundary with host-dependent styling.
 - Don't promote compact diagnostic typography into primary reading text.
+- Don't reuse dormant welcome, launcher or multi-column styles as current design guidance.
+
