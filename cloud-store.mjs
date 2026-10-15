@@ -12,8 +12,10 @@ export function codec(secret){
 export class SessionBusy extends Error {}
 export function privateSessions(blob,token){
  const crypt=codec(token);
- async function read(path){const result=await blob.get(path,{access:'private',useCache:false,token});if(!result)return null;return {value:crypt.open(await new Response(result.stream).text()),etag:result.blob.etag};}
- async function write(path,value,etag){return blob.put(path,crypt.seal(value),{access:'private',token,addRandomSuffix:false,contentType:'text/plain',cacheControlMaxAge:60,...(etag?{ifMatch:etag}:{allowOverwrite:false})});}
+ // Octet-stream avoids CDN compression rewriting the object's strong ETag as W/...
+ // Older text/plain records may already have the transport's weak prefix.
+ async function read(path){const result=await blob.get(path,{access:'private',useCache:false,token});if(!result)return null;return {value:crypt.open(await new Response(result.stream).text()),etag:result.blob.etag.replace(/^W\//,'')};}
+ async function write(path,value,etag){return blob.put(path,crypt.seal(value),{access:'private',token,addRandomSuffix:false,contentType:'application/octet-stream',cacheControlMaxAge:60,...(etag?{ifMatch:etag}:{allowOverwrite:false})});}
  return {
   read,
   async workspace(path,mutating){

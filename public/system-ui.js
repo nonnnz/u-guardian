@@ -32,6 +32,7 @@ async function savePhone(){await runState('phone/settings',{toNumber:$('phone-to
 export function renderSystem(s){
  if(!s.phone)return;
  const cloud=s.integration.deployment==='vercel';$('phone-enabled').disabled=cloud;
+ $('phone-settings').querySelector('details p').textContent=cloud?'ใช้ HTTPS origin ของเว็บนี้เป็น callback แล้วกดสร้าง / อัปเดต Guardian agent เพื่อเชื่อม U-bot และ wallet tools ระหว่างสาย':'ใช้ HTTPS tunnel ไปที่ callback port 4175 เพื่อให้ ElevenLabs เรียก U-bot และ wallet tools';
  $('phone-enabled').closest('label').querySelector('small').textContent=cloud?'เวอร์ชันเว็บรองรับโทรทดสอบด้วยตนเอง · โทรอัตโนมัติใช้ local server':'ทำงานเมื่อเปิด Live monitoring · หนึ่งคำขอต่อเหตุการณ์ · ต้องเปิด server ไว้';
  let monitorNote=$('cloud-monitor-note');if(!monitorNote){monitorNote=document.createElement('p');monitorNote.id='cloud-monitor-note';monitorNote.className='helper';document.querySelector('.wallet-toolbar').after(monitorNote);}
  monitorNote.hidden=!cloud;monitorNote.textContent='Live monitoring รีเฟรชทุก 60 วินาทีขณะเปิดหน้านี้ · ไม่ตรวจเบื้องหลังเมื่อปิดเว็บ';
