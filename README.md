@@ -42,7 +42,7 @@ The old dashboard and separate Settings page have been removed. Old /settings.ht
 
 ## Debug the agent
 
-Open the mascot chat and enable **Debug** in its header. The adjacent **แชต / Debug** tabs switch between the conversation and diagnostics. Send a message, request a briefing or use voice in the chat tab, then inspect each expandable event in Debug.
+Open the mascot chat and enable **Debug** in its header. The adjacent **Chat / Debug** (or **แชต / Debug** in Thai) tabs switch between the conversation and diagnostics. Send a message, request a briefing or use voice in the chat tab, then inspect each expandable event in Debug.
 
 Each request records timestamps and duration, the input, U-bot prompts and expanded payload (including the selected mode), raw provider response, validated JSON decision, tool arguments/results, provider calls/cache results, retries, errors, session saves and final answer. Local demo rules and briefings are explicitly identified as not calling U-bot. Voice requests record STT text and TTS metadata, not audio bytes in the log.
 
@@ -80,3 +80,25 @@ node test/debug-browser.cjs
 Browser tests use Playwright with Edge; set PLAYWRIGHT_MODULE to its installed module location when needed. Run an isolated server at port 4180 (or set BASE_URL), with GUARDIAN_IGNORE_SUPPLIED_KEYS=1, a separate GUARDIAN_ENV_FILE and GUARDIAN_STATE_DIR. The settings test writes a dummy credential to that isolated environment file. Never run it against a server using your actual credentials.
 
 The browser smoke test covers collapsed chat, focus/Escape, reports, watch confirmation, settings persistence, mobile layout, and controlled wallet/mapping fixtures. The voice smoke uses a synthetic microphone and mocked speech APIs; it does not test a physical microphone or incur provider charges.
+
+
+## English and Thai
+
+English is the default interface. Use **English / ไทย** in the header to switch; the preference is saved locally under `guardian-language`. Switching reloads the page and clears its temporary chat/Debug display, but keeps saved wallet/provider settings, goals and watches. It is blocked while a task is running.
+
+The browser sends `x-guardian-language: en|th` on every API request, including audio uploads. HTTP requests default to English. Request-scoped async context keeps concurrent callers’ languages separate. Planner replies, watch labels, evidence explanations, local briefings, capability guards and provider errors use the selected language. STT receives `eng` or `tha` as its language hint ([ElevenLabs API](https://elevenlabs.io/docs/api-reference/speech-to-text/convert)); TTS reads the resulting text with the configured voice. User text, token identities, raw evidence and saved goal option values are not machine-translated.
+
+Authored strings live in `public/messages.js`; marked HTML uses `public/i18n.js`, and server copy uses `locale.mjs`. The Thai source keys retain compatibility with existing saved goal values. Direct legacy library calls without a request context retain Thai.
+
+Additional browser verification (isolated test server only):
+
+```powershell
+$env:BASE_URL='http://127.0.0.1:4186'
+node test/bilingual-browser.cjs
+$env:TEST_LANGUAGE='en'
+node test/guardian-voice-smoke.cjs
+$env:TEST_LANGUAGE='th'
+node test/guardian-voice-smoke.cjs
+```
+
+See [AGENT-EVALUATION.md](AGENT-EVALUATION.md) for observed live English provider results and test limitations.

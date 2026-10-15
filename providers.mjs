@@ -1,3 +1,4 @@
+import {t as tr,language} from './locale.mjs';
 import {providerSignal} from './agent-budget.mjs';
 import {debugEvent,debugStep} from './debug.mjs';
 import { randomUUID } from 'node:crypto';
@@ -24,7 +25,7 @@ export function textFrom(value) {
   return textFrom(value.choices?.[0]?.delta?.content ?? value.choices?.[0]?.message?.content ?? value.message?.content ?? value.response ?? value.content ?? value.text ?? value.answer ?? value.data?.content ?? value.data?.text ?? '');
 }
 export function parseReply(body, contentType = '') {
-  if (body.includes('[DEGENERATE]')) throw new Error('U-bot แจ้งว่าคำตอบผิดรูปแบบ กรุณาลองอีกครั้ง');
+  if (body.includes('[DEGENERATE]')) throw new Error(tr('U-bot แจ้งว่าคำตอบผิดรูปแบบ กรุณาลองอีกครั้ง'));
   body = body.replace(/\[STATUS:\w+\]/g, '').trim();
   if (contentType.includes('text/html') || /^\s*<!doctype html|^\s*<html/i.test(body)) return '';
   if (contentType.includes('json') && !contentType.includes('event-stream')) {const value=JSON.parse(body);return ['tool','answer'].includes(value?.type)?JSON.stringify(value):textFrom(value);}
@@ -41,39 +42,39 @@ export function parseReply(body, contentType = '') {
   catch { return contentType.includes('text/plain') ? body : ''; }
 }
 export async function ubot(config, prompt, timeout=60000) {
-  if (!config.ubotToken) throw new Error('ยังไม่ได้ตั้ง U-bot Bearer token');
+  if (!config.ubotToken) throw new Error(tr('ยังไม่ได้ตั้ง U-bot Bearer token'));
   let template;
-  try { template = JSON.parse(normalizeUbotTemplate(config.ubotTemplate)); } catch { throw new Error('U-bot payload template ไม่ใช่ JSON'); }
-  if (!config.ubotTemplate.includes('{{prompt}}')) throw new Error('Payload ต้องมี {{prompt}} ในตำแหน่งข้อความ');
+  try { template = JSON.parse(normalizeUbotTemplate(config.ubotTemplate)); } catch { throw new Error(tr('U-bot payload template ไม่ใช่ JSON')); }
+  if (!config.ubotTemplate.includes('{{prompt}}')) throw new Error(tr('Payload ต้องมี {{prompt}} ในตำแหน่งข้อความ'));
   const payload=fill(template,prompt,randomUUID());
   const res = await debugStep('provider','U-bot HTTP',{url:'https://u.bot/api/chat',method:'POST',payload},()=>fetch('https://u.bot/api/chat', { method: 'POST', redirect: 'error',
     headers: { Authorization: `Bearer ${config.ubotToken}`, 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' },
     body: JSON.stringify(payload), signal: providerSignal(timeout) }).then(async res=>({ok:res.ok,status:res.status,contentType:res.headers.get('content-type')||'',body:await res.text()})));
-  if (!res.ok) throw new Error(`U-bot HTTP ${res.status}: ตรวจ token และ payload จากเว็บอีกครั้ง`);
+  if (!res.ok) throw new Error(tr('U-bot HTTP {0}: ตรวจ token และ payload จากเว็บอีกครั้ง',res.status));
   const text = parseReply(res.body, res.contentType);
-  if (!text.trim()) throw new Error('ยังอ่าน response ของ U-bot รูปแบบนี้ไม่ได้ ต้องปรับ adapter ตาม response จริง');
+  if (!text.trim()) throw new Error(tr('ยังอ่าน response ของ U-bot รูปแบบนี้ไม่ได้ ต้องปรับ adapter ตาม response จริง'));
   return text.slice(0, 12000);
 }
 // Verify the supplied or stored credential before changing the active agent.
 // This is a credential check, not OAuth or a cross-site session import.
 export async function verifyUbotConnection(config, input={}, call=ubot) {
-  for(const key of Object.keys(input))if(!['ubotToken','ubotTemplate'].includes(key))throw new Error('พารามิเตอร์เชื่อมต่อ U-bot ไม่ถูกต้อง');
+  for(const key of Object.keys(input))if(!['ubotToken','ubotTemplate'].includes(key))throw new Error(tr('พารามิเตอร์เชื่อมต่อ U-bot ไม่ถูกต้อง'));
   if(input.ubotToken!==undefined&&(typeof input.ubotToken!=='string'||input.ubotToken.length>10000||/[\r\n']/.test(input.ubotToken)))throw new Error('U-bot token ไม่ถูกต้อง');
   const token=(input.ubotToken||'').trim().replace(/^Bearer\s+/i,'')||config.ubotToken;
-  if(!token)throw new Error('ยังไม่มี U-bot token ที่บันทึกไว้ เปิดตั้งค่า token ด้วยตนเองก่อน ขณะนี้ยังไม่รองรับการเชื่อมบัญชีผ่าน OAuth');
+  if(!token)throw new Error(tr('ยังไม่มี U-bot token ที่บันทึกไว้ เปิดตั้งค่า token ด้วยตนเองก่อน ขณะนี้ยังไม่รองรับการเชื่อมบัญชีผ่าน OAuth'));
   const template=input.ubotTemplate===undefined?config.ubotTemplate:input.ubotTemplate;
-  if(typeof template!=='string'||template.length>16000||!template.includes('{{prompt}}'))throw new Error('U-bot template ต้องมี {{prompt}}');
-  try{JSON.parse(template);}catch{throw new Error('U-bot template ต้องเป็น JSON ที่ถูกต้อง');}
+  if(typeof template!=='string'||template.length>16000||!template.includes('{{prompt}}'))throw new Error(tr('U-bot template ต้องมี {{prompt}}'));
+  try{JSON.parse(template);}catch{throw new Error(tr('U-bot template ต้องเป็น JSON ที่ถูกต้อง'));}
   const candidate={...config,ubotToken:token,ubotTemplate:normalizeUbotTemplate(template)};
-  const text=await call(candidate,'ตอบสั้น ๆ ว่า U-Guardian เชื่อมต่อสำเร็จ',45000);
+  const text=await call(candidate,tr('ตอบสั้น ๆ ว่า U-Guardian เชื่อมต่อสำเร็จ'),45000);
   return {text,config:{...candidate,mode:'ubot',ubotStatus:'verified'}};
 }
 async function eleven(config, path, options = {}) {
-  if (!config.elevenKey) throw new Error('ยังไม่ได้ตั้ง ElevenLabs API key');
+  if (!config.elevenKey) throw new Error(tr('ยังไม่ได้ตั้ง ElevenLabs API key'));
   debugEvent('provider.request','ElevenLabs HTTP',{path,method:options.method||'GET',body:typeof options.body==='string'?options.body:options.body instanceof FormData?{model:options.body.get('model_id'),audioBytes:options.body.get('file')?.size}:undefined});
   const res = await fetch(`https://api.elevenlabs.io${path}`, { ...options, redirect: 'error', headers: { ...options.headers, 'xi-api-key': config.elevenKey }, signal: providerSignal(30000) });
   debugEvent('provider.response','ElevenLabs HTTP',{path,status:res.status});
-  if (!res.ok) throw new Error(`ElevenLabs HTTP ${res.status}: ตรวจ API key, สิทธิ์, voice/model และเครดิต`);
+  if (!res.ok) throw new Error(tr('ElevenLabs HTTP {0}: ตรวจ API key, สิทธิ์, voice/model และเครดิต',res.status));
   return res;
 }
 export async function voices(config) {
@@ -82,7 +83,7 @@ export async function voices(config) {
   return (data.voices || []).map(v => ({ id: v.voice_id, name: v.name }));
 }
 export async function speech(config, text) {
-  if (!config.voiceId) throw new Error('เลือก ElevenLabs voice ก่อน');
+  if (!config.voiceId) throw new Error(tr('เลือก ElevenLabs voice ก่อน'));
   const res = await eleven(config, `/v1/text-to-speech/${encodeURIComponent(config.voiceId)}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
     body: JSON.stringify({ text: text.slice(0, 2500), model_id: config.ttsModel }) });
@@ -91,6 +92,7 @@ export async function speech(config, text) {
 export async function transcribe(config, bytes, mime) {
   const form = new FormData();
   form.append('model_id', config.sttModel);
+  form.append('language_code', language() === 'th' ? 'tha' : 'eng');
   form.append('file', new Blob([bytes], { type: mime }), mime.includes('mp4') ? 'voice.mp4' : 'voice.webm');
   const res = await eleven(config, '/v1/speech-to-text', { method: 'POST', body: form });
   const result=await res.json();debugEvent('voice.result','Speech transcribed',result);return result.text;

@@ -1,56 +1,57 @@
-<!doctype html>
-<html lang="th">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f2f3e9"><title>U-Guardian · กระเป๋าของคุณ</title><link rel="stylesheet" href="/shell.css"></head>
+<!DOCTYPE html>
+
+<html lang="en">
+<head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="#f2f3e9" name="theme-color"/><title data-i18n="U-Guardian · กระเป๋าของคุณ">U-Guardian · Your wallet</title><link href="/shell.css" rel="stylesheet"/></head>
 <body>
-<header class="top"><a class="brand" href="/">u—guardian</a><button id="open-settings" class="outline" aria-haspopup="dialog">ตั้งค่า</button></header>
+<header class="top"><a class="brand" href="/">u—guardian</a><div class="header-actions"><select id="language" aria-label="Language / ภาษา"><option value="en" lang="en">English</option><option value="th" lang="th">ไทย</option></select><button aria-haspopup="dialog" class="outline" data-i18n="ตั้งค่า" id="open-settings">Settings</button></div></header>
 <main class="layout">
-  <section class="wallet" aria-labelledby="wallet-title">
-    <u-guardian collapsed></u-guardian>
-    <div class="wallet-heading"><h1 id="wallet-title">กระเป๋าของคุณ</h1><span id="mode">กำลังอ่าน…</span></div>
-    <p id="network"></p><p id="address" class="address"></p>
-    <div class="asset-heading"><span>สินทรัพย์</span><span>จำนวนที่ถือ</span></div><div id="assets" class="assets" aria-live="polite"></div>
-    <p id="wallet-error" class="error-text" role="alert"></p>
-    <div class="wallet-bottom"><p id="freshness" class="muted"></p><button id="refresh" class="outline">รีเฟรชกระเป๋า</button></div>
-  </section>
-  <p class="companion-note">กดที่ Guardian ขอบกล่องเพื่อคุยหรือสั่งงานด้วยเสียง</p>
-  <p id="home-status" class="muted" role="status"></p>
+<section aria-labelledby="wallet-title" class="wallet">
+<u-guardian collapsed=""></u-guardian>
+<div class="wallet-heading"><h1 data-i18n="กระเป๋าของคุณ" id="wallet-title">Your wallet</h1><span data-i18n="กำลังอ่าน…" id="mode">Loading…</span></div>
+<p id="network"></p><p class="address" id="address"></p>
+<div class="asset-heading"><span data-i18n="สินทรัพย์">Asset</span><span data-i18n="จำนวนที่ถือ">Quantity</span></div><div aria-live="polite" class="assets" id="assets"></div>
+<p class="error-text" id="wallet-error" role="alert"></p>
+<div class="wallet-bottom"><p class="muted" id="freshness"></p><button class="outline" data-i18n="รีเฟรชกระเป๋า" id="refresh">Refresh wallet</button></div>
+</section>
+<p class="companion-note" data-i18n="กดที่ Guardian ขอบกล่องเพื่อคุยหรือสั่งงานด้วยเสียง">Tap Guardian on the wallet card to chat or use your voice.</p>
+<p class="muted" id="home-status" role="status"></p>
 </main>
 <footer>U-bot · Avalanche · Tokenomist · ElevenLabs</footer>
-<dialog id="settings" aria-labelledby="settings-title">
-  <div class="settings-heading"><h2 id="settings-title">ตั้งค่า</h2><button id="close-settings" class="outline">ปิด</button></div>
-  <p id="storage-note" class="muted"></p><p id="settings-status" role="status"></p>
-  <section class="settings-section"><h3>กระเป๋า</h3>
-    <form id="wallet-form">
-      <label>ข้อมูลที่แสดง<select id="data-mode"><option value="demo">Demo · กระเป๋าตัวอย่าง</option><option value="live">Live · กระเป๋าจริง</option></select></label>
-      <div id="live-fields" hidden><p class="muted">อ่านข้อมูลด้วย public address เท่านั้น ไม่ต้องใช้ seed phrase หรือเซ็นอนุญาต</p>
-        <label>Public wallet address<input id="wallet-address" placeholder="0x…" maxlength="42" pattern="0x[0-9a-fA-F]{40}" autocomplete="off" spellcheck="false"></label>
-        <label>เครือข่าย<select id="wallet-chain"><option value="43114">Avalanche C-Chain · Mainnet</option><option value="43113">Avalanche Fuji · Testnet</option></select></label>
-        <label>ดูเหตุการณ์อุปทานล่วงหน้า (วัน)<input id="horizon-days" type="number" min="1" max="90" value="30"></label>
-      </div>
-      <button class="primary" id="save-wallet">บันทึกกระเป๋า</button><p id="wallet-status" class="form-status" role="status"></p>
-    </form>
-    <div id="demo-controls" hidden><button id="demo-event" class="text-button">จำลอง USDC ออก 25 เหรียญ</button><p class="muted">ทดสอบรายงานและการติดตามด้วยข้อมูลจำลอง</p></div>
-  </section>
-  <section class="settings-section"><h3>การเชื่อมต่อ</h3><p class="muted">เว้นช่อง key/token ว่างเพื่อใช้ค่าที่บันทึกไว้</p>
-    <form id="integration-form">
-      <label>ตัวช่วยวิเคราะห์<select id="agent-mode"><option value="demo">Demo · คำตอบตัวอย่าง</option><option value="ubot">U-bot · Professional</option></select></label>
-      <details class="provider"><summary>U-bot <span id="ubot-status"></span></summary><p class="muted">ใช้ Professional สำหรับเลือกเครื่องมือและอธิบายผล เชื่อมต่อด้วย token ที่บันทึกไว้</p><button type="button" class="primary" id="connect-ubot">Connect U-bot</button> <a class="text-button" href="https://u.bot/" target="_blank" rel="noopener noreferrer">เปิดเว็บ U-bot</a><p id="ubot-result" class="form-status" role="status"></p><p class="muted">การเปิดเว็บ U-bot ยังไม่เชื่อมบัญชีให้อัตโนมัติ หาก token หมดอายุให้ใส่ค่าใหม่ด้านล่าง</p><details id="ubot-manual"><summary>ตั้งค่า token ด้วยตนเอง</summary><label>Bearer token<input id="ubot-token" type="password" autocomplete="new-password" spellcheck="false" placeholder="เว้นว่างเพื่อใช้ token ที่บันทึกไว้"></label></details><details><summary>รูปแบบคำขอขั้นสูง</summary><label>JSON template<textarea id="ubot-template" rows="5" spellcheck="false"></textarea></label></details></details>
-      <details class="provider"><summary>Avalanche <span id="avalanche-status"></span></summary><label>Data API key<input id="avalanche-key" type="password" autocomplete="new-password" spellcheck="false"></label><button type="button" class="outline" data-test="avalanche">บันทึกและทดสอบ Avalanche</button><p id="avalanche-result" class="form-status" role="status"></p></details>
-      <details class="provider"><summary>Tokenomist <span id="tokenomist-status"></span></summary><label>API key<input id="tokenomist-key" type="password" autocomplete="new-password" spellcheck="false"></label><button type="button" class="outline" data-test="tokenomist">บันทึกและทดสอบ Tokenomist</button><p id="tokenomist-result" class="form-status" role="status"></p></details>
-      <details class="provider"><summary>ElevenLabs <span id="eleven-status"></span></summary><label>API key<input id="eleven-key" type="password" autocomplete="new-password" spellcheck="false"></label><button type="button" class="outline" data-test="elevenlabs">บันทึกและโหลดเสียง</button><p id="eleven-result" class="form-status" role="status"></p><label id="voice-options" hidden>เลือกเสียง<select id="voice-select"><option value="">เลือกเสียง</option></select></label><label>Voice ID<input id="voice-id" autocomplete="off"></label><details><summary>โมเดลเสียง</summary><label>โมเดลพูด<input id="tts-model"></label><label>โมเดลถอดเสียง<input id="stt-model"></label></details></details>
-      <button class="primary" id="save-integrations">บันทึกการเชื่อมต่อ</button><p id="integration-status" class="form-status" role="status"></p>
-    </form>
-    <details class="clear-keys"><summary>ล้างการเชื่อมต่อ</summary><p class="muted">ลบ API keys/token ทั้งสี่ที่บันทึกไว้ แล้วเปลี่ยนเป็น Demo agent</p><button id="disconnect" class="outline danger">ล้าง API keys ทั้งหมด</button></details>
-  </section>
-  <details class="settings-section"><summary>เป้าหมายของคุณ</summary><p class="muted">ใช้ประกอบคำอธิบายของ Guardian</p><form id="goal">
-    <label>อยากทำอะไร<select name="purpose"><option>ทำความเข้าใจก่อนเริ่มลงทุน</option><option>ถือระยะยาว</option><option>เก็งกำไรระยะสั้น</option><option>เก็บออมเพื่อใช้ในอนาคต</option></select></label>
-    <label>ช่วงเวลาที่สนใจ<select name="horizon"><option>ยังไม่แน่ใจ</option><option>ไม่เกิน 1 เดือน</option><option>3–12 เดือน</option><option>มากกว่า 1 ปี</option></select></label>
-    <label>รับความผันผวนได้แค่ไหน<select name="risk"><option>ยังไม่แน่ใจ ต้องการคำอธิบาย</option><option>ต่ำ ต้องใช้เงินก้อนนี้</option><option>ปานกลาง</option><option>สูง แต่มีวงเงินจำกัด</option></select></label>
-    <button class="primary">บันทึกเป้าหมาย</button><p id="goal-status" class="form-status" role="status"></p></form>
-  </details>
-  <details class="settings-section" id="mapping-section"><summary>จับคู่เหรียญกับ Tokenomist</summary><p class="muted">AVAX บน Mainnet จับคู่อัตโนมัติ ส่วน ERC-20 ต้องตรวจว่า contract ตรงกับโครงการก่อนจับคู่ ชื่อเหรียญเหมือนกันอาจเป็นคนละเหรียญ</p><p id="mapping-current" class="muted"></p>
-    <button id="load-catalog" class="outline">โหลดรายชื่อ Tokenomist</button>
-    <form id="mapping-form"><label>เหรียญในกระเป๋า<select id="mapping-asset" required></select></label><label>ค้นหาชื่อหรือสัญลักษณ์<input id="mapping-search" type="search"></label><label>โครงการใน Tokenomist<select id="mapping-token" required></select></label><label class="checkbox"><input id="mapping-confirm" type="checkbox" required>ฉันตรวจแล้วว่า contract ตรงกับโครงการนี้</label><button class="primary">บันทึกการจับคู่</button><button id="remove-mapping" class="text-button" type="button">ยกเลิกการจับคู่เหรียญนี้</button><p id="mapping-status" class="form-status" role="status"></p></form>
-  </details>
+<dialog aria-labelledby="settings-title" id="settings">
+<div class="settings-heading"><h2 data-i18n="ตั้งค่า" id="settings-title">Settings</h2><button class="outline" data-i18n="ปิด" id="close-settings">Close</button></div>
+<p class="muted" id="storage-note"></p><p id="settings-status" role="status"></p>
+<section class="settings-section"><h3 data-i18n="กระเป๋า">Wallet</h3>
+<form id="wallet-form">
+<label><span data-i18n="ข้อมูลที่แสดง">Wallet data</span><select id="data-mode"><option data-i18n="Demo · กระเป๋าตัวอย่าง" value="demo">Demo · Sample wallet</option><option data-i18n="Live · กระเป๋าจริง" value="live">Live · Real wallet</option></select></label>
+<div hidden="" id="live-fields"><p class="muted" data-i18n="อ่านข้อมูลด้วย public address เท่านั้น ไม่ต้องใช้ seed phrase หรือเซ็นอนุญาต">Read-only access using your public address. No seed phrase or signature needed.</p>
+<label>Public wallet address<input autocomplete="off" id="wallet-address" maxlength="42" pattern="0x[0-9a-fA-F]{40}" placeholder="0x…" spellcheck="false"/></label>
+<label><span data-i18n="เครือข่าย">Network</span><select id="wallet-chain"><option value="43114">Avalanche C-Chain · Mainnet</option><option value="43113">Avalanche Fuji · Testnet</option></select></label>
+<label><span data-i18n="ดูเหตุการณ์อุปทานล่วงหน้า (วัน)">Supply event lookahead (days)</span><input id="horizon-days" max="90" min="1" type="number" value="30"/></label>
+</div>
+<button class="primary" data-i18n="บันทึกกระเป๋า" id="save-wallet">Save wallet</button><p class="form-status" id="wallet-status" role="status"></p>
+</form>
+<div hidden="" id="demo-controls"><button class="text-button" data-i18n="จำลอง USDC ออก 25 เหรียญ" id="demo-event">Simulate 25 USDC leaving</button><p class="muted" data-i18n="ทดสอบรายงานและการติดตามด้วยข้อมูลจำลอง">Test briefings and watches with simulated data.</p></div>
+</section>
+<section class="settings-section"><h3 data-i18n="การเชื่อมต่อ">Connections</h3><p class="muted" data-i18n="เว้นช่อง key/token ว่างเพื่อใช้ค่าที่บันทึกไว้">Leave key/token fields blank to keep saved credentials.</p>
+<form id="integration-form">
+<label><span data-i18n="ตัวช่วยวิเคราะห์">Agent</span><select id="agent-mode"><option data-i18n="Demo · คำตอบตัวอย่าง" value="demo">Demo · Sample responses</option><option value="ubot">U-bot · Professional</option></select></label>
+<details class="provider"><summary>U-bot <span id="ubot-status"></span></summary><p class="muted" data-i18n="ใช้ Professional สำหรับเลือกเครื่องมือและอธิบายผล เชื่อมต่อด้วย token ที่บันทึกไว้">Professional selects tools and explains results. Connect using your saved token.</p><button class="primary" id="connect-ubot" type="button">Connect U-bot</button> <a class="text-button" data-i18n="เปิดเว็บ U-bot" href="https://u.bot/" rel="noopener noreferrer" target="_blank">Open U-bot</a><p class="form-status" id="ubot-result" role="status"></p><p class="muted" data-i18n="การเปิดเว็บ U-bot ยังไม่เชื่อมบัญชีให้อัตโนมัติ หาก token หมดอายุให้ใส่ค่าใหม่ด้านล่าง">Opening U-bot does not connect your account automatically. If your token has expired, enter a new one below.</p><details id="ubot-manual"><summary data-i18n="ตั้งค่า token ด้วยตนเอง">Enter token manually</summary><label>Bearer token<input autocomplete="new-password" data-i18n-placeholder="เว้นว่างเพื่อใช้ token ที่บันทึกไว้" id="ubot-token" placeholder="Leave blank to keep the saved token" spellcheck="false" type="password"/></label></details><details><summary data-i18n="รูปแบบคำขอขั้นสูง">Advanced request template</summary><label>JSON template<textarea id="ubot-template" rows="5" spellcheck="false"></textarea></label></details></details>
+<details class="provider"><summary>Avalanche <span id="avalanche-status"></span></summary><label>Data API key<input autocomplete="new-password" id="avalanche-key" spellcheck="false" type="password"/></label><button class="outline" data-i18n="บันทึกและทดสอบ Avalanche" data-test="avalanche" type="button">Save and test Avalanche</button><p class="form-status" id="avalanche-result" role="status"></p></details>
+<details class="provider"><summary>Tokenomist <span id="tokenomist-status"></span></summary><label>API key<input autocomplete="new-password" id="tokenomist-key" spellcheck="false" type="password"/></label><button class="outline" data-i18n="บันทึกและทดสอบ Tokenomist" data-test="tokenomist" type="button">Save and test Tokenomist</button><p class="form-status" id="tokenomist-result" role="status"></p></details>
+<details class="provider"><summary>ElevenLabs <span id="eleven-status"></span></summary><label>API key<input autocomplete="new-password" id="eleven-key" spellcheck="false" type="password"/></label><button class="outline" data-i18n="บันทึกและโหลดเสียง" data-test="elevenlabs" type="button">Save and load voices</button><p class="form-status" id="eleven-result" role="status"></p><label hidden="" id="voice-options"><span data-i18n="เลือกเสียง">Choose a voice</span><select id="voice-select"><option data-i18n="เลือกเสียง" value="">Choose a voice</option></select></label><label>Voice ID<input autocomplete="off" id="voice-id"/></label><details><summary data-i18n="โมเดลเสียง">Voice models</summary><label><span data-i18n="โมเดลพูด">Text-to-speech model</span><input id="tts-model"/></label><label><span data-i18n="โมเดลถอดเสียง">Speech-to-text model</span><input id="stt-model"/></label></details></details>
+<button class="primary" data-i18n="บันทึกการเชื่อมต่อ" id="save-integrations">Save connections</button><p class="form-status" id="integration-status" role="status"></p>
+</form>
+<details class="clear-keys"><summary data-i18n="ล้างการเชื่อมต่อ">Clear connections</summary><p class="muted" data-i18n="ลบ API keys/token ทั้งสี่ที่บันทึกไว้ แล้วเปลี่ยนเป็น Demo agent">Remove all four saved provider credentials and switch to the Demo agent.</p><button class="outline danger" data-i18n="ล้าง API keys ทั้งหมด" id="disconnect">Clear all API keys</button></details>
+</section>
+<details class="settings-section"><summary data-i18n="เป้าหมายของคุณ">Your goals</summary><p class="muted" data-i18n="ใช้ประกอบคำอธิบายของ Guardian">Help Guardian put its explanations in context.</p><form id="goal">
+<label><span data-i18n="อยากทำอะไร">What is your goal?</span><select name="purpose"><option data-i18n="ทำความเข้าใจก่อนเริ่มลงทุน" value="ทำความเข้าใจก่อนเริ่มลงทุน">Understand before investing</option><option data-i18n="ถือระยะยาว" value="ถือระยะยาว">Hold for the long term</option><option data-i18n="เก็งกำไรระยะสั้น" value="เก็งกำไรระยะสั้น">Short-term speculation</option><option data-i18n="เก็บออมเพื่อใช้ในอนาคต" value="เก็บออมเพื่อใช้ในอนาคต">Save for a future expense</option></select></label>
+<label><span data-i18n="ช่วงเวลาที่สนใจ">Time horizon</span><select name="horizon"><option data-i18n="ยังไม่แน่ใจ" value="ยังไม่แน่ใจ">Not sure yet</option><option data-i18n="ไม่เกิน 1 เดือน" value="ไม่เกิน 1 เดือน">Up to 1 month</option><option data-i18n="3–12 เดือน" value="3–12 เดือน">3–12 months</option><option data-i18n="มากกว่า 1 ปี" value="มากกว่า 1 ปี">More than 1 year</option></select></label>
+<label><span data-i18n="รับความผันผวนได้แค่ไหน">How much volatility can you accept?</span><select name="risk"><option data-i18n="ยังไม่แน่ใจ ต้องการคำอธิบาย" value="ยังไม่แน่ใจ ต้องการคำอธิบาย">Not sure — explain the risks</option><option data-i18n="ต่ำ ต้องใช้เงินก้อนนี้" value="ต่ำ ต้องใช้เงินก้อนนี้">Low — I need this money</option><option data-i18n="ปานกลาง" value="ปานกลาง">Moderate</option><option data-i18n="สูง แต่มีวงเงินจำกัด" value="สูง แต่มีวงเงินจำกัด">High, within a limited budget</option></select></label>
+<button class="primary" data-i18n="บันทึกเป้าหมาย">Save goals</button><p class="form-status" id="goal-status" role="status"></p></form>
+</details>
+<details class="settings-section" id="mapping-section"><summary data-i18n="จับคู่เหรียญกับ Tokenomist">Match assets to Tokenomist</summary><p class="muted" data-i18n="AVAX บน Mainnet จับคู่อัตโนมัติ ส่วน ERC-20 ต้องตรวจว่า contract ตรงกับโครงการก่อนจับคู่ ชื่อเหรียญเหมือนกันอาจเป็นคนละเหรียญ">Mainnet AVAX is matched automatically. For ERC-20 assets, verify the contract belongs to the project first. Different tokens can share a name.</p><p class="muted" id="mapping-current"></p>
+<button class="outline" data-i18n="โหลดรายชื่อ Tokenomist" id="load-catalog">Load Tokenomist catalog</button>
+<form id="mapping-form"><label><span data-i18n="เหรียญในกระเป๋า">Wallet asset</span><select id="mapping-asset" required=""></select></label><label><span data-i18n="ค้นหาชื่อหรือสัญลักษณ์">Search name or symbol</span><input id="mapping-search" type="search"/></label><label><span data-i18n="โครงการใน Tokenomist">Tokenomist project</span><select id="mapping-token" required=""></select></label><label class="checkbox"><input id="mapping-confirm" required="" type="checkbox"/><span data-i18n="ฉันตรวจแล้วว่า contract ตรงกับโครงการนี้">I verified that this contract belongs to this project.</span></label><button class="primary" data-i18n="บันทึกการจับคู่">Save match</button><button class="text-button" data-i18n="ยกเลิกการจับคู่เหรียญนี้" id="remove-mapping" type="button">Remove this match</button><p class="form-status" id="mapping-status" role="status"></p></form>
+</details>
 </dialog>
-<script type="module" src="/shell.js"></script></body></html>
+<script src="/shell.js" type="module"></script></body></html>

@@ -1,3 +1,4 @@
+import {t as tr,language,withLanguage} from './locale.mjs';
 import {createDebug,debugEvent} from './debug.mjs';
 import {planWithUbot} from './planner.mjs';
 import {createGuardian} from './guardian-service.mjs';
@@ -42,25 +43,25 @@ const status=()=>({ubotConfigured:!!config.ubotToken,ubotStatus:config.ubotStatu
 const guardian=createGuardian({saved:saved?.agent,config,live,getDemo:()=>state,getMode:()=>dataMode,refresh:()=>refreshAll(),persist,cloud});
 const snapshot=()=>({...state,assessment:assessment(state),integration:status(),dataMode,live:{...live,stale:!fresh(live.snapshot),risk:personalizedRisk(live)},phone:publicPhone(phone,config),guardian:guardian.summary()});
 async function refreshSupply(){
- if(!live.snapshot)throw new Error('อ่าน wallet ก่อน');
+ if(!live.snapshot)throw new Error(tr('อ่าน wallet ก่อน'));
  try{live.supply=await readSupply(live.snapshot,config.tokenomistKey,live.settings,live.mappings);if(['ok','partial'].includes(live.supply.status))config.tokenomistStatus='verified';}
  catch(e){live.supply={status:'error',source:'Tokenomist v5',fetchedAt:new Date().toISOString(),events:[],emissions:[],coverage:[],warnings:[e.message]};config.tokenomistStatus='error';}
 }
 async function refreshAll(settings=live.settings){await refreshLive(live,config.avalancheKey,settings);await refreshSupply();await persist();}
-function requireDemo(){if(dataMode!=='demo')throw new Error('ปุ่มจำลองใช้ได้เฉพาะ Demo mode กรุณาสลับโหมดก่อน');}
+function requireDemo(){if(dataMode!=='demo')throw new Error(tr('ปุ่มจำลองใช้ได้เฉพาะ Demo mode กรุณาสลับโหมดก่อน'));}
 function json(res, code, data) { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(data)); }
 async function readBody(req, max = 100000) {
   const chunks = []; let length = 0;
-  for await (const c of req) { length += c.length; if (length > max) throw new Error('ข้อมูลมีขนาดเกินที่รองรับ'); chunks.push(c); }
+  for await (const c of req) { length += c.length; if (length > max) throw new Error(tr('ข้อมูลมีขนาดเกินที่รองรับ')); chunks.push(c); }
   return Buffer.concat(chunks);
 }
 async function checkedConfig(p) {
   if (p.ubotTemplate !== undefined) {
-    if (typeof p.ubotTemplate !== 'string' || p.ubotTemplate.length > 16000 || !p.ubotTemplate.includes('{{prompt}}')) throw new Error('Payload ต้องเป็น JSON และมี {{prompt}}');
-    try{JSON.parse(p.ubotTemplate);}catch{throw new Error('U-bot payload template ต้องเป็น JSON ที่ถูกต้อง');}
+    if (typeof p.ubotTemplate !== 'string' || p.ubotTemplate.length > 16000 || !p.ubotTemplate.includes('{{prompt}}')) throw new Error(tr('Payload ต้องเป็น JSON และมี {{prompt}}'));
+    try{JSON.parse(p.ubotTemplate);}catch{throw new Error(tr('U-bot payload template ต้องเป็น JSON ที่ถูกต้อง'));}
   }
-  for (const k of ['ubotToken','elevenKey','avalancheKey','tokenomistKey','voiceId','ttsModel','sttModel']) if (p[k] !== undefined && (typeof p[k] !== 'string' || p[k].length > 10000)) throw new Error('ตั้งค่าไม่ถูกต้อง');
-  for(const name of ['ubotToken','elevenKey','avalancheKey','tokenomistKey','voiceId','ttsModel','sttModel'])if(typeof p[name]==='string'&&/[\r\n']/.test(p[name]))throw new Error('Credential มีอักขระที่ไม่รองรับ');
+  for (const k of ['ubotToken','elevenKey','avalancheKey','tokenomistKey','voiceId','ttsModel','sttModel']) if (p[k] !== undefined && (typeof p[k] !== 'string' || p[k].length > 10000)) throw new Error(tr('ตั้งค่าไม่ถูกต้อง'));
+  for(const name of ['ubotToken','elevenKey','avalancheKey','tokenomistKey','voiceId','ttsModel','sttModel'])if(typeof p[name]==='string'&&/[\r\n']/.test(p[name]))throw new Error(tr('Credential มีอักขระที่ไม่รองรับ'));
   if(p.tokenomistKey){config.tokenomistKey=p.tokenomistKey.trim();config.tokenomistStatus='untested';clearTokenCache();live.supply=null;}
   if (p.ubotToken) { config.ubotToken = p.ubotToken.trim().replace(/^Bearer\s+/i,''); config.ubotStatus = 'untested'; }
   if (p.elevenKey) { config.elevenKey = p.elevenKey.trim(); config.elevenStatus = 'untested'; }
@@ -71,7 +72,7 @@ async function checkedConfig(p) {
   await saveConfig();
 }
 async function chat(message) {
-  if (!message || typeof message !== 'string' || message.length > 2000) throw new Error('ข้อความต้องมี 1–2,000 ตัวอักษร');
+  if (!message || typeof message !== 'string' || message.length > 2000) throw new Error(tr('ข้อความต้องมี 1–2,000 ตัวอักษร'));
   const trace = [];
   const isLive=dataMode==='live';
   const tools=isLive?liveTools(live):toolsFor(state);
@@ -112,7 +113,7 @@ const coreHandler = async (req,res) => {
     if (req.method === 'GET' && pathname === '/api/state') return json(res,200,snapshot());
     if (req.method === 'POST' && pathname.startsWith('/api/')) {
       if (req.headers['x-guardian-client'] !== 'local-poc') return json(res,403,{error:'Missing client header'});
-      if (busy) return json(res,409,{error:'ระบบกำลังทำงาน กรุณาลองอีกครั้ง'});
+      if (busy) return json(res,409,{error:tr('ระบบกำลังทำงาน กรุณาลองอีกครั้ง')});
       busy = true; locked = true;
       if (pathname === '/api/transcribe') {
         const bytes = await readBody(req, cloud?4000000:8000000);
@@ -138,7 +139,7 @@ const coreHandler = async (req,res) => {
       if (pathname === '/api/prepare') { requireDemo();prepare(state, Number(p.amount)); return json(res,200,snapshot()); }
       if (pathname === '/api/confirm') { requireDemo();confirm(state,p.id); return json(res,200,snapshot()); }
       if (pathname === '/api/monitor/tick') {if(dataMode==='live'&&live.settings.monitor&&(!live.snapshot||Date.now()-Date.parse(live.snapshot.fetchedAt)>55000))await refreshAll();return json(res,200,snapshot());}
-      if (pathname === '/api/data-mode') {if(!['live','demo'].includes(p.mode))throw new Error('โหมดไม่ถูกต้อง');dataMode=p.mode;await persist();return json(res,200,snapshot());}
+      if (pathname === '/api/data-mode') {if(!['live','demo'].includes(p.mode))throw new Error(tr('โหมดไม่ถูกต้อง'));dataMode=p.mode;await persist();return json(res,200,snapshot());}
       if (pathname === '/api/wallet/connect') {const settings=validateSettings(p);await refreshAll(settings);dataMode='live';await persist();return json(res,200,snapshot());}
       if (pathname === '/api/wallet/refresh') {await refreshAll();return json(res,200,snapshot());}
       if (pathname === '/api/wallet/monitor') {live.settings.monitor=!!p.enabled;await persist();return json(res,200,snapshot());}
@@ -165,9 +166,9 @@ const coreHandler = async (req,res) => {
       if(pathname==='/api/test/tokenomist'||pathname==='/api/tokenomist/catalog'){const result=await tokenCatalog(config.tokenomistKey);config.tokenomistStatus='verified';return json(res,200,{tokens:result.data,count:result.data.length,fetchedAt:result.fetchedAt,credit:result.metadata.credit});}
       if(pathname==='/api/tokenomist/refresh'){await refreshSupply();await persist();return json(res,200,snapshot());}
       if(pathname==='/api/tokenomist/mapping'){
-        if(!live.snapshot||live.snapshot.chainId!=='43114')throw new Error('จับคู่ได้เฉพาะ wallet บน Mainnet');
-        const asset=live.snapshot.assets.find(a=>a.address===String(p.contract).toLowerCase());if(!asset||asset.address==='native')throw new Error('เลือก contract จากสินทรัพย์ที่อ่านได้');
-        const key='43114:'+asset.address;if(p.tokenId){const list=await tokenCatalog(config.tokenomistKey);if(!list.data.some(t=>t.id===p.tokenId))throw new Error('Tokenomist ไม่ครอบคลุม ID นี้');live.mappings[key]=p.tokenId;}else delete live.mappings[key];
+        if(!live.snapshot||live.snapshot.chainId!=='43114')throw new Error(tr('จับคู่ได้เฉพาะ wallet บน Mainnet'));
+        const asset=live.snapshot.assets.find(a=>a.address===String(p.contract).toLowerCase());if(!asset||asset.address==='native')throw new Error(tr('เลือก contract จากสินทรัพย์ที่อ่านได้'));
+        const key='43114:'+asset.address;if(p.tokenId){const list=await tokenCatalog(config.tokenomistKey);if(!list.data.some(t=>t.id===p.tokenId))throw new Error(tr('Tokenomist ไม่ครอบคลุม ID นี้'));live.mappings[key]=p.tokenId;}else delete live.mappings[key];
         await refreshSupply();await persist();return json(res,200,snapshot());
       }
       if(pathname==='/api/phone/settings'){if(cloud&&p.enabled)throw new Error('Vercel demo รองรับโทรทดสอบด้วยตนเอง ส่วนโทรอัตโนมัติใช้โหมด local ที่เปิด server ค้างไว้');phone.settings=validatePhone(p,phone.settings);await persist();return json(res,200,snapshot());}
@@ -185,19 +186,19 @@ const coreHandler = async (req,res) => {
         return json(res,200,{text:result.text,status:status()});
       }
       if (pathname === '/api/test/ubot') {
-        const text = await ubot(config,'ตอบสั้น ๆ ว่า U-Guardian เชื่อมต่อสำเร็จ'); config.ubotStatus='verified'; return json(res,200,{text,status:status()});
+        const text = await ubot(config,tr('ตอบสั้น ๆ ว่า U-Guardian เชื่อมต่อสำเร็จ')); config.ubotStatus='verified'; return json(res,200,{text,status:status()});
       }
       if (pathname === '/api/test/elevenlabs') {
         const list = await voices(config); config.elevenStatus='verified'; return json(res,200,{voices:list,status:status()});
       }
       if (pathname === '/api/speech') {
-        if (typeof p.text !== 'string' || !p.text.trim()) throw new Error('ไม่มีข้อความให้อ่าน');
+        if (typeof p.text !== 'string' || !p.text.trim()) throw new Error(tr('ไม่มีข้อความให้อ่าน'));
         const bytes=await speech(config,p.text); if(req.headers['x-guardian-debug']==='1')return json(res,200,{audio:bytes.toString('base64'),mime:'audio/mpeg'});res.writeHead(200,{'Content-Type':'audio/mpeg','Cache-Control':'no-store'}); return res.end(bytes);
       }
       return json(res,404,{error:'Unknown API route'});
     }
     if(req.method==='GET'&&['/settings.html','/embed-example.html'].includes(pathname)){res.writeHead(302,{Location:'/'});return res.end();}
-    const files = {'/':'index.html','/index.html':'index.html','/guardian-widget.js':'guardian-widget.js','/guardian-widget.css':'guardian-widget.css','/shell.js':'shell.js','/shell.css':'shell.css'};
+    const files = {'/':'index.html','/index.html':'index.html','/guardian-widget.js':'guardian-widget.js','/guardian-widget.css':'guardian-widget.css','/shell.js':'shell.js','/shell.css':'shell.css','/i18n.js':'i18n.js','/messages.js':'messages.js'};
     if (req.method !== 'GET' || !files[pathname]) return json(res,404,{error:'Not found'});
     const file = files[pathname];
     const bytes = await readFile(fileURLToPath(new URL(`./public/${file}`,import.meta.url)));
@@ -207,12 +208,12 @@ const coreHandler = async (req,res) => {
     if (pathname === '/api/test/elevenlabs') config.elevenStatus='error';
     if (pathname === '/api/test/avalanche') config.avalancheStatus='error';
     if (pathname === '/api/test/tokenomist') config.tokenomistStatus='error';
-    json(res,400,{error:e.name === 'TimeoutError' ? 'Provider ตอบช้าเกินเวลาที่กำหนด กรุณาลองใหม่' : e.message});
+    json(res,400,{error:e.name === 'TimeoutError' ? tr('Provider ตอบช้าเกินเวลาที่กำหนด กรุณาลองใหม่') : e.message});
   } finally { if (locked) busy=false; }
 };
 // Use the same buffered JSON response locally and on Vercel. A trace belongs only
 // to this request and is returned after it completes, including handled failures.
-const handler=async(req,res)=>{
+const tracedHandler=async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
  if(req.headers['x-guardian-debug']!=='1'||req.method!=='POST'||!(/^\/api\/agent\/(chat|brief|ack|check|watch\/confirm|watch\/remove)$/.test(path)||['/api/transcribe','/api/speech'].includes(path)))return coreHandler(req,res);
  const log=createDebug({...config,phoneSecret});let status=200;
@@ -224,6 +225,7 @@ const handler=async(req,res)=>{
  res.setHeader('Cache-Control','private, no-store');
  return log.run(async()=>{log.add('request.start','Request started',{path,mode:config.mode,dataMode});await coreHandler(req,output);});
 };
+const handler=(req,res)=>withLanguage(req.headers['x-guardian-language']||'en',()=>tracedHandler(req,res));
 const callback=async(req,res)=>{
   if(req.url!=='/phone/tool'||req.method!=='POST')return json(res,404,{error:'Not found'});
   if(dataMode!=='live'||!authenticatePhone(req.headers,phoneSecret,phone,live))return json(res,403,{error:'Unauthorized or expired call context'});

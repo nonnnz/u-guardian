@@ -1,3 +1,4 @@
+import {translate} from '../public/messages.js';
 import * as blob from '@vercel/blob';
 import {randomBytes} from 'node:crypto';
 import {Readable} from 'node:stream';
@@ -5,10 +6,10 @@ import {createApplication} from '../application.mjs';
 import {privateSessions,sessionPath,callPath,SessionBusy} from '../cloud-store.mjs';
 
 export const config={api:{bodyParser:false}};
-function error(res,status,message){res.setHeader('Cache-Control','private, no-store');res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify({error:message}));}
+function error(res,status,message,language='en'){res.setHeader('Cache-Control','private, no-store');res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify({error:translate(message,language)}));}
 export default async function handler(req,res){
  const token=process.env.BLOB_READ_WRITE_TOKEN;
- if(!token)return error(res,503,'Cloud storage ยังไม่พร้อม กรุณาติดต่อผู้ดูแล');
+ if(!token)return error(res,503,'Cloud storage ยังไม่พร้อม กรุณาติดต่อผู้ดูแล',req.headers['x-guardian-language']);
  const host=req.headers.host,pathname=new URL(req.url,'https://'+host).pathname;
  const callback=pathname==='/phone/tool';
  if(!callback&&req.headers.origin&&req.headers.origin!=='https://'+host)return error(res,403,'Cross-origin request rejected');
@@ -41,6 +42,6 @@ export default async function handler(req,res){
   res.setHeader('Cache-Control','private, no-store');res.writeHead(result.status);res.end(result.body);
  }catch(e){
   if(workspace)await workspace.release().catch(()=>{});
-  error(res,e instanceof SessionBusy?409:503,e instanceof SessionBusy?e.message:'บันทึกหรืออ่าน session ไม่สำเร็จ กรุณาลองใหม่ หากเพิ่งส่งคำขอโทรให้ตรวจประวัติสายก่อนส่งซ้ำ');
+  error(res,e instanceof SessionBusy?409:503,e instanceof SessionBusy?e.message:'บันทึกหรืออ่าน session ไม่สำเร็จ กรุณาลองใหม่ หากเพิ่งส่งคำขอโทรให้ตรวจประวัติสายก่อนส่งซ้ำ',req.headers['x-guardian-language']);
  }
 }

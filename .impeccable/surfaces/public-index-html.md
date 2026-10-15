@@ -7,7 +7,7 @@ related_targets: ["public/shell.css","public/shell.js","public/guardian-widget.j
 
 # Wallet status with a perched companion
 
-Mode: Operate. Audience: Thai-speaking crypto beginners who want wallet explanations and selected monitoring.
+Mode: Operate. Audience: English- and Thai-speaking crypto beginners who want wallet explanations and selected monitoring.
 
 The shipped page has one centered wallet card and a Settings button in the header. Its first view shows written DEMO/LIVE status, network, public address or demo disclosure, exact asset quantities, freshness and refresh. The established geometric mascot perches at the card's top-right edge on desktop and mobile. Chat starts closed. The launcher has a readable label beneath the feet; its final label offset is 128px and its button height is 152px. The host positions the 150px-wide element 106px above the card edge, 22px from the right on desktop and 10px on mobile. These are surface geometry, not general system tokens.
 
@@ -27,3 +27,6 @@ The final implementation corrections separate the launcher label from its feet, 
 
 
 Debug is an opt-in checkbox in the chat header. Enabling it reveals adjacent Chat / Debug tabs within the same dialog, keeping the incumbent colors, typography and spacing. The diagnostic panel uses expandable requests and timestamped events, with wrapped monospace JSON, visible pending/error/empty states and a clear action. It retains the latest four requests only in browser memory and presents logs after each request completes. Tabs support arrow keys, Home/End and explicit selected state. Disabling Debug clears its logs and returns to Chat. Desktop/mobile captures are debug-desktop.png and debug-mobile.png under the ignored review directory; the browser test covers timing, errors, keyboard navigation, safe text rendering and overflow.
+
+
+The header now includes an accessible English / ไทย selector beside Settings. English is the first-visit default; the browser remembers the selection. Changing language reloads the page after checking that no task is running, retaining saved wallet/provider settings and watch rules. UI copy, briefings, agent instructions, guard responses and STT language hints use that preference. User-authored labels, saved goal identifiers, token IDs and raw provider evidence keep their original values. Both languages retain the same layout and mascot. English desktop/mobile captures use the english- prefix in the ignored review directory.

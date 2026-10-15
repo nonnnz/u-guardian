@@ -84,13 +84,13 @@ components:
 
 **Creative North Star: "The companion beside your wallet"**
 
-An approachable geometric robot sits within a calm daylight workspace. Warm ivory, forest ink and sage preserve the established identity; quiet space gives the mascot a recognizable presence while Thai explanations and evidence remain easy to read. This is descriptive language for the shipped world, not a separately approved concept.
+An approachable geometric robot sits within a calm daylight workspace. Warm ivory, forest ink and sage preserve the established identity; quiet space gives the mascot a recognizable presence while plain-language explanations and evidence remain easy to read. This is descriptive language for the shipped world, not a separately approved concept.
 
 The wallet is a quiet paper surface, while chat and settings use focused dialogs. The mascot lends personality to the entry point and pairs its expression with written operational status inside chat. Reusable visual decisions are recorded here; the single-page composition and interaction contract live in the surface brief.
 
 **Key Characteristics:**
 - Warm ivory surfaces with forest controls and sage emphasis.
-- Thai-first interface text with restrained serif wordmarks.
+- English-first interface text with a Thai language option with restrained serif wordmarks.
 - A geometric robot whose expression accompanies written status.
 - Quiet dividers, expandable evidence and explicit review actions.
 

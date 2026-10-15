@@ -5,7 +5,7 @@
 Single-page web application and Node.js backend. Embedding in other applications is deferred.
 
 ## Users
-Thai-speaking crypto beginners who want plain-language answers, wallet explanations and selected monitoring without learning specialist vocabulary first.
+English- and Thai-speaking crypto beginners who want plain-language answers, wallet explanations and selected monitoring without learning specialist vocabulary first.
 
 ## Product Purpose
 Make the agentic companion the product: a mascot perched on a wallet panel opens a voice-enabled chat when clicked. Wallet status is the main page; settings open within that page.
@@ -17,7 +17,7 @@ Vanilla JavaScript custom element with Shadow DOM, CSS geometric mascot, Node 24
 Three pillars: wallet health and goal-aware explanations; investigation of changes since an acknowledged briefing; user-confirmed watch rules. Multi-step U-bot tool loop with validated allowlist and bounded steps. Token research includes allocation, fundraising, buyback and burn datasets when covered. Voice is push-to-talk with visible errors and text alternative, not continuous listening. No automatic trading. Health does not yet cover approvals or DeFi. No claims of buy/sell timing from tokenomics alone. Demo and live are explicit. Public Vercel monitoring runs while the page is visible; background scheduler, SMS and Web Push are not provisioned. The single-page settings dialog contains wallet/network, provider credentials and tests, voice selection, goal preferences and explicit ERC-20 identity matching. Old dashboard, phone/Fuji transaction screens, embedding example and integration transport are removed from the frontend. Legacy backend endpoints remain for compatibility and are not advertised as current UI tasks.
 
 ## Brand Commitments
-U-Guardian, Thai first, warm ivory/forest/sage, approachable geometric robot mascot with eyes, mouth and hands responding to operational state. One centered wallet panel with the mascot perched at its top-right edge on desktop and mobile. Chat stays closed until requested. Existing identity retained.
+U-Guardian, English first with a Thai language option, warm ivory/forest/sage, approachable geometric robot mascot with eyes, mouth and hands responding to operational state. One centered wallet panel with the mascot perched at its top-right edge on desktop and mobile. Chat stays closed until requested. Existing identity retained.
 
 ## Product Principles
 Evidence before advice. Missing data remains unknown. Exact wallet quantities; no invented fiat values. Explicit confirmation before saving a watch. User-controlled voice and playback. Wallet, chat and settings share one page.

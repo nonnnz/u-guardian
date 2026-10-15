@@ -1,3 +1,4 @@
+import {t as tr} from './locale.mjs';
 import {providerSignal} from './agent-budget.mjs';
 import {debugStep} from './debug.mjs';
 import { randomUUID } from 'node:crypto';
@@ -7,15 +8,15 @@ export const CHAINS = {
   '43113': { name: 'Avalanche Fuji', rpc: 'https://api.avax-test.network/ext/bc/C/rpc', explorer: 'https://explorer-test.avax.network/c-chain' },
 };
 export function address(value) {
-  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(value) || /^0x0{40}$/i.test(value)) throw new Error('ใส่ public address 0x ตามด้วย 40 ตัวอักษร hex และไม่ใช่ zero address');
+  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(value) || /^0x0{40}$/i.test(value)) throw new Error(tr('ใส่ public address 0x ตามด้วย 40 ตัวอักษร hex และไม่ใช่ zero address'));
   return value.toLowerCase();
 }
-export function chain(value) { const id=String(value); if (!CHAINS[id]) throw new Error('รองรับเฉพาะ Avalanche C-Chain และ Fuji'); return id; }
+export function chain(value) { const id=String(value); if (!CHAINS[id]) throw new Error(tr('รองรับเฉพาะ Avalanche C-Chain และ Fuji')); return id; }
 export function parseUnits(value, decimals=18) {
   const text=String(value);
-  if (!Number.isInteger(decimals) || decimals<0 || decimals>36 || !/^\d+(\.\d+)?$/.test(text) || text.length>80) throw new Error('จำนวน token ไม่ถูกต้อง');
+  if (!Number.isInteger(decimals) || decimals<0 || decimals>36 || !/^\d+(\.\d+)?$/.test(text) || text.length>80) throw new Error(tr('จำนวน token ไม่ถูกต้อง'));
   const [whole,fraction='']=text.split('.');
-  if (fraction.length>decimals) throw new Error(`สินทรัพย์นี้รองรับทศนิยมไม่เกิน ${decimals} ตำแหน่ง`);
+  if (fraction.length>decimals) throw new Error(tr('สินทรัพย์นี้รองรับทศนิยมไม่เกิน {0} ตำแหน่ง',decimals));
   return BigInt(whole)*10n**BigInt(decimals)+BigInt(fraction.padEnd(decimals,'0')||'0');
 }
 export function formatUnits(value, decimals=18) {
@@ -29,19 +30,19 @@ async function readRpc(chainId, method, params, fetcher) {
   const res=await fetcher(CHAINS[id].rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:providerSignal(15000),redirect:'error'});
   if(!res.ok)throw new Error(`Avalanche RPC HTTP ${res.status}`);
   const data=await res.json();
-  if(data.error || data.result===undefined)throw new Error(`Avalanche RPC ${method} ไม่สำเร็จ${data.error?.code?' ('+data.error.code+')':''}`);
+  if(data.error || data.result===undefined)throw new Error(tr('Avalanche RPC {0} ไม่สำเร็จ{1}',method,data.error?.code?' ('+data.error.code+')':''));
   return data.result;
 }
 export async function dataApi(key,path,fetcher=fetch){return debugStep('provider','Avalanche Data API',{method:'GET',path},()=>readDataApi(key,path,fetcher));}
 async function readDataApi(key,path,fetcher) {
-  if(!key)throw new Error('ยังไม่มี Avalanche Data API key');
+  if(!key)throw new Error(tr('ยังไม่มี Avalanche Data API key'));
   const res=await fetcher('https://data-api.avax.network'+path,{headers:{Accept:'application/json','x-glacier-api-key':key},signal:providerSignal(15000),redirect:'error'});
-  if(!res.ok)throw new Error(`Avalanche Data API HTTP ${res.status}${res.status===429?' — เกิน quota ให้รอก่อนรีเฟรช':''}`);
+  if(!res.ok)throw new Error(`Avalanche Data API HTTP ${res.status}${res.status===429?tr(' — เกิน quota ให้รอก่อนรีเฟรช'):''}`);
   return res.json();
 }
 export async function testDataKey(key,fetcher=fetch) {
   const value=await dataApi(key,'/v1/chains/43114',fetcher);
-  return {ok:true,chainId:String(value.chainId || '43114'),scope:'chain metadata endpoint',note:'ยืนยัน endpoint นี้เท่านั้น; balances/history ตรวจเมื่ออ่าน wallet'};
+  return {ok:true,chainId:String(value.chainId || '43114'),scope:'chain metadata endpoint',note:tr('ยืนยัน endpoint นี้เท่านั้น; balances/history ตรวจเมื่ออ่าน wallet')};
 }
 function abiText(hex) {
   if(typeof hex!=='string' || !/^0x[0-9a-f]*$/i.test(hex))return 'ERC-20';
@@ -81,7 +82,7 @@ export async function readWallet(settings,key,fetcher=fetch) {
       rpc(chainId,'eth_call',[{to:reserveContract,data:'0x70a08231'+wallet.slice(2).padStart(64,'0')},block],fetcher),
       rpc(chainId,'eth_call',[{to:reserveContract,data:'0x95d89b41'},block],fetcher).catch(()=>null),
     ]);
-    const decimals=Number(BigInt(decimalsHex));if(decimals>36)throw new Error('ERC-20 decimals ไม่อยู่ในช่วงที่รองรับ');
+    const decimals=Number(BigInt(decimalsHex));if(decimals>36)throw new Error(tr('ERC-20 decimals ไม่อยู่ในช่วงที่รองรับ'));
     reserve={symbol:abiText(symbolHex),decimals,rawBalance:BigInt(balanceHex).toString(),units:formatUnits(balanceHex,decimals),contract:reserveContract};
   }
   const warnings=[],tokens=[],transfers=[];let tokensTruncated=false,historyTruncated=false,indexerStatus='not-configured';
@@ -91,25 +92,25 @@ export async function readWallet(settings,key,fetcher=fetch) {
     const results=await Promise.allSettled([
       (async()=>{let pageToken;for(let page=0;page<3;page++){
         const data=await dataApi(key,root+'/balances:listErc20?pageSize=100&filterSpamTokens=true&currency=usd'+(pageToken?'&pageToken='+encodeURIComponent(pageToken):''),fetcher);
-        if(!Array.isArray(data.erc20TokenBalances))throw new Error('รูปแบบ balances ของ Data API ไม่ตรงกับที่รองรับ');
-        for(const t of data.erc20TokenBalances){try{tokens.push(normalizeToken(t));}catch{warnings.push('มี token metadata ที่อ่านไม่ได้ จึงไม่รวมรายการนั้น');}}
+        if(!Array.isArray(data.erc20TokenBalances))throw new Error(tr('รูปแบบ balances ของ Data API ไม่ตรงกับที่รองรับ'));
+        for(const t of data.erc20TokenBalances){try{tokens.push(normalizeToken(t));}catch{warnings.push(tr('มี token metadata ที่อ่านไม่ได้ จึงไม่รวมรายการนั้น'));}}
         if(data.nativeTokenBalance?.balanceValue?.currencyCode?.toLowerCase()==='usd') {const v=Number(data.nativeTokenBalance.balanceValue.value);if(Number.isFinite(v)&&v>=0)nativeValue=v;}
         pageToken=data.nextPageToken;if(!pageToken)break;
       }tokensTruncated=!!pageToken;})(),
       ...['Native','Erc20'].map(kind=>(async()=>{
         const data=await dataApi(key,root+`/transactions:list${kind}?pageSize=20`,fetcher);
         const list=data.transactions;
-        if(!Array.isArray(list))throw new Error(`รูปแบบประวัติ ${kind} ไม่ตรงกับที่รองรับ`);
+        if(!Array.isArray(list))throw new Error(tr('รูปแบบประวัติ {0} ไม่ตรงกับที่รองรับ',kind));
         transfers.push(...list.map(t=>normalizeTransfer(t,kind==='Native'?'native':'erc20')).filter(Boolean));
         historyTruncated ||= !!data.nextPageToken;
       })()),
     ]);
     results.forEach((r,i)=>{if(r.status==='rejected')warnings.push(`${['Token list','Native history','ERC-20 history'][i]}: ${r.reason.message}`);});
     indexerStatus=results.every(r=>r.status==='fulfilled')?'ok':results.every(r=>r.status==='rejected')?'error':'partial';
-  }else warnings.push('ยังไม่มี Data API key: อ่าน AVAX/สินทรัพย์สำรองผ่าน RPC ได้ แต่ไม่มีรายการ token และประวัติจาก indexer');
+  }else warnings.push(tr('ยังไม่มี Data API key: อ่าน AVAX/สินทรัพย์สำรองผ่าน RPC ได้ แต่ไม่มีรายการ token และประวัติจาก indexer'));
   const assets=[{address:'native',symbol:'AVAX',name:'Avalanche',decimals:18,rawBalance:BigInt(nativeRaw).toString(),units:formatUnits(nativeRaw),usdValue:chainId==='43113'?null:nativeValue,source:'RPC'},...tokens.map(t=>({...t,usdValue:chainId==='43113'?null:t.usdValue,source:'Data API'}))];
   if(reserveContract){const at=assets.findIndex(t=>t.address===reserveContract);const item={...(at>=0?assets[at]:{}),address:reserveContract,name:reserve.symbol,...reserve,source:'RPC'};if(at>=0)assets[at]=item;else assets.push(item);}
-  const target=parseUnits(settings.target,reserve.decimals);if(target<=0n)throw new Error('เป้าหมายต้องมากกว่า 0');
+  const target=parseUnits(settings.target,reserve.decimals);if(target<=0n)throw new Error(tr('เป้าหมายต้องมากกว่า 0'));
   const balance=BigInt(reserve.rawBalance),gap=target>balance?target-balance:0n;
   return {chainId,network:CHAINS[chainId].name,address:wallet,blockNumber:BigInt(block).toString(),fetchedAt:new Date().toISOString(),source:'Avalanche live',reserve,
     assessment:{target:String(settings.target),gap:formatUnits(gap,reserve.decimals),coverage:Number(balance*10000n/target)/100,status:gap?'attention':'on-track',unit:reserve.symbol,source:'RPC exact token units',valuation:'Token units only; not fiat'},
@@ -119,7 +120,7 @@ function timeValue(value){return Number.isFinite(Number(value))?Number(value):Da
 export function fresh(snapshot) {return !!snapshot && Date.now()-Date.parse(snapshot.fetchedAt)<120000;}
 export async function prepareFuji(from,to,amount,fetcher=fetch) {
   from=address(from);to=address(to);if(from===to)throw new Error('กระเป๋าต้นทางและปลายทางต้องต่างกัน');
-  const value=parseUnits(amount);if(value<=0n)throw new Error('จำนวนต้องมากกว่า 0');
+  const value=parseUnits(amount);if(value<=0n)throw new Error(tr('จำนวนต้องมากกว่า 0'));
   if(await rpc('43113','eth_getCode',[to,'latest'],fetcher)!=='0x')throw new Error('POC รองรับส่ง test AVAX ไปกระเป๋าธรรมดาเท่านั้น ไม่ส่งไป contract');
   const tx={from,to,value:'0x'+value.toString(16),data:'0x'};
   const [gas,gasPrice,balance,nonce]=await Promise.all([rpc('43113','eth_estimateGas',[tx],fetcher),rpc('43113','eth_gasPrice',[],fetcher),rpc('43113','eth_getBalance',[from,'latest'],fetcher),rpc('43113','eth_getTransactionCount',[from,'pending'],fetcher)]);

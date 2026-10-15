@@ -4,6 +4,7 @@ const base=process.env.BASE_URL||'http://127.0.0.1:4184';
 (async()=>{const browser=await chromium.launch({headless:true,channel:'msedge'});try{
  const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>localStorage.setItem('guardian-language','th'));
  await page.goto(base);await page.waitForFunction(()=>document.querySelector('u-guardian').state);
  await page.getByRole('button',{name:'เปิดแชตกับ Guardian',exact:true}).click();
  assert.equal(await page.locator('u-guardian #agent-tabs').isVisible(),false);

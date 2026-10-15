@@ -3,6 +3,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs');
 const base=process.env.BASE_URL||'http://127.0.0.1:4180';
 (async()=>{const browser=await chromium.launch({headless:true,channel:'msedge'});try{
  const page=await browser.newPage({viewport:{width:1440,height:1050}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>localStorage.setItem('guardian-language','th'));
  await page.goto(base);await page.waitForFunction(()=>document.querySelector('u-guardian').state);
  assert.equal(await page.locator('u-guardian #chat-dialog').evaluate(e=>e.open),false);
  fs.mkdirSync('.impeccable/review',{recursive:true});await page.waitForTimeout(350);await page.screenshot({path:'.impeccable/review/desktop.png',fullPage:true});
