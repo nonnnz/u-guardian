@@ -32,13 +32,13 @@ function fillSettings(){
  if(!state)return;const c=state.integration,w=state.live.settings;
  $('data-mode').value=state.dataMode;$('wallet-address').value=w.address;$('wallet-chain').value=w.chainId;$('horizon-days').value=w.horizonDays;toggleLive();
  $('agent-mode').value=c.mode;
- for(const [id,key] of [['ubot-template','ubotTemplate'],['voice-id','voiceId'],['tts-model','ttsModel'],['stt-model','sttModel']])$(id).value=c[key]||'';
+ for(const [id,key] of [['voice-id','voiceId'],['tts-model','ttsModel'],['stt-model','sttModel']])$(id).value=c[key]||'';
  renderProviders(c);
  $('storage-note').textContent=c.deployment==='vercel'?tr('บันทึกสำหรับเซสชันของเบราว์เซอร์นี้ เก็บ API keys ฝั่งเซิร์ฟเวอร์'):tr('บันทึก API keys ลง .env ของเครื่องนี้');
  for(const [k,v]of Object.entries(state.guardian?.goal||{})){const field=$('goal').elements.namedItem(k);if(field&&[...field.options].some(o=>o.value===v))field.value=v;}
  fillMapping();
 }
-function renderProviders(c){for(const name of ['ubot','eleven','avalanche','tokenomist'])$(name+'-status').textContent=!c[name+'Configured']?tr('ยังไม่ตั้งค่า'):c[name+'Status']==='verified'?tr('ทดสอบแล้ว'):tr('บันทึก key แล้ว');}
+function renderProviders(c){for(const name of ['ubot','eleven','avalanche','tokenomist'])$(name+'-status').textContent=!c[name+'Configured']?tr('ยังไม่ตั้งค่า'):c[name+'Status']==='verified'?tr('ทดสอบแล้ว'):name==='ubot'?'Available':tr('บันทึก key แล้ว');}
 function fillMapping(){
  const assets=state.live.snapshot?.chainId==='43114'?state.live.snapshot.assets.filter(a=>a.address!=='native'):[];
  const selected=$('mapping-asset').value;$('mapping-asset').replaceChildren(new Option(tr('เลือกเหรียญในกระเป๋า'),''));
@@ -57,9 +57,9 @@ async function operation(output,fn){
  catch(e){status(output,e.message,true);}
  finally{controls.forEach((e,i)=>e.disabled=previous[i]);$('refresh').disabled=false;settingsBusy=false;widget.settingsBusy=false;}
 }
-const credentialIds=['ubot-token','eleven-key','avalanche-key','tokenomist-key'];
+const credentialIds=['eleven-key','avalanche-key','tokenomist-key'];
 function clearCredentialInputs(){credentialIds.forEach(id=>$(id).value='');}
-function configPayload(){return {ubotToken:$('ubot-token').value,elevenKey:$('eleven-key').value,avalancheKey:$('avalanche-key').value,tokenomistKey:$('tokenomist-key').value,ubotTemplate:$('ubot-template').value,voiceId:$('voice-id').value,ttsModel:$('tts-model').value,sttModel:$('stt-model').value,mode:$('agent-mode').value};}
+function configPayload(){return {elevenKey:$('eleven-key').value,avalancheKey:$('avalanche-key').value,tokenomistKey:$('tokenomist-key').value,voiceId:$('voice-id').value,ttsModel:$('tts-model').value,sttModel:$('stt-model').value,mode:$('agent-mode').value};}
 async function saveConfig(payload){const c=await widget.request('integrations',payload);clearCredentialInputs();state.integration=c;renderProviders(c);await reload();}
 widget.addEventListener('guardian:state',e=>render(e.detail));
 widget.addEventListener('guardian:notification',e=>status('home-status',tr('มีเรื่องอัปเดต {0} รายการ กดที่ Guardian เพื่อดู',e.detail.length)));
@@ -71,7 +71,8 @@ $('data-mode').onchange=toggleLive;
 $('wallet-form').onsubmit=e=>{e.preventDefault();const mode=$('data-mode').value,payload={...state.live.settings,reserveContract:'',target:'0.1',monitor:false,address:$('wallet-address').value.trim(),chainId:$('wallet-chain').value,horizonDays:Number($('horizon-days').value)};
  operation('wallet-status',async()=>{widget.acceptState(await widget.request(mode==='live'?'wallet/connect':'data-mode',mode==='live'?payload:{mode}));fillMapping();status('wallet-status',mode==='live'?tr('อ่านกระเป๋าจริงแล้ว กลับไปคุยกับ Guardian ได้เลย'):tr('ใช้กระเป๋าตัวอย่างแล้ว'));});};
 $('integration-form').onsubmit=e=>{e.preventDefault();const payload=configPayload();operation('integration-status',async()=>{await saveConfig(payload);status('integration-status',tr('บันทึกการเชื่อมต่อแล้ว'));});};
-$('connect-ubot').onclick=()=>{const payload={ubotToken:$('ubot-token').value,ubotTemplate:$('ubot-template').value};operation('ubot-result',async()=>{await widget.request('ubot/connect',payload);$('ubot-token').value='';await reload();$('agent-mode').value=state.integration.mode;renderProviders(state.integration);status('ubot-result',tr('เชื่อมต่อแล้ว · เปิดใช้ U-bot agent แล้ว'));});};
+$('connect-ubot').onclick=()=>operation('ubot-result',async()=>{widget.setPhase('connecting');try{await widget.request('ubot/connect',{});widget.clearConversation();await reload();$('agent-mode').value=state.integration.mode;renderProviders(state.integration);status('ubot-result','Connected to the shared U-Bot demo account.');widget.setPhase('idle');}catch(e){widget.setPhase('error');throw e;}});
+$('disconnect-ubot').onclick=()=>operation('ubot-result',async()=>{await widget.request('ubot/disconnect',{});widget.clearConversation();await reload();$('agent-mode').value=state.integration.mode;renderProviders(state.integration);status('ubot-result','U-Bot disconnected for this visitor.');widget.setPhase('disconnected');});
 document.querySelectorAll('[data-test]').forEach(b=>b.onclick=()=>{const provider=b.dataset.test,out=(provider==='elevenlabs'?'eleven':provider)+'-result',payload=configPayload();operation(out,async()=>{
  await saveConfig(payload);const r=await widget.request('test/'+provider,{});
  if(provider==='elevenlabs'){$('voice-select').replaceChildren(new Option(tr('เลือกเสียง'),''));for(const v of r.voices)$('voice-select').add(new Option(v.name,v.id));$('voice-options').hidden=false;status(out,tr('โหลดได้ {0} เสียง เลือกเสียงแล้วกดบันทึกการเชื่อมต่อ',r.voices.length));}

@@ -17,6 +17,7 @@ export default async function handler(req,res){
  if(!callback&&req.method==='POST'&&req.headers['x-guardian-client']!=='local-poc')return error(res,403,'Missing client header');
  if(req.method==='GET'&&pathname!=='/api/state')return error(res,404,'Not found');
  const sessions=privateSessions(blob,token);let workspace;
+ const cancellation=new AbortController();res.on('close',()=>cancellation.abort());req.guardianSignal=cancellation.signal;
  try{
   let path;
   if(callback){
@@ -33,7 +34,7 @@ export default async function handler(req,res){
   workspace=await sessions.workspace(path,req.method==='POST');
   const app=await createApplication({cloud:true,host,env:{},store:workspace.store,config:workspace.record.config,saveConfig:workspace.saveConfig});
   // Keep the application's raw-body contract if the platform parsed a JSON body.
-  if(req.body!==undefined){const stream=Readable.from([Buffer.isBuffer(req.body)?req.body:Buffer.from(typeof req.body==='string'?req.body:JSON.stringify(req.body))]);stream.headers=req.headers;stream.url=req.url;stream.method=req.method;req=stream;}
+  if(req.body!==undefined){const stream=Readable.from([Buffer.isBuffer(req.body)?req.body:Buffer.from(typeof req.body==='string'?req.body:JSON.stringify(req.body))]);stream.headers=req.headers;stream.url=req.url;stream.method=req.method;stream.guardianSignal=req.guardianSignal;req=stream;}
   const result={status:200,headers:{},body:null};
   const buffer={setHeader:(k,v)=>{result.headers[k]=v;},writeHead:(code,headers)=>{result.status=code;Object.assign(result.headers,headers);},end:body=>{result.body=body;}};
   await (callback?app.callback:app.handler)(req,buffer);

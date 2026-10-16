@@ -5,6 +5,7 @@ import {debugEvent,debugStep} from './debug.mjs';
 import {createAgentState,walletChanges,assessWallet,proposeWatch,confirmWatch,evaluateWatches,runAgent,unsupportedWatchReason,validateWatchIntent} from './agent.mjs';
 import {tokenCatalog,tokenApi} from './tokenomist.mjs';
 import {parseUnits} from './avalanche.mjs';
+import {ubot} from './providers.mjs';
 
 const now=()=>new Date().toISOString();
 export function createGuardian({saved,config,live,getDemo,getMode,refresh,persist,cloud,call}){
@@ -28,7 +29,7 @@ export function createGuardian({saved,config,live,getDemo,getMode,refresh,persis
   agent.pendingBrief={wallet,at:now()};await debugStep('process','Save session',{},persist);return result;
  }
  async function acknowledge(){if(agent.pendingBrief){agent.baseline=agent.pendingBrief.wallet;agent.pendingBrief=null;await debugStep('process','Save session',{},persist);}return summary();}
- async function message(message){
+ async function message(message,signal){
   if(typeof message!=='string'||!message.trim()||message.length>2000)throw new Error(tr('ข้อความต้องมี 1–2,000 ตัวอักษร'));
   let refreshed=false;const known=new Set(getMode()==='live'?(live.supply?.coverage||[]).map(x=>x.tokenId).filter(Boolean):config.tokenomistKey?[]:['avalanche-2','usd-coin']);
   const wallet=async()=>{if(!refreshed){if(getMode()==='live'){if(!live.settings.address)throw new Error(tr('ยังไม่ได้เชื่อม public wallet'));await debugStep('process','Refresh wallet and supply',{},refresh);}refreshed=true;}return current();};
@@ -53,7 +54,13 @@ export function createGuardian({saved,config,live,getDemo,getMode,refresh,persis
   let result;
   const unsupported=unsupportedWatchReason(message);
   if(unsupported){result={text:unsupported,trace:[],evidence:[],proposals:[],mode:'capability-check',dataMode:getMode()};debugEvent('agent.guard','Unsupported watch condition',{message});agent.history.push({role:'user',text:message},{role:'assistant',text:unsupported});agent.history=agent.history.slice(-12);}
-  else if(config.mode==='ubot')result=await runAgent({message,config,agent,tools,context:{language:language(),dataMode:getMode(),goal:agent.goal,wallet:live.settings.address||null,monitoring:monitoring()},maxSteps:5,...(call?{call}:{})});
+  else if(config.mode==='ubot'){
+   const priorHistory=agent.history.slice();
+   try{
+    result=await runAgent({message,config,agent,tools,context:{language:language(),dataMode:getMode(),goal:agent.goal,wallet:live.settings.address||null,monitoring:monitoring()},maxSteps:5,call:call||((config,prompt,timeout)=>ubot(config,prompt,timeout,signal))});
+    if(signal?.aborted)throw new DOMException('Request cancelled','AbortError');
+   }catch(e){if(signal?.aborted)agent.history=priorHistory;throw e;}
+  }
   else{
    if(typeof message!=='string'||!message.trim()||message.length>2000)throw new Error(tr('ระบุข้อความไม่เกิน 2,000 ตัวอักษร'));
    let draft;const wants=/watch|alert|notify|monitor|เตือน|ติดตาม/i.test(message);
