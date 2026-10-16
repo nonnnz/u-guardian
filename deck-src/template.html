@@ -331,7 +331,7 @@ body:hover #nav{opacity:1}
 <!-- 9 · Team & close -->
 <section class="slide s9" data-notes="Picture opening your wallet and hearing Guardian explain what changed since your last visit. You can ask a follow-up by voice and choose what it should watch next. For consequential answers, you can always inspect the information Guardian used. We would like to test that experience with U-topia users.">
   <div class="chip"><b>09</b>Team &amp; close</div>
-  <div class="mas"><img class="mascot" src="{{P_answering}}" alt=""></div>
+  <div class="mas"><img class="mascot" id="endMas" src="{{P_answering}}" alt="" data-poster="{{P_answering}}"></div>
   <div class="wrap">
     <div>
       <div class="tag">give_every_wallet_a_guide</div>
@@ -364,7 +364,7 @@ function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080);$('#stage').st
 addEventListener('resize',fit);fit();
 $('#dots').innerHTML=slides.map((_,i)=>`<button class="d" data-i="${i}"></button>`).join('');
 function go(i){cur=Math.max(0,Math.min(N-1,i));slides.forEach((s,k)=>s.classList.toggle('on',k===cur));$$('#dots .d').forEach((d,k)=>d.classList.toggle('on',k===cur));
-  $('#bar').style.width=((cur+1)/N*100)+'%';history.replaceState(null,'','#'+(cur+1));$('#notes').innerHTML='<b>NOTES</b>'+(slides[cur].dataset.notes||'')}
+  $('#bar').style.width=((cur+1)/N*100)+'%';if(cur===N-1)animateMascot();history.replaceState(null,'','#'+(cur+1));$('#notes').innerHTML='<b>NOTES</b>'+(slides[cur].dataset.notes||'')}
 $('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);$('#dots').onclick=e=>e.target.dataset.i&&go(+e.target.dataset.i);
 $('#nbtn').onclick=()=>$('#notes').classList.toggle('show');$('#fs').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
 addEventListener('keydown',e=>{const k=e.key;if(['ArrowRight','PageDown',' ','Enter'].includes(k)){e.preventDefault();go(cur+1)}else if(['ArrowLeft','PageUp','Backspace'].includes(k))go(cur-1);else if(k==='Home')go(0);else if(k==='End')go(N-1);else if(k==='n'||k==='N')$('#notes').classList.toggle('show');else if(k==='f'||k==='F')$('#fs').click();else if(/^[1-9]$/.test(k))go(+k-1)});
@@ -375,8 +375,11 @@ const ORDER=['health','watch','call','debug'];
 function setStep(i){$$('.step').forEach((s,k)=>s.classList.toggle('act',k===i));const img=$('#demoImg');img.style.opacity=.15;setTimeout(()=>{img.src=SHOTS[ORDER[i]];img.style.opacity=1},160)}
 $$('.step').forEach(s=>s.onclick=()=>setStep(+s.dataset.i));
 
+// Web only: loop the animated mascot on the last slide; the PDF keeps the still poster.
+function animateMascot(){const el=$('#endMas');if(el.dataset.anim)return;const p=new Image();p.onload=()=>{el.dataset.anim=1;el.src=p.src};p.src='assets/mascot/answering.webp'}
+function freezeMascot(){const el=$('#endMas');el.src=el.dataset.poster;delete el.dataset.anim}
 // Print/PDF: expand the interactive demo into 4 static pages, one per step.
-function expandDemo(){const s4=slides[3];if(document.querySelector('.s4-print'))return;let after=s4;
+function expandDemo(){freezeMascot();const s4=slides[3];if(document.querySelector('.s4-print'))return;let after=s4;
   for(let i=0;i<4;i++){const c=i===0?s4:s4.cloneNode(true);
     if(i){c.classList.add('s4-print');c.classList.add('on');after.after(c);after=c}
     c.querySelectorAll('.step').forEach((e,k)=>e.classList.toggle('act',k===i));
@@ -384,7 +387,7 @@ function expandDemo(){const s4=slides[3];if(document.querySelector('.s4-print'))
     c.querySelector('.chip.r').textContent='STEP '+(i+1)+' / 4 · REAL PRODUCT';
     if(i)c.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'))}
   }
-function collapseDemo(){$$('.s4-print').forEach(e=>e.remove());$('#demoChip').textContent='CLICK A STEP · REAL PRODUCT'}
+function collapseDemo(){if(cur===N-1)animateMascot();$$('.s4-print').forEach(e=>e.remove());$('#demoChip').textContent='CLICK A STEP · REAL PRODUCT'}
 addEventListener('beforeprint',expandDemo);addEventListener('afterprint',collapseDemo);
 // real API numbers
 $('#dBlock').textContent='#'+Number(LIVE.wallet.block).toLocaleString('en-US');
