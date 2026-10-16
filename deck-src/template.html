@@ -120,6 +120,8 @@ table{width:100%;border-collapse:separate;border-spacing:0}
 .why .glass{padding:26px 30px}
 .why h3{font:500 18px "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--orangeText);margin-bottom:10px}
 .why p{font-size:23px;line-height:1.48}
+.archwrap{display:flex;justify-content:center;margin-top:8px}
+.archwrap svg{width:1400px;height:auto;display:block}
 /* 6 */
 .cols{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
 .cols .glass h3{font:500 19px "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--orangeText);margin-bottom:12px}
@@ -216,7 +218,7 @@ body:hover #nav{opacity:1}
     </div>
   </div>
   <p class="src r" style="margin-top:30px">Evidence: FCA 2025 UK survey. UK survey findings, <b style="color:var(--orangeText)">not</b> measured behavior of U-topia users.<br><a href="https://www.fca.org.uk/publications/research-notes/cryptoassets-consumer-research-2025">fca.org.uk · cryptoassets-consumer-research-2025</a> · <a href="https://www.fca.org.uk/publication/research-notes/cryptoasset-consumer-research-2025-wave-6.pdf">2025 report, risk understanding</a></p>
-  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>02</b> / 09</span></div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>02</b> / 10</span></div>
 </section>
 
 <!-- 3 · Solution -->
@@ -232,7 +234,7 @@ body:hover #nav{opacity:1}
     <tr><td>Advice with real information</td><td>“What is AVAX, and what should I watch out for?”</td><td>Uses retrieved project, market, tokenomics, and available headline evidence to explain trade-offs and uncertainty.</td></tr>
   </table></div>
   <p class="r" style="margin-top:30px;font-size:27px"><b style="color:var(--orangeText)">Product idea:</b> the mascot is the agent interface. Text, voice, status animations, sources, and watch confirmations are all in one conversation.</p>
-  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>03</b> / 09</span></div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>03</b> / 10</span></div>
 </section>
 
 <!-- 4 · Demo -->
@@ -251,12 +253,20 @@ body:hover #nav{opacity:1}
     </div>
     <div class="shot" id="demoShot"><div class="bar"><i></i><i></i><i></i><span>u-guardian.vercel.app</span></div><img id="demoImg" src="{{S_health}}" alt="Product screenshot"></div>
   </div>
-  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>Screenshots from the live product · price move is synthetic demo data</span></span><span class="n"><b>04</b> / 09</span></div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>Screenshots from the live product · price move is synthetic demo data</span></span><span class="n"><b>04</b> / 10</span></div>
 </section>
 
-<!-- 5 · Technology -->
+<!-- 5 · Architecture at a glance -->
+<section class="slide s5a" style="padding-top:132px" data-notes="Here is the whole system on one page. The user talks to the Guardian web app. Our Node.js backend asks U-bot to plan, validates each tool request against an allowlist, and calls Avalanche, Tokenomist and CoinGecko. ElevenLabs gives the agent a voice. A watch only becomes active after the user confirms it, and a triggered watch comes back as an in-app alert.">
+  <div class="chip"><b>05</b>Architecture</div><div class="chip r">HIGH-LEVEL OVERVIEW</div>
+  <h2 style="font-size:58px;margin-bottom:6px">U-Guardian at a glance: <em>one conversation, named tools.</em></h2>
+  <div class="archwrap r">{{ARCH_SVG}}</div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>Product and sponsor logos shown in their own nodes</span></span><span class="n"><b>05</b> / 10</span></div>
+</section>
+
+<!-- 6 · Technology -->
 <section class="slide s5" style="padding-top:132px" data-notes="The agent does more than answer from one prompt. U-bot can choose tools over several steps. Our backend validates each tool name and its arguments before calling an API, then returns the result to U-bot for an explanation. When a source lacks coverage, the answer should say what is missing rather than invent a number. The three numbers are a real pull from the provider APIs the app uses.">
-  <div class="chip"><b>05</b>Technology</div><div class="chip r warn" id="liveChip">● REAL API PULL</div>
+  <div class="chip"><b>06</b>Technology</div><div class="chip r warn" id="liveChip">● REAL API PULL</div>
   <h2 style="font-size:58px;margin-bottom:26px">Agent decisions <em>backed by named tools.</em></h2>
   <div class="tech">
     <div class="flow">
@@ -274,12 +284,12 @@ body:hover #nav{opacity:1}
       <div class="glass"><h3>Why this matters</h3><p>Wallet data personalizes the answer. Tokenomist adds supply and project evidence. Public market and news sources fill gaps the sponsor APIs do not cover. ElevenLabs makes the agent accessible by voice. Debug shows each tool choice, result, and failure.</p></div>
     </div>
   </div>
-  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span id="dWhen"></span></span><span class="n"><b>05</b> / 09</span></div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span id="dWhen"></span></span><span class="n"><b>06</b> / 10</span></div>
 </section>
 
 <!-- 6 · Impact -->
 <section class="slide s6" data-notes="For U-topia, the opportunity is to put this companion inside an app people already use. The current product is a working, single-page web MVP. Embedding it in another app is the next product step, not a feature we claim to have shipped today.">
-  <div class="chip"><b>06</b>Impact &amp; business model</div>
+  <div class="chip"><b>07</b>Impact &amp; business model</div>
   <div class="tag">inside_an_existing_app</div>
   <h2 style="font-size:58px">Make crypto easier to understand <em>inside an existing app.</em></h2>
   <div class="cols">
@@ -288,12 +298,12 @@ body:hover #nav{opacity:1}
     <div class="glass r"><h3>Proposed model · hypothesis</h3><p><b>B2B licensing / white-label companion</b> for wallet and financial apps, with a platform fee and usage-based pricing for agent and voice calls. Not launched pricing.</p></div>
     <div class="glass r"><h3>Pilot measures · to measure</h3><p>Time to understand a wallet change; % of users who correctly understand an alert; watch activation and retention; source-detail views; voice use; provider cost per useful answer. Not claimed results.</p></div>
   </div>
-  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>06</b> / 09</span></div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>07</b> / 10</span></div>
 </section>
 
 <!-- 7 · Market -->
 <section class="slide s7" data-notes="Other wallets and assistants already do useful things. What we can demonstrate is a single conversation that combines a person's wallet context, several named data sources, tool selection, and voice. We would use a pilot to learn how many U-topia users actually want that experience.">
-  <div class="chip"><b>07</b>Market &amp; advantage</div>
+  <div class="chip"><b>08</b>Market &amp; advantage</div>
   <div class="tag">context_a_balance_screen_misses</div>
   <h2>Context that a <em>balance screen misses.</em></h2>
   <div class="who r">
@@ -308,12 +318,12 @@ body:hover #nav{opacity:1}
     <tr><td>Separate alert service</td><td>Set a rule in a different interface</td><td>Drafts a watch conversationally and asks for confirmation</td></tr>
   </table></div>
   <p class="src r" style="margin-top:22px"><b style="color:var(--orangeText)">Market evidence, not TAM:</b> FCA 2025 UK survey reports 8% adult ownership and 91% awareness. We would validate demand with an in-app pilot before estimating U-topia-specific adoption or revenue. <a href="https://www.fca.org.uk/publications/research-notes/cryptoassets-consumer-research-2025">fca.org.uk</a></p>
-  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>07</b> / 09</span></div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>08</b> / 10</span></div>
 </section>
 
 <!-- 8 · Roadmap -->
 <section class="slide s8" data-notes="Today, the website checks watches while the page is visible and presents alerts as simulated in-app calls. Background monitoring and delivery to a user after they leave the app are future work. Moving checks to a background service is a priority if the pilot shows that users value these alerts.">
-  <div class="chip"><b>08</b>Roadmap</div>
+  <div class="chip"><b>09</b>Roadmap</div>
   <div class="tag">from_hackathon_mvp_to_in_app_companion</div>
   <h2>From hackathon MVP <em>to in-app companion.</em></h2>
   <div class="road">
@@ -325,12 +335,12 @@ body:hover #nav{opacity:1}
     <div class="glass r"><div class="when">Next 6 months</div><h3>Always on</h3><ul><li>Background watch evaluation and real delivery channels.</li><li>Stronger wallet coverage and explicit freshness / coverage reporting.</li></ul></div>
     <div class="glass r"><div class="when">Next 12 months</div><h3>Platform</h3><ul><li>Reusable integration kit.</li><li>Production-grade consent and account controls.</li><li>Broader asset coverage and measured platform rollout.</li></ul></div>
   </div>
-  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>“Next” items are proposals, not current product behavior</span></span><span class="n"><b>08</b> / 09</span></div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>“Next” items are proposals, not current product behavior</span></span><span class="n"><b>09</b> / 10</span></div>
 </section>
 
 <!-- 9 · Team & close -->
 <section class="slide s9" data-notes="Picture opening your wallet and hearing Guardian explain what changed since your last visit. You can ask a follow-up by voice and choose what it should watch next. For consequential answers, you can always inspect the information Guardian used. We would like to test that experience with U-topia users.">
-  <div class="chip"><b>09</b>Team &amp; close</div>
+  <div class="chip"><b>10</b>Team &amp; close</div>
   <div class="mas"><img class="mascot" id="endMas" src="{{P_answering}}" alt="" data-poster="{{P_answering}}"></div>
   <div class="wrap">
     <div>
@@ -347,7 +357,7 @@ body:hover #nav{opacity:1}
       <div class="glass mem r"><img src="{{A_nonnnz}}" alt="Ratchanon Buachum"><div><h3>Ratchanon Buachum</h3><div class="rl">AI Engineer · Armstrong Technology</div><a href="https://github.com/nonnnz">github/nonnnz</a><a href="https://www.linkedin.com/in/ratchanon-buachum/">linkedin/ratchanon-buachum</a></div></div>
     </div>
   </div>
-  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>Team TuiDui · Thank you</span></span><span class="n"><b>09</b> / 09</span></div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>Team TuiDui · Thank you</span></span><span class="n"><b>10</b> / 10</span></div>
 </section>
 </div>
 

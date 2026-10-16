@@ -16,6 +16,11 @@ const rep={
   '{{QR}}':r(new URL('qr.svg',s),'utf8'),
   '{{LIVE}}':r(new URL('live-data.js',d),'utf8').replace(/^window\.LIVE_DATA=|;\s*$/g,''),
 };
+const arch=r(new URL('diagrams/architecture.html',s),'utf8').match(/<svg[\s\S]*<\/svg>/)[0]
+  .replace(/<rect width="100%" height="100%" fill="#111318"\/>/,'')
+  .replace('viewBox="0 0 1280 720"','viewBox="32 64 1216 656"')
+  .replace(/'Geist Mono',ui-monospace/g,"'Geist Mono','JetBrains Mono',ui-monospace");
+rep['{{ARCH_SVG}}']=arch;
 for(const n of ['home','health','watch','call','debug'])rep[`{{S_${n}}}`]=b64(`assets/shots/${n}.jpg`,'image/jpeg');
 for(const [k,v] of Object.entries(rep))h=h.split(k).join(v);
 w(new URL('index.html',d),h);console.log('deck/index.html',(h.length/1024).toFixed(0)+'KB');
