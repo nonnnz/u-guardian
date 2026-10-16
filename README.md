@@ -1,18 +1,76 @@
+<div align="center">
+
+<img src="deck/assets/logo.jpg" alt="U-Guardian mascot" width="128" height="128" style="border-radius:50%">
+
 # U-Guardian
 
-An English-first, bilingual voice companion for understanding a crypto wallet. The app has one page: wallet status, a mascot perched on its edge, and a Settings button. Click the mascot to open chat; closing it returns to the wallet without discarding the conversation.
+**Your wallet shows what you own. U-Guardian explains what matters.**
 
-Live app: https://u-guardian.vercel.app
+An AI companion that explains your crypto wallet, investigates what changed, and speaks up when a watch you chose is triggered.
 
-Pitch deck (Team TuiDui, U-Hackathon 2026 Track 1: AI): https://u-guardian-pitch-desk.nonnnz.dev · [PDF](deck/U-Guardian-Pitch-Deck.pdf) · [screenshots](deck/screenshots) · see [Pitch deck](#pitch-deck)
+[![Live demo](https://img.shields.io/badge/Live%20demo-u--guardian.vercel.app-ff994d?style=for-the-badge&logo=vercel&logoColor=white)](https://u-guardian.vercel.app)
+[![Pitch deck](https://img.shields.io/badge/Pitch%20deck-u--guardian--pitch--desk.nonnnz.dev-111318?style=for-the-badge&logo=cloudflare&logoColor=ff994d)](https://u-guardian-pitch-desk.nonnnz.dev)
+[![PDF](https://img.shields.io/badge/Deck-PDF-34363d?style=for-the-badge)](deck/U-Guardian-Pitch-Deck.pdf)
 
-## Pitch deck
+![U-Hackathon 2026](https://img.shields.io/badge/U--Hackathon%202026-Track%201%3A%20AI-ff994d?style=flat-square)
+![Team](https://img.shields.io/badge/Team-TuiDui-111318?style=flat-square)
+![Node](https://img.shields.io/badge/Node.js-24.x-5fa04e?style=flat-square&logo=nodedotjs&logoColor=white)
+![Avalanche](https://img.shields.io/badge/Avalanche-C--Chain-e84142?style=flat-square&logo=avalanche&logoColor=white)
+![Tokenomist](https://img.shields.io/badge/Tokenomist-API-c2185b?style=flat-square)
+![ElevenLabs](https://img.shields.io/badge/ElevenLabs-voice-000000?style=flat-square&logo=elevenlabs&logoColor=white)
+![U-bot](https://img.shields.io/badge/U--bot-agent-6c5ce7?style=flat-square)
 
-A 10-slide interactive deck in the app's dark palette, built from [pitch deck.md](pitch%20deck.md). Slide 4 is a clickable walkthrough of the real product, and slide 5 is a high-level architecture diagram (built with the diagram-design skill, source in `deck-src/diagrams/`) and slide 6 shows a live pull from the Avalanche, Tokenomist and CoinGecko APIs. Print or export to PDF and slide 4 expands into four static pages (one per demo step).
+</div>
 
-- Site: https://u-guardian-pitch-desk.nonnnz.dev (Cloudflare Worker serving static assets). Keys: arrows/space, `N` notes, `F` fullscreen.
-- Source: `deck-src/template.html`. Build the self-contained page (fonts, logo, screenshots and QR inlined) with `node deck-src/build.mjs`, which writes `deck/index.html`.
-- Deploy: `cd deck-src && npx wrangler deploy` (config in `deck-src/wrangler.jsonc`).
+<p align="center">
+  <a href="https://u-guardian.vercel.app"><img src="deck/screenshots/01-title.png" alt="U-Guardian pitch deck title slide" width="860"></a>
+</p>
+
+## Try it
+
+| | |
+|---|---|
+| **Demo** | https://u-guardian.vercel.app (click the mascot, then **Connect U-Bot** in Settings) |
+| **Pitch deck** | https://u-guardian-pitch-desk.nonnnz.dev (13-page [PDF](deck/U-Guardian-Pitch-Deck.pdf)) |
+| **Repo** | this one. Hackathon MVP; "next" items in the deck are proposals, not shipped behavior |
+
+Try asking: **"Check my wallet health."** · **"Alert me when AVAX price drops 10% from the price when I confirm."** · **"What changed since my last briefing?"** Then open **Settings → Simulate AVAX price −12%** to see a simulated in-app alert (demo data, no real call).
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img src="deck/assets/shots/home.jpg" alt="Wallet with the mascot perched on the card"><br><sub>One page: the wallet, with the mascot as the agent interface.</sub></td>
+    <td width="50%"><img src="deck/assets/shots/health.jpg" alt="Wallet health answer with sources and details"><br><sub>Wallet health in plain language, with Sources &amp; details.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="deck/assets/shots/watch.jpg" alt="Review before saving a watch"><br><sub>Every watch is reviewed and confirmed before it is active.</sub></td>
+    <td width="50%"><img src="deck/assets/shots/call.jpg" alt="Simulated in-app call alert"><br><sub>A triggered watch arrives as a simulated in-app call (demo data).</sub></td>
+  </tr>
+</table>
+
+## How it works
+
+<p align="center"><img src="deck/screenshots/04-architecture.png" alt="U-Guardian architecture overview" width="900"></p>
+
+Three jobs in one conversation:
+
+1. **Wallet health**: reads a public Avalanche wallet and explains holdings, coverage and concentration against a saved goal.
+2. **What changed and monitor**: compares the latest observations with the last briefing and drafts a specific watch for you to confirm.
+3. **Advice with real information**: explains trade-offs and uncertainty from retrieved project, market, tokenomics and headline evidence.
+
+U-bot chooses a tool, the Node.js backend validates it against an allowlist, and the result goes back to U-bot to explain. The model never runs generated code. Sources: Avalanche (wallet/transfers), Tokenomist (supply/tokens), CoinGecko plus publisher RSS (market/news), ElevenLabs (speech in and out).
+
+## Team TuiDui
+
+| | |
+|---|---|
+| **Wayu Tharai**, AI Engineer, Bangkok Bank | [GitHub](https://github.com/Wayu650610806) · [LinkedIn](https://www.linkedin.com/in/wayu-tharai-b575a5338/) |
+| **Ratchanon Buachum**, AI Engineer, Armstrong Technology | [GitHub](https://github.com/nonnnz) · [LinkedIn](https://www.linkedin.com/in/ratchanon-buachum/) |
+
+---
+
+# Developer guide
 
 ## What works
 
@@ -75,6 +133,19 @@ Vercel serves public assets and a Node function. Connect a **private Vercel Blob
 The hosted demo has no login. A random HttpOnly/Secure/SameSite session cookie identifies one wallet and settings for each browser session. Records and credentials are encrypted with AES-256-GCM in private Blob storage; provider keys are not returned in state responses or kept in browser storage. Clearing cookies loses access to that session. The encryption key is derived from the Blob token, so rotating that token requires data migration or new sessions. This is a hackathon demo, not a multi-user financial service.
 
 Conditional writes and a lease serialize serverless mutations; an interrupted request may temporarily block another operation. Audio uploads are capped at 4 MB. GitHub/Vercel access is separate from an app visitor's session.
+
+## Pitch deck site (source and deploy)
+
+The deck is a self-contained page generated from `deck-src/template.html` (fonts, logo, screenshots, mascot poster, QR code and a live API pull are inlined, so nothing depends on outside hosting).
+
+```bash
+node deck-src/build.mjs          # writes deck/index.html
+cd deck-src && npx wrangler deploy   # Cloudflare Worker serving ./deck as static assets
+```
+
+- Content follows [pitch deck.md](pitch%20deck.md). Slide 4 is a clickable walkthrough of the real product; printing or exporting to PDF expands it into four static pages. Keys: arrows/space, `N` speaker notes, `F` fullscreen.
+- The architecture slide comes from `deck-src/diagrams/` (`python3 deck-src/diagrams/build_architecture.py`, made with the diagram-design skill).
+- Worker config: `deck-src/wrangler.jsonc`.
 
 ## Verification
 
