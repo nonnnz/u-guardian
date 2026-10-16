@@ -64,6 +64,11 @@ test('HTTP defaults to English, honors Thai and serves the shared catalog',async
  };
  const en=await request('/api/agent/chat',undefined,{message:'Check my wallet health'});assert.equal(en.status,200);noThai(JSON.parse(en.result).text);
  const th=await request('/api/agent/chat','th',{message:'ช่วยตรวจสุขภาพกระเป๋า'});assert.match(JSON.parse(th.result).text,/[\u0e00-\u0e7f]/);
+ const draft=JSON.parse((await request('/api/agent/chat','en',{message:'Watch for quantity changes across my wallet.'})).result).proposals[0];assert.ok(draft?.id);
+ assert.ok(JSON.parse((await request('/api/state')).result).guardian.history.length);
+ const fresh=await request('/api/agent/new-chat','en',{});assert.equal(fresh.status,200);assert.deepEqual(JSON.parse(fresh.result).guardian.history,[]);
+ assert.deepEqual(JSON.parse((await request('/api/state')).result).guardian.history,[]);
+ assert.equal((await request('/api/agent/watch/confirm','en',{id:draft.id})).status,400);
  const invalid=await request('/api/agent/chat','en',{message:''});assert.equal(invalid.status,400);noThai(JSON.parse(invalid.result).error);
  assert.equal((await request('/messages.js')).status,200);
 });

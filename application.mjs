@@ -135,6 +135,7 @@ const coreHandler = async (req,res) => {
       const p = JSON.parse((await readBody(req)).toString() || '{}');
       debugEvent('request.input','Request input',p);
       if(pathname==='/api/agent/chat'){if(config.mode==='ubot')limitUbot(req,'chat',12);return json(res,200,{...await guardian.message(p.message,signal),state:snapshot()});}
+      if(pathname==='/api/agent/new-chat'){guardian.agent.history=[];guardian.agent.proposals=[];await persist();return json(res,200,snapshot());}
       if(pathname==='/api/agent/brief')return json(res,200,{...await guardian.brief(),state:snapshot()});
       if(pathname==='/api/agent/ack')return json(res,200,await guardian.acknowledge());
       if(pathname==='/api/agent/check')return json(res,200,await guardian.check());
