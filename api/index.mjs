@@ -35,6 +35,9 @@ export default async function handler(req,res){
   const app=await createApplication({cloud:true,host,env:{},store:workspace.store,config:{...workspace.record.config,
    avalancheKey:workspace.record.config.avalancheKey||process.env.AVALANCHE_DATA_API_KEY||'',
    elevenKey:workspace.record.config.elevenKey||process.env.ELEVENLABS_API_KEY||'',
+   voiceId:workspace.record.config.voiceId||process.env.ELEVENLABS_VOICE_ID||'',
+   ttsModel:workspace.record.config.ttsModel||process.env.ELEVENLABS_TTS_MODEL||'eleven_v3',
+   sttModel:workspace.record.config.sttModel||process.env.ELEVENLABS_STT_MODEL||'scribe_v2',
    tokenomistKey:workspace.record.config.tokenomistKey||process.env.TOKENOMIST_API_KEY||''},saveConfig:workspace.saveConfig});
   // Keep the application's raw-body contract if the platform parsed a JSON body.
   if(req.body!==undefined){const stream=Readable.from([Buffer.isBuffer(req.body)?req.body:Buffer.from(typeof req.body==='string'?req.body:JSON.stringify(req.body))]);stream.headers=req.headers;stream.url=req.url;stream.method=req.method;stream.guardianSignal=req.guardianSignal;req=stream;}

@@ -77,6 +77,9 @@ test('voice adapter sends English/Thai STT hints and preserves TTS text',async()
   assert.equal(seen[0].body.get('language_code'),'eng');assert.equal(seen[1].body.get('language_code'),'tha');
   await withLanguage('en',()=>speech(config,'AVAX represents 57% of priced holdings.'));
   assert.equal(JSON.parse(seen[2].body).text,'AVAX represents 57% of priced holdings.');
+  assert.equal(JSON.parse(seen[2].body).language_code,'en');
+  await withLanguage('th',()=>speech(config,'สวัสดีค่ะ พร้อมช่วยคุณแล้ว'));
+  assert.equal(JSON.parse(seen[3].body).language_code,'th');
  }finally{globalThis.fetch=original;}
 });
 

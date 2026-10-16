@@ -88,7 +88,8 @@ export async function speech(config, text) {
   if (!config.voiceId) throw new Error(tr('เลือก ElevenLabs voice ก่อน'));
   const res = await eleven(config, `/v1/text-to-speech/${encodeURIComponent(config.voiceId)}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
-    body: JSON.stringify({ text: text.slice(0, 2500), model_id: config.ttsModel }) });
+    body: JSON.stringify({ text: text.slice(0, 2500), model_id: config.ttsModel,
+      ...(config.ttsModel === 'eleven_v3' ? { language_code: language() } : {}) }) });
   const bytes=Buffer.from(await res.arrayBuffer());debugEvent('voice.result','Speech generated',{bytes:bytes.length,mime:'audio/mpeg'});return bytes;
 }
 export async function transcribe(config, bytes, mime) {
