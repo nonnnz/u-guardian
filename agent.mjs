@@ -150,6 +150,7 @@ export async function runAgent({message,config,agent,tools,context,call=ubot,max
      const raw=await withinBudget(plannerDeadline,()=>debugStep('model','U-bot Professional · choose next step',{step:i+1,attempt:attempt+1,prompt},()=>call(config,prompt,Math.max(1,Math.min(planningTimeoutMs,plannerDeadline-Date.now())))));
      step=parseAgentStep(raw);debugEvent('agent.decision','Validated JSON decision',{step:i+1,decision:step});break;
     }catch(e){
+     if(typeof e.code==='string'||e.name==='AbortError')throw e;
      const retry=e instanceof AgentPlanError&&attempt===0&&Date.now()<plannerDeadline-1000;
      debugEvent('agent.validation','Decision failed',{step:i+1,attempt:attempt+1,error:e.message,retry});
      if(retry){repair=e.message;continue;}
@@ -177,7 +178,7 @@ export async function runAgent({message,config,agent,tools,context,call=ubot,max
   if(!text&&(needsExplanation||evidence.length)){
    const prompt=answerPrompt({message,context:{...ctx,warnings},history:agent.history,evidence});
    try{if(Date.now()>=deadline)throw new Error(tr('หมดเวลาประมวลผล'));text=narrative(await debugStep('model','U-bot Professional · final explanation',{prompt},()=>call(config,prompt,Math.max(1,Math.min(answerTimeoutMs,deadline-Date.now())))));}
-   catch(e){warn(tr('สรุปด้วย U-bot ไม่สำเร็จ: ')+e.message);}
+   catch(e){if(typeof e.code==='string'||e.name==='AbortError')throw e;warn(tr('สรุปด้วย U-bot ไม่สำเร็จ: ')+e.message);}
   }
   if(!text)text=tr('ยังสรุปคำตอบให้ครบไม่ได้ในรอบนี้ครับ ดูผลที่อ่านได้ในหลักฐานด้านล่าง แล้วลองถามประเด็นที่ต้องการต่อได้ ไม่มีการโอน ซื้อขาย หรือเปิดกฎติดตามอัตโนมัติ');
   if(proposals.length)text+=tr('\n\nรายการติดตามนี้ยังเป็นร่างครับ ต้องกด “ยืนยันการติดตาม” ในแชตก่อนจึงจะเริ่มทำงาน');

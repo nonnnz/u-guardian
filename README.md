@@ -17,17 +17,15 @@ Live app: https://u-guardian.vercel.app
 
 Open **ตั้งค่า**. Settings stay in a dialog on the same page.
 
-1. Under **การเชื่อมต่อ**, enter U-bot Bearer token, Avalanche Data API key, Tokenomist API key and ElevenLabs key. Blank credential fields retain the saved value.
-2. Click **Connect U-bot** to verify its saved or newly supplied token and activate the U-bot agent. Test other providers, load/select an ElevenLabs voice, then save.
-3. Under **กระเป๋า**, choose Live, paste a public C-Chain address beginning with 0x, choose Mainnet or Fuji, then save. This reads public data; no private key or signature is needed.
-4. Optionally save your goals. For ERC-20 supply monitoring, use **จับคู่เหรียญกับ Tokenomist**, verify the project's contract yourself and confirm the match. Native Mainnet AVAX is mapped automatically.
-5. Close Settings and click the mascot. Ask for wallet health, what changed, or a watch.
+1. Configure `UBOT_SUPABASE_ANON_KEY`, `UBOT_EMAIL`, and `UBOT_PASSWORD` as server-only values in `.env` locally or Secret environment variables on Vercel. The URL and chat endpoint have defaults in `.env.example`.
+2. Under **Connections**, click **Connect U-Bot**. It verifies the shared demo account with a real U-Bot response, then enables U-Bot in Guardian chat. **Disconnect U-Bot** clears only this visitor's connection and conversation state.
+3. Configure Avalanche, Tokenomist, and ElevenLabs separately if needed. The demo wallet and those integrations remain independent of U-Bot authentication.
+4. Under **Wallet**, choose Live, enter a public Avalanche C-Chain address, and save. No private key or signature is needed.
+5. Optionally save goals and verify Tokenomist asset matches. Close Settings and open Guardian chat.
 
 Demo wallet data and local example answers are synthetic unless U-bot mode is selected for reasoning. Public market/news tools still return real sourced evidence. Settings provides synthetic price-drop and outgoing-transfer buttons. See [USER-TEST-GUIDE.md](USER-TEST-GUIDE.md) for the current three-pillar capability matrix, English prompts, limits and repeatable demo.
 
-**Connect U-bot is a saved-credential connection check, not OAuth.** It switches to the real agent only after a successful request; failed authentication leaves the prior configuration intact. The Open U-bot link opens the provider's site and does not import its browser session. An expired token must still be replaced under manual token settings. No documented third-party OAuth integration was found in the supplied guide or the public frontend/discovery documents inspected on 2026-10-15.
-
-U-bot requests use **Professional** (`professional`) for both planning and explanations. Existing saved templates are normalized to Professional when loaded, saved or called, and the exact legacy no-numbers guard is removed. Other custom payload fields are retained. There is no silent fallback to Casual. This selects the requested mode; it does not establish that Professional is universally more accurate.
+**Connect U-Bot uses a shared backend demo account.** Visitors never enter a Bearer token or receive the account password or access token. The server signs in with Supabase, verifies a genuine chat response, and signs in again for each chat request. An expired access token triggers one fresh login and retry. This does not connect a visitor's personal U-Bot account. See [UBOT_INTEGRATION.md](UBOT_INTEGRATION.md).
 
 Planning and explanation use separate prompts. The planner returns validated JSON and allowlisted arguments. A `finishAfterTool` hint skips a redundant planning request when one tool is sufficient; token search still requires a separate research step. The explainer may use numbers, units, dates and token names supported by this turn's evidence. Large evidence is compacted into valid JSON with explicit omissions, while full tool results remain in the UI subject to Debug display limits.
 
@@ -45,7 +43,7 @@ The old dashboard and separate Settings page have been removed. Old /settings.ht
 
 Open the mascot chat and enable **Debug** in its header. The adjacent **Chat / Debug** (or **แชต / Debug** in Thai) tabs switch between the conversation and diagnostics. Send a message, request a briefing or use voice in the chat tab, then inspect each expandable event in Debug.
 
-Each request records timestamps and duration, the input, U-bot prompts and expanded payload (including the selected mode), raw provider response, validated JSON decision, tool arguments/results, provider calls/cache results, retries, errors, session saves and final answer. Local demo rules and briefings are explicitly identified as not calling U-bot. Voice requests record STT text and TTS metadata, not audio bytes in the log.
+Each request records timestamps and duration, the input, U-Bot prompts, non-secret provider metadata, validated JSON decision, tool arguments/results, retries, errors, session saves and final answer. Local demo rules and briefings are explicitly identified as not calling U-bot. Voice requests record STT text and TTS metadata, not audio bytes in the log.
 
 Logs arrive **after each request completes**, not as a live stream. Debug retains the latest four requests in browser memory only; clearing logs, disabling Debug or reloading removes them. Logs are not written to chat history, Blob records or server console. Credentials are redacted before delivery, but messages and public wallet data remain visible. Long payloads are explicitly truncated (40,000 characters per event; bounded request total/event count). These are operational request/response logs, not the model's private reasoning. Network/platform failures before the application responds may have no backend trace.
 

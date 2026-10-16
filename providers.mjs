@@ -2,6 +2,8 @@ import {t as tr,language} from './locale.mjs';
 import {providerSignal} from './agent-budget.mjs';
 import {debugEvent,debugStep} from './debug.mjs';
 import { randomUUID } from 'node:crypto';
+import {login} from './ubot/auth.mjs';
+import {ProviderError,streamUbot} from './ubot/ubot.mjs';
 const legacyIntegrationGuard = 'IMPORTANT U-GUARDIAN CONTRACT: When asked for a tool plan, return ONLY the requested JSON. When asked for an explanation, use concise Thai WITHOUT NUMBERS OR CURRENCY NAMES. The UI shows verified tool numbers separately. coverage is a percentage; remaining is the shortfall to goal, not wallet balance. Respect the evidence data mode: simulated or live read-only. Never call simulated data live, or live data simulated. Only a prepared action draft needs UI confirmation; assessment and simulation do not execute actions. Never claim a real transfer.\n';
 export const defaultTemplate = JSON.stringify({mode:'professional',sessionId:'{{sessionId}}',messages:[{role:'user',content:'{{prompt}}'}],userText:'{{prompt}}'});
 export function normalizeUbotTemplate(raw=defaultTemplate){
@@ -41,33 +43,33 @@ export function parseReply(body, contentType = '') {
   try { return textFrom(JSON.parse(body)) || (contentType.includes('text/plain') ? body : ''); }
   catch { return contentType.includes('text/plain') ? body : ''; }
 }
-export async function ubot(config, prompt, timeout=60000) {
-  if (!config.ubotToken) throw new Error(tr('ยังไม่ได้ตั้ง U-bot Bearer token'));
-  let template;
-  try { template = JSON.parse(normalizeUbotTemplate(config.ubotTemplate)); } catch { throw new Error(tr('U-bot payload template ไม่ใช่ JSON')); }
-  if (!config.ubotTemplate.includes('{{prompt}}')) throw new Error(tr('Payload ต้องมี {{prompt}} ในตำแหน่งข้อความ'));
-  const payload=fill(template,prompt,randomUUID());
-  const res = await debugStep('provider','U-bot HTTP',{url:'https://u.bot/api/chat',method:'POST',payload},()=>fetch('https://u.bot/api/chat', { method: 'POST', redirect: 'error',
-    headers: { Authorization: `Bearer ${config.ubotToken}`, 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' },
-    body: JSON.stringify(payload), signal: providerSignal(timeout) }).then(async res=>({ok:res.ok,status:res.status,contentType:res.headers.get('content-type')||'',body:await res.text()})));
-  if (!res.ok) throw new Error(tr('U-bot HTTP {0}: ตรวจ token และ payload จากเว็บอีกครั้ง',res.status));
-  const text = parseReply(res.body, res.contentType);
-  if (!text.trim()) throw new Error(tr('ยังอ่าน response ของ U-bot รูปแบบนี้ไม่ได้ ต้องปรับ adapter ตาม response จริง'));
-  return text.slice(0, 12000);
+export async function ubot(config, prompt, timeout=60000, cancellation) {
+  const signal = cancellation?AbortSignal.any([providerSignal(timeout),cancellation]):providerSignal(timeout);
+  const messages = [{role:'user',content:prompt}];
+  const sessionId = randomUUID();
+  let token = await login({signal});
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let text = '';
+    try {
+      await debugStep('provider','U-bot HTTP',{url:process.env.UBOT_CHAT_URL||'https://u.bot/api/chat',method:'POST'},async()=>{
+        for await (const event of streamUbot({token,messages,sessionId,signal,url:process.env.UBOT_CHAT_URL||'https://u.bot/api/chat'})) {
+          if (event.type === 'delta') text += event.text;
+        }
+      });
+      if (!text.trim()) throw new ProviderError('empty','U-Bot returned no readable answer.');
+      return text.slice(0,12000);
+    } catch (error) {
+      if (error.code !== 'expired' || attempt) throw error;
+      token = await login({signal});
+    }
+  }
 }
-// Verify the supplied or stored credential before changing the active agent.
-// This is a credential check, not OAuth or a cross-site session import.
+
+// Verify the shared server account before enabling U-Bot for this visitor.
 export async function verifyUbotConnection(config, input={}, call=ubot) {
-  for(const key of Object.keys(input))if(!['ubotToken','ubotTemplate'].includes(key))throw new Error(tr('พารามิเตอร์เชื่อมต่อ U-bot ไม่ถูกต้อง'));
-  if(input.ubotToken!==undefined&&(typeof input.ubotToken!=='string'||input.ubotToken.length>10000||/[\r\n']/.test(input.ubotToken)))throw new Error('U-bot token ไม่ถูกต้อง');
-  const token=(input.ubotToken||'').trim().replace(/^Bearer\s+/i,'')||config.ubotToken;
-  if(!token)throw new Error(tr('ยังไม่มี U-bot token ที่บันทึกไว้ เปิดตั้งค่า token ด้วยตนเองก่อน ขณะนี้ยังไม่รองรับการเชื่อมบัญชีผ่าน OAuth'));
-  const template=input.ubotTemplate===undefined?config.ubotTemplate:input.ubotTemplate;
-  if(typeof template!=='string'||template.length>16000||!template.includes('{{prompt}}'))throw new Error(tr('U-bot template ต้องมี {{prompt}}'));
-  try{JSON.parse(template);}catch{throw new Error(tr('U-bot template ต้องเป็น JSON ที่ถูกต้อง'));}
-  const candidate={...config,ubotToken:token,ubotTemplate:normalizeUbotTemplate(template)};
-  const text=await call(candidate,tr('ตอบสั้น ๆ ว่า U-Guardian เชื่อมต่อสำเร็จ'),45000);
-  return {text,config:{...candidate,mode:'ubot',ubotStatus:'verified'}};
+  if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).length) throw new Error('U-Bot connection accepts no browser credentials.');
+  const text = await call(config,'Reply only with: Connected',45000);
+  return {text,config:{...config,mode:'ubot',ubotStatus:'verified'}};
 }
 async function eleven(config, path, options = {}) {
   if (!config.elevenKey) throw new Error(tr('ยังไม่ได้ตั้ง ElevenLabs API key'));

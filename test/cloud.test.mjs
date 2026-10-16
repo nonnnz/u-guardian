@@ -28,10 +28,10 @@ test('compressed legacy Blob reads preserve conditional writes after weak ETag n
 test('serverless app survives recreation, redacts credentials and rejects background auto calls',async()=>{
  const sessions=privateSessions(fakeBlob(),'secret'),path=sessionPath('browser');let w=await sessions.workspace(path,true);
  let app=await createApplication({cloud:true,host:'guardian.vercel.app',env:{},store:w.store,config:w.record.config,saveConfig:w.saveConfig});
- assert.equal((await request(app,'/api/integrations',{ubotToken:'private-fixture',mode:'demo'})).code,200);
+ assert.equal((await request(app,'/api/integrations',{elevenKey:'private-fixture',mode:'demo'})).code,200);
  await request(app,'/api/profile',{goal:'ค่าเทอม',target:1500,due:'2026-12-01',callEnabled:false});await app.persist();await w.saveConfig(app.config);await w.release();
  w=await sessions.workspace(path,true);app=await createApplication({cloud:true,host:'guardian.vercel.app',env:{},store:w.store,config:w.record.config,saveConfig:w.saveConfig});
- const r=await request(app,'/api/state');assert.equal(r.data.profile.goal,'ค่าเทอม');assert.equal(r.data.integration.ubotConfigured,true);assert.equal(r.data.integration.storage,'private-session');assert.ok(!JSON.stringify(r.data).includes('private-fixture'));
+ const r=await request(app,'/api/state');assert.equal(r.data.profile.goal,'ค่าเทอม');assert.equal(r.data.integration.ubotConfigured,false);assert.equal(r.data.integration.elevenConfigured,true);assert.equal(r.data.integration.storage,'private-session');assert.ok(!JSON.stringify(r.data).includes('private-fixture'));
  assert.equal((await request(app,'/api/phone/settings',{enabled:true,consent:true})).code,400);
  await request(app,'/api/disconnect',{});await w.release();assert.equal((await sessions.workspace(path,false)).record.config.ubotToken,'');
 });

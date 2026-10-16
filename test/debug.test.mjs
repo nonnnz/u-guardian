@@ -37,16 +37,18 @@ test('agent trace records invalid JSON retry, parsed plan, tool args, failure ev
  assert.ok(log.events.every((e,i)=>e.seq===i+1&&e.elapsedMs>=0));
 });
 
-test('U-bot transport records actual expanded template and raw response without bearer',async t=>{
- const original=globalThis.fetch;t.after(()=>{globalThis.fetch=original;});
- globalThis.fetch=async(_url,options)=>{assert.equal(options.headers.Authorization,'Bearer secret-token');return new Response('{"type":"answer","text":"done"}',{headers:{'content-type':'text/plain'}});};
- const log=createDebug({ubotToken:'secret-token'});
- await log.run(()=>ubot({ubotToken:'secret-token',ubotTemplate:defaultTemplate},'question'));
+test('U-Bot transport omits server credentials and access tokens from debug traces',async t=>{
+ const original=globalThis.fetch;
+ const previous=Object.fromEntries(['UBOT_SUPABASE_ANON_KEY','UBOT_EMAIL','UBOT_PASSWORD'].map(k=>[k,process.env[k]]));
+ t.after(()=>{globalThis.fetch=original;for(const [key,value] of Object.entries(previous))if(value===undefined)delete process.env[key];else process.env[key]=value;});
+ Object.assign(process.env,{UBOT_SUPABASE_ANON_KEY:'anon-fixture',UBOT_EMAIL:'demo@example.com',UBOT_PASSWORD:'private-password'});
+ globalThis.fetch=async(url,options)=>url.includes('/auth/v1/token')?Response.json({access_token:'private-access-token'}):new Response('done',{headers:{'content-type':'text/plain'}});
+ const log=createDebug({ubotPassword:'private-password'});
+ assert.equal(await log.run(()=>ubot({},'question')),'done');
  const start=log.events.find(e=>e.type==='provider.start');
- assert.equal(start.data.input.payload.mode,'professional');assert.match(start.data.input.payload.userText,/question/);
- assert.ok(!start.data.input.payload.userText.includes('{{prompt}}'));
- assert.equal(log.events.find(e=>e.type==='provider.result').data.result.status,200);
- assert.ok(!JSON.stringify(log.events).includes('secret-token'));
+ assert.equal(start.data.input.method,'POST');
+ assert.ok(!JSON.stringify(log.events).includes('private-password'));
+ assert.ok(!JSON.stringify(log.events).includes('private-access-token'));
 });
 
 async function request(app,path,body,debug=false){
