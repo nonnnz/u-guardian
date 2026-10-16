@@ -20,7 +20,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs');
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'.impeccable/review/expanded-call-mobile.png',fullPage:true});
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  await page.locator('u-guardian #answer-call').click();assert.equal(await page.locator('u-guardian #chat-dialog').evaluate(e=>e.open),true);assert.match(await page.locator('u-guardian .assistant').last().innerText(),/-12.00%/);
- await page.getByRole('button',{name:'Tell me what’s new',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('u-guardian').busy);
+ await page.locator('u-guardian #chat-options > summary').click();await page.getByRole('button',{name:'Tell me what’s new',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('u-guardian').busy);
  await send('Alert me about outgoing transfers over $20.');await page.getByRole('button',{name:'Confirm watch',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('u-guardian').busy);
  await page.keyboard.press('Escape');await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Simulate 25 USDC leaving',exact:true}).click();await page.locator('#wallet-status').filter({hasText:'Balance change simulated'}).waitFor();await page.keyboard.press('Escape');
  await page.locator('u-guardian #incoming-call').waitFor({state:'visible'});assert.match(await page.locator('u-guardian #call-preview').innerText(),/exceeds \$20/);await page.locator('u-guardian #dismiss-call').click();

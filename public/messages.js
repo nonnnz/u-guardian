@@ -1,6 +1,9 @@
 // Thai source keys preserve existing saved goal values. Only authored copy is translated;
 // user messages, provider evidence, addresses and token identities remain untouched.
 export const messages = {
+ 'กำลังค้นข้อมูลจากเครื่องมือ…':'Searching with tools…','กำลังตอบคุณ':'Answering you','คำตอบจากเซิร์ฟเวอร์ไม่สมบูรณ์ กรุณาลองอีกครั้ง':'The server response was incomplete. Please try again.','ผู้จัดเดโมตั้งค่าการเชื่อมต่อไว้แล้ว ไม่สามารถเปลี่ยนจากหน้านี้ได้':'The demo organizer manages these connections. They cannot be changed here.','ผู้จัดเดโมตั้งค่าการเชื่อมต่อไว้แล้ว คุณใช้บริการเหล่านี้ได้ทันที':'The demo organizer has configured these services. You can use them immediately.','ผู้จัดเดโมดูแล API keys ส่วนกระเป๋าและเป้าหมายบันทึกแยกตามเบราว์เซอร์':'The demo organizer manages API keys. Wallets and goals are saved separately for each browser.',
+ 'หมวดการตั้งค่า':'Settings sections','จับคู่เหรียญ':'Asset matching',
+ 'ตัวเลือกแชต':'Chat options','คำถามตัวอย่าง':'Suggested questions','วันนี้อยากรู้อะไรครับ':'What’s on your mind?','ถามเรื่องกระเป๋าหรือคริปโตได้เลย':'Let’s talk about your wallet or crypto.','ถาม Guardian ได้เลย…':'Ask Guardian anything…','กลับไปแชต':'Back to chat','ข้อมูลและแหล่งอ้างอิง':'Sources & details',
  'เงื่อนไขนี้ยังไม่รองรับ จึงไม่ได้สร้างกฎให้ รองรับจำนวนเหรียญทั้งกระเป๋า เหตุการณ์อุปทาน วันทบทวน ราคาเปลี่ยนเป็นเปอร์เซ็นต์จากตอนยืนยัน และรายการโอนเกินวงเงิน USD':'That exact condition is not supported, so no watch was created. Supported: wallet quantity changes, supply events, review dates, percentage price moves from activation, and transfers over a USD threshold.',
  'ตลาดและคำแนะนำ':'Market & advice',
  'เหรียญไหนกำลังได้รับความสนใจ และอะไรต้องระวังก่อนลงทุน':'Which coins are getting attention, and what should I consider before investing?',

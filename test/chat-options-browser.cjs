@@ -1,0 +1,41 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const assert=require('node:assert/strict');
+(async()=>{
+ const browser=await chromium.launch({headless:true,channel:'msedge'});
+ try{
+  const page=await browser.newPage({viewport:{width:1440,height:960}});
+  await page.goto(process.env.BASE_URL||'http://127.0.0.1:4186');
+  await page.waitForFunction(()=>document.querySelector('u-guardian').state&&!document.querySelector('u-guardian').busy);
+  await page.evaluate(()=>document.querySelector('u-guardian').dismissAlerts());
+  await page.locator('u-guardian #launcher').click();
+  await page.locator('u-guardian #input').fill('Watch for quantity changes across my wallet.');
+  await page.locator('u-guardian #send').click();
+  await page.waitForFunction(()=>!document.querySelector('u-guardian').busy);
+  await page.locator('u-guardian .confirm').last().click();
+  await page.waitForFunction(()=>!document.querySelector('u-guardian').busy);
+  await page.locator('u-guardian #chat-options > summary').click();
+  await page.locator('u-guardian #open-watches').click();
+  await page.route('**/api/agent/watch/remove',route=>route.fulfill({status:503,json:{error:'Watch service unavailable. Please try again.'}}));
+  await page.locator('u-guardian #watches button').first().click();
+  await page.waitForFunction(()=>!document.querySelector('u-guardian').busy);
+  assert.equal(await page.locator('u-guardian #error').isVisible(),true);
+  assert.match(await page.locator('u-guardian #error').innerText(),/Please try again/);
+  assert.equal(await page.locator('u-guardian #watch-panel').isVisible(),true);
+  await page.screenshot({path:'.impeccable/review/chat-watch-error-desktop.png',animations:'disabled'});
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:'.impeccable/review/chat-watch-error-mobile.png',animations:'disabled'});
+  await page.unroute('**/api/agent/watch/remove');
+  const beforeRetry=await page.locator('u-guardian #watches button').count();
+  await page.locator('u-guardian #watches button').first().click();
+  await page.waitForFunction(()=>!document.querySelector('u-guardian').busy);
+  assert.equal(await page.locator('u-guardian #watches button').count(),beforeRetry-1);
+  assert.equal(await page.locator('u-guardian #error').isVisible(),false);
+  await page.locator('u-guardian #back-chat').click();
+  assert.equal(await page.locator('u-guardian #input').evaluate(e=>e===e.getRootNode().activeElement),true);
+  await page.locator('u-guardian #chat-options > summary').click();
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('u-guardian #chat-options').evaluate(e=>e.open),false);
+  assert.equal(await page.locator('u-guardian #chat-dialog').evaluate(e=>e.open),true);
+  console.log('PASS chat options: watch-removal errors stay visible in watches, retry works, Back restores composer focus, Escape dismisses options before chat.');
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exit(1);});

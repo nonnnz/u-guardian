@@ -1,123 +1,207 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-15T15:47:31.8873252Z",
+  "generatedAt": "2026-10-16T03:24:54.160Z",
   "title": "Design System: U-Guardian",
   "extensions": {
     "colorMeta": {
-      "forest-ink": {
-        "displayName": "Forest Ink",
+      "orange": {
+        "displayName": "Warm Orange",
         "role": "primary",
         "tonalRamp": [
-          "oklch(15.00% 0.0388 171.89)",
-          "oklch(26.43% 0.0388 171.89)",
-          "oklch(37.86% 0.0388 171.89)",
-          "oklch(49.29% 0.0388 171.89)",
-          "oklch(60.71% 0.0388 171.89)",
-          "oklch(72.14% 0.0388 171.89)",
-          "oklch(83.57% 0.0388 171.89)",
-          "oklch(95.00% 0.0388 171.89)"
+          "oklch(15.00% 0.1517 54.76)",
+          "oklch(26.43% 0.1517 54.76)",
+          "oklch(37.86% 0.1517 54.76)",
+          "oklch(49.29% 0.1517 54.76)",
+          "oklch(60.71% 0.1517 54.76)",
+          "oklch(72.14% 0.1517 54.76)",
+          "oklch(83.57% 0.1517 54.76)",
+          "oklch(95.00% 0.1517 54.76)"
         ]
       },
-      "forest-action": {
-        "displayName": "Forest Action",
+      "orange-hover": {
+        "displayName": "Orange Hover",
         "role": "primary",
         "tonalRamp": [
-          "oklch(15.00% 0.0626 165.78)",
-          "oklch(26.43% 0.0626 165.78)",
-          "oklch(37.86% 0.0626 165.78)",
-          "oklch(49.29% 0.0626 165.78)",
-          "oklch(60.71% 0.0626 165.78)",
-          "oklch(72.14% 0.0626 165.78)",
-          "oklch(83.57% 0.0626 165.78)",
-          "oklch(95.00% 0.0626 165.78)"
+          "oklch(15.00% 0.1226 58.93)",
+          "oklch(26.43% 0.1226 58.93)",
+          "oklch(37.86% 0.1226 58.93)",
+          "oklch(49.29% 0.1226 58.93)",
+          "oklch(60.71% 0.1226 58.93)",
+          "oklch(72.14% 0.1226 58.93)",
+          "oklch(83.57% 0.1226 58.93)",
+          "oklch(95.00% 0.1226 58.93)"
         ]
       },
-      "muted-ink": {
-        "displayName": "Muted Ink",
+      "orange-text": {
+        "displayName": "Orange Link",
+        "role": "primary",
+        "tonalRamp": [
+          "oklch(15.00% 0.1089 57.46)",
+          "oklch(26.43% 0.1089 57.46)",
+          "oklch(37.86% 0.1089 57.46)",
+          "oklch(49.29% 0.1089 57.46)",
+          "oklch(60.71% 0.1089 57.46)",
+          "oklch(72.14% 0.1089 57.46)",
+          "oklch(83.57% 0.1089 57.46)",
+          "oklch(95.00% 0.1089 57.46)"
+        ]
+      },
+      "graphite": {
+        "displayName": "Graphite",
         "role": "neutral",
         "tonalRamp": [
-          "oklch(15.00% 0.0231 159.13)",
-          "oklch(26.43% 0.0231 159.13)",
-          "oklch(37.86% 0.0231 159.13)",
-          "oklch(49.29% 0.0231 159.13)",
-          "oklch(60.71% 0.0231 159.13)",
-          "oklch(72.14% 0.0231 159.13)",
-          "oklch(83.57% 0.0231 159.13)",
-          "oklch(95.00% 0.0231 159.13)"
+          "oklch(15.00% 0.0107 268.11)",
+          "oklch(26.43% 0.0107 268.11)",
+          "oklch(37.86% 0.0107 268.11)",
+          "oklch(49.29% 0.0107 268.11)",
+          "oklch(60.71% 0.0107 268.11)",
+          "oklch(72.14% 0.0107 268.11)",
+          "oklch(83.57% 0.0107 268.11)",
+          "oklch(95.00% 0.0107 268.11)"
         ]
       },
-      "shell-ivory": {
-        "displayName": "Shell Ivory",
+      "surface": {
+        "displayName": "Raised Graphite",
         "role": "neutral",
         "tonalRamp": [
-          "oklch(15.00% 0.0133 111.27)",
-          "oklch(26.43% 0.0133 111.27)",
-          "oklch(37.86% 0.0133 111.27)",
-          "oklch(49.29% 0.0133 111.27)",
-          "oklch(60.71% 0.0133 111.27)",
-          "oklch(72.14% 0.0133 111.27)",
-          "oklch(83.57% 0.0133 111.27)",
-          "oklch(95.00% 0.0133 111.27)"
+          "oklch(15.00% 0.0138 272.74)",
+          "oklch(26.43% 0.0138 272.74)",
+          "oklch(37.86% 0.0138 272.74)",
+          "oklch(49.29% 0.0138 272.74)",
+          "oklch(60.71% 0.0138 272.74)",
+          "oklch(72.14% 0.0138 272.74)",
+          "oklch(83.57% 0.0138 272.74)",
+          "oklch(95.00% 0.0138 272.74)"
         ]
       },
-      "paper": {
-        "displayName": "Paper",
+      "ivory": {
+        "displayName": "Ivory",
         "role": "neutral",
         "tonalRamp": [
-          "oklch(15.00% 0.0054 95.10)",
-          "oklch(26.43% 0.0054 95.10)",
-          "oklch(37.86% 0.0054 95.10)",
-          "oklch(49.29% 0.0054 95.10)",
-          "oklch(60.71% 0.0054 95.10)",
-          "oklch(72.14% 0.0054 95.10)",
-          "oklch(83.57% 0.0054 95.10)",
-          "oklch(95.00% 0.0054 95.10)"
+          "oklch(15.00% 0.0115 84.58)",
+          "oklch(26.43% 0.0115 84.58)",
+          "oklch(37.86% 0.0115 84.58)",
+          "oklch(49.29% 0.0115 84.58)",
+          "oklch(60.71% 0.0115 84.58)",
+          "oklch(72.14% 0.0115 84.58)",
+          "oklch(83.57% 0.0115 84.58)",
+          "oklch(95.00% 0.0115 84.58)"
         ]
       },
-      "sage-action": {
-        "displayName": "Sage Action",
-        "role": "secondary",
-        "tonalRamp": [
-          "oklch(15.00% 0.0190 119.75)",
-          "oklch(26.43% 0.0190 119.75)",
-          "oklch(37.86% 0.0190 119.75)",
-          "oklch(49.29% 0.0190 119.75)",
-          "oklch(60.71% 0.0190 119.75)",
-          "oklch(72.14% 0.0190 119.75)",
-          "oklch(83.57% 0.0190 119.75)",
-          "oklch(95.00% 0.0190 119.75)"
-        ]
-      },
-      "field": {
-        "displayName": "Field",
+      "muted": {
+        "displayName": "Muted Gray",
         "role": "neutral",
         "tonalRamp": [
-          "oklch(15.00% 0.0106 112.37)",
-          "oklch(26.43% 0.0106 112.37)",
-          "oklch(37.86% 0.0106 112.37)",
-          "oklch(49.29% 0.0106 112.37)",
-          "oklch(60.71% 0.0106 112.37)",
-          "oklch(72.14% 0.0106 112.37)",
-          "oklch(83.57% 0.0106 112.37)",
-          "oklch(95.00% 0.0106 112.37)"
+          "oklch(15.00% 0.0100 279.64)",
+          "oklch(26.43% 0.0100 279.64)",
+          "oklch(37.86% 0.0100 279.64)",
+          "oklch(49.29% 0.0100 279.64)",
+          "oklch(60.71% 0.0100 279.64)",
+          "oklch(72.14% 0.0100 279.64)",
+          "oklch(83.57% 0.0100 279.64)",
+          "oklch(95.00% 0.0100 279.64)"
+        ]
+      },
+      "action-ink": {
+        "displayName": "Action Ink",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0133 61.88)",
+          "oklch(26.43% 0.0133 61.88)",
+          "oklch(37.86% 0.0133 61.88)",
+          "oklch(49.29% 0.0133 61.88)",
+          "oklch(60.71% 0.0133 61.88)",
+          "oklch(72.14% 0.0133 61.88)",
+          "oklch(83.57% 0.0133 61.88)",
+          "oklch(95.00% 0.0133 61.88)"
         ]
       },
       "divider": {
-        "displayName": "Divider",
+        "displayName": "Graphite Divider",
         "role": "neutral",
         "tonalRamp": [
-          "oklch(15.00% 0.0140 124.56)",
-          "oklch(26.43% 0.0140 124.56)",
-          "oklch(37.86% 0.0140 124.56)",
-          "oklch(49.29% 0.0140 124.56)",
-          "oklch(60.71% 0.0140 124.56)",
-          "oklch(72.14% 0.0140 124.56)",
-          "oklch(83.57% 0.0140 124.56)",
-          "oklch(95.00% 0.0140 124.56)"
+          "oklch(15.00% 0.0126 273.02)",
+          "oklch(26.43% 0.0126 273.02)",
+          "oklch(37.86% 0.0126 273.02)",
+          "oklch(49.29% 0.0126 273.02)",
+          "oklch(60.71% 0.0126 273.02)",
+          "oklch(72.14% 0.0126 273.02)",
+          "oklch(83.57% 0.0126 273.02)",
+          "oklch(95.00% 0.0126 273.02)"
+        ]
+      },
+      "field": {
+        "displayName": "Recessed Field",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0123 270.75)",
+          "oklch(26.43% 0.0123 270.75)",
+          "oklch(37.86% 0.0123 270.75)",
+          "oklch(49.29% 0.0123 270.75)",
+          "oklch(60.71% 0.0123 270.75)",
+          "oklch(72.14% 0.0123 270.75)",
+          "oklch(83.57% 0.0123 270.75)",
+          "oklch(95.00% 0.0123 270.75)"
+        ]
+      },
+      "composer": {
+        "displayName": "Composer Surface",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0133 272.88)",
+          "oklch(26.43% 0.0133 272.88)",
+          "oklch(37.86% 0.0133 272.88)",
+          "oklch(49.29% 0.0133 272.88)",
+          "oklch(60.71% 0.0133 272.88)",
+          "oklch(72.14% 0.0133 272.88)",
+          "oklch(83.57% 0.0133 272.88)",
+          "oklch(95.00% 0.0133 272.88)"
+        ]
+      },
+      "warm-inset": {
+        "displayName": "Warm Inset",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0196 56.78)",
+          "oklch(26.43% 0.0196 56.78)",
+          "oklch(37.86% 0.0196 56.78)",
+          "oklch(49.29% 0.0196 56.78)",
+          "oklch(60.71% 0.0196 56.78)",
+          "oklch(72.14% 0.0196 56.78)",
+          "oklch(83.57% 0.0196 56.78)",
+          "oklch(95.00% 0.0196 56.78)"
+        ]
+      },
+      "focus": {
+        "displayName": "Orange Focus",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.1235 56.61)",
+          "oklch(26.43% 0.1235 56.61)",
+          "oklch(37.86% 0.1235 56.61)",
+          "oklch(49.29% 0.1235 56.61)",
+          "oklch(60.71% 0.1235 56.61)",
+          "oklch(72.14% 0.1235 56.61)",
+          "oklch(83.57% 0.1235 56.61)",
+          "oklch(95.00% 0.1235 56.61)"
+        ]
+      },
+      "error": {
+        "displayName": "Peach Error",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15.00% 0.0950 37.54)",
+          "oklch(26.43% 0.0950 37.54)",
+          "oklch(37.86% 0.0950 37.54)",
+          "oklch(49.29% 0.0950 37.54)",
+          "oklch(60.71% 0.0950 37.54)",
+          "oklch(72.14% 0.0950 37.54)",
+          "oklch(83.57% 0.0950 37.54)",
+          "oklch(95.00% 0.0950 37.54)"
         ]
       },
       "leaf": {
-        "displayName": "Leaf",
+        "displayName": "Sage Leaf",
         "role": "secondary",
         "tonalRamp": [
           "oklch(15.00% 0.0718 121.48)",
@@ -131,8 +215,8 @@
         ]
       },
       "visor": {
-        "displayName": "Visor",
-        "role": "neutral",
+        "displayName": "Forest Visor",
+        "role": "secondary",
         "tonalRamp": [
           "oklch(15.00% 0.0478 168.23)",
           "oklch(26.43% 0.0478 168.23)",
@@ -146,7 +230,7 @@
       },
       "face-light": {
         "displayName": "Face Light",
-        "role": "neutral",
+        "role": "secondary",
         "tonalRamp": [
           "oklch(15.00% 0.0236 104.24)",
           "oklch(26.43% 0.0236 104.24)",
@@ -157,88 +241,111 @@
           "oklch(83.57% 0.0236 104.24)",
           "oklch(95.00% 0.0236 104.24)"
         ]
-      },
-      "focus": {
-        "displayName": "Focus",
-        "role": "neutral",
-        "tonalRamp": [
-          "oklch(15.00% 0.1016 45.67)",
-          "oklch(26.43% 0.1016 45.67)",
-          "oklch(37.86% 0.1016 45.67)",
-          "oklch(49.29% 0.1016 45.67)",
-          "oklch(60.71% 0.1016 45.67)",
-          "oklch(72.14% 0.1016 45.67)",
-          "oklch(83.57% 0.1016 45.67)",
-          "oklch(95.00% 0.1016 45.67)"
-        ]
-      },
-      "shell-divider": {
-        "displayName": "Shell Divider",
-        "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0.020 120)",
-          "oklch(26.43% 0.020 120)",
-          "oklch(37.86% 0.020 120)",
-          "oklch(49.29% 0.020 120)",
-          "oklch(60.71% 0.020 120)",
-          "oklch(72.14% 0.020 120)",
-          "oklch(83.57% 0.020 120)",
-          "oklch(95% 0.020 120)"
-        ]
       }
     },
     "typographyMeta": {
+      "display": {
+        "displayName": "Wallet title",
+        "purpose": "Main wallet heading, responsive with Thai tracking override."
+      },
       "wordmark": {
-        "displayName": "Serif wordmark",
-        "purpose": "Compact Guardian identity."
+        "displayName": "Shield wordmark",
+        "purpose": "Original U-Guardian brand in the page header."
       },
       "title": {
-        "displayName": "Thai surface title",
-        "purpose": "Wallet and Settings headings; wallet title reduces on mobile."
+        "displayName": "Dialog title",
+        "purpose": "Settings title."
+      },
+      "body": {
+        "displayName": "Interface body",
+        "purpose": "Shared Manrope interface with Thai system fallback."
+      },
+      "quantity": {
+        "displayName": "Exact quantity",
+        "purpose": "Right-aligned asset amounts with tabular numerals."
+      },
+      "label": {
+        "displayName": "Supporting label",
+        "purpose": "Secondary controls and compact metadata."
       }
     },
     "shadows": [
       {
-        "name": "mascot-body",
-        "value": "inset -7px -8px 0 #b8cf95,0 14px 23px -14px #49634950",
-        "purpose": "Character shading and soft contact shadow."
+        "name": "wallet",
+        "value": "0 24px 64px #00000026",
+        "purpose": "Ambient wallet elevation."
       },
       {
-        "name": "modal",
-        "value": "0 24px 70px #17362933",
-        "purpose": "Chat and Settings dialogs above a #203d3466 backdrop."
+        "name": "dialog",
+        "value": "0 32px 100px #0008",
+        "purpose": "Chat and Settings modal elevation."
+      },
+      {
+        "name": "options",
+        "value": "0 18px 48px #0007",
+        "purpose": "Secondary chat controls popover."
+      },
+      {
+        "name": "call",
+        "value": "0 16px 50px #0008",
+        "purpose": "Simulated alert card."
+      },
+      {
+        "name": "mascot",
+        "value": "inset -7px -8px 0 #b8cf95, 0 14px 23px -14px #49634950",
+        "purpose": "Retained sage body shading."
       }
     ],
     "motion": [
       {
-        "name": "button-transition",
-        "value": "background .18s,color .18s",
-        "purpose": "Interaction feedback."
+        "name": "ease",
+        "value": "cubic-bezier(.2,.8,.2,1)",
+        "purpose": "Shared entrance and spatial easing."
       },
       {
-        "name": "blink",
-        "value": "7s infinite",
-        "purpose": "Idle robot eyes."
+        "name": "wallet-entrance",
+        "value": "650ms",
+        "purpose": "Opacity and 14px upward arrival."
       },
       {
-        "name": "thinking",
-        "value": "1s infinite alternate",
-        "purpose": "Lateral eye motion."
+        "name": "row-entrance",
+        "value": "450ms; 55ms stagger capped at row index 5",
+        "purpose": "Holding rows enter on render."
       },
       {
-        "name": "speaking",
-        "value": ".25s infinite alternate",
-        "purpose": "Mouth motion."
+        "name": "settings-entrance",
+        "value": "360ms",
+        "purpose": "20px vertical entry and scale .97 to 1."
+      },
+      {
+        "name": "chat-call-entrance",
+        "value": "400ms",
+        "purpose": "22px vertical entry and scale .96 to 1."
+      },
+      {
+        "name": "message-entrance",
+        "value": "300ms",
+        "purpose": "8px message entry."
+      },
+      {
+        "name": "companion-float",
+        "value": "5s ease-in-out infinite",
+        "purpose": "Up to 5px vertical movement."
+      },
+      {
+        "name": "hover-wave",
+        "value": "750ms ease-in-out; 2 iterations",
+        "purpose": "Right-hand greeting on launcher hover."
+      },
+      {
+        "name": "pointer-arcs",
+        "value": "600ms; x ±5px, y ±4px",
+        "purpose": "Fine pointer decoration with no financial-value tilt."
       },
       {
         "name": "reduced-motion",
-        "value": "animation:none!important;transition:none!important",
-        "purpose": "Widget reduced-motion preference."
-      },
-      {
-        "name": "launcher-hover",
-        "value": "transform .25s",
-        "purpose": "Desktop mascot lifts 4px and rotates -4deg; small screens retain its resting scale."
+        "value": "animation: none; transition: none; scroll-behavior: auto",
+        "purpose": "Shell and widget honor prefers-reduced-motion; pointer drift is preference-gated."
       }
     ],
     "breakpoints": [
@@ -247,108 +354,120 @@
         "value": "620px"
       },
       {
-        "name": "widget-compact",
+        "name": "chat-mobile",
         "value": "520px"
+      },
+      {
+        "name": "wide-layout",
+        "value": "1600px"
       }
     ]
   },
   "components": [
     {
-      "name": "Voice button",
+      "name": "Save wallet",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Forest voice action with visible hover, focus and disabled states.",
-      "html": "<button class=\"ds-control ds-button\">กดเพื่อพูด</button>",
-      "css": ".ds-button{font-family:\"Leelawadee UI\",Tahoma,sans-serif;background:var(--guardian-accent,#285946);color:#fffefa;border:0;border-radius:9px;padding:11px 16px;cursor:pointer;transition:background .18s,color .18s}.ds-button:hover{filter:brightness(.96)}.ds-control:focus-visible{outline:3px solid #9a5635;outline-offset:4px}.ds-control:disabled{opacity:.55;cursor:wait}"
+      "description": "Primary save, confirmation and connection action.",
+      "html": "<button class=\"ds-primary\" type=\"button\">Save wallet</button>",
+      "css": ".ds-primary{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;background:var(--accent,#ff994d);color:#211b16;border:1px solid var(--accent,#ff994d);border-radius:10px;padding:11px 16px;min-height:44px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s,transform .2s}.ds-primary:focus-visible{outline:2px solid #ffad70;outline-offset:4px}.ds-primary:active{transform:translateY(2px)}.ds-primary:disabled{opacity:.5;cursor:wait}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}}.ds-primary:hover{background:#ffb070}"
     },
     {
-      "name": "Report button",
-      "kind": "button",
-      "refersTo": "button-report",
-      "description": "Quiet report action beside the compact mascot inside chat.",
-      "html": "<button class=\"ds-control ds-button\">เล่าให้ฟังว่ามีอะไรใหม่</button>",
-      "css": ".ds-button{font-family:\"Leelawadee UI\",Tahoma,sans-serif;background:transparent;color:#28513e;border:0;border-radius:9px;padding:4px 0;min-height:36px;font-size:13px;cursor:pointer;transition:background .18s,color .18s}.ds-button:hover{filter:brightness(.96)}.ds-control:focus-visible{outline:3px solid #9a5635;outline-offset:4px}.ds-control:disabled{opacity:.55;cursor:wait}"
-    },
-    {
-      "name": "Outline button",
+      "name": "Refresh wallet",
       "kind": "button",
       "refersTo": "button-outline",
-      "description": "Shell refresh, Settings and secondary dialog controls.",
-      "html": "<button class=\"ds-control ds-button\">รีเฟรชกระเป๋า</button>",
-      "css": ".ds-button{font-family:\"Leelawadee UI\",Tahoma,sans-serif;background:transparent;color:#28513e;border:1px solid #bac6af;border-radius:8px;padding:10px 14px;min-height:44px;font-size:14px;cursor:pointer}.ds-button:hover{background:#e4ead7;filter:brightness(.96)}.ds-control:focus-visible{outline:3px solid #9a5635;outline-offset:4px}.ds-control:disabled{opacity:.55;cursor:wait}"
+      "description": "Secondary shell action.",
+      "html": "<button class=\"ds-outline\" type=\"button\">Refresh wallet</button>",
+      "css": ".ds-outline{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;background:transparent;color:#f5f1e9;border:1px solid #535058;border-radius:10px;padding:11px 16px;min-height:44px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s,transform .2s}.ds-outline:focus-visible{outline:2px solid #ffad70;outline-offset:4px}.ds-outline:active{transform:translateY(2px)}.ds-outline:disabled{opacity:.5;cursor:wait}@media(prefers-reduced-motion:reduce){.ds-outline{transition:none}}.ds-outline:hover{background:#303139;border-color:#8c7770}"
     },
     {
-      "name": "Composer",
-      "kind": "input",
-      "refersTo": "composer",
-      "description": "Labeled text alternative to voice.",
-      "html": "<label class=\"ds-label\" for=\"ds-question\">ถาม Guardian</label><div class=\"ds-composer\"><textarea class=\"ds-control ds-input\" id=\"ds-question\" rows=\"1\" placeholder=\"ถาม Guardian\"></textarea><button class=\"ds-control ds-send\" aria-label=\"ส่งข้อความ\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m5 12 7-7 7 7M12 5v15\"/></svg></button></div>",
-      "css": ".ds-label{font-family:\"Leelawadee UI\",Tahoma,sans-serif;font-size:12px;color:#59685f}.ds-composer{display:flex;align-items:center;gap:10px;background:#f3f4ec;border-radius:12px;padding:9px 10px 9px 16px}.ds-input{font-family:\"Leelawadee UI\",Tahoma,sans-serif;resize:vertical;min-height:28px;max-height:120px;flex:1;min-width:0;border:0;background:transparent;color:#203d34;font-size:16px}.ds-send{background:var(--guardian-accent,#285946);color:#fffefa;border:0;border-radius:8px;width:37px;height:37px;cursor:pointer}.ds-send svg{width:21px;height:21px}.ds-send:hover{filter:brightness(.96)}.ds-control:focus-visible{outline:3px solid #9a5635;outline-offset:4px}.ds-control:disabled{opacity:.55;cursor:wait}"
-    },
-    {
-      "name": "Data mode tag",
-      "kind": "chip",
-      "description": "Explicit demo or live mode beside wallet heading.",
-      "html": "<span class=\"ds-tag\">DEMO</span>",
-      "css": ".ds-tag{font-family:\"Leelawadee UI\",Tahoma,sans-serif;display:inline-block;font-size:11px;color:#203d34;border:1px solid #b7c6a9;border-radius:5px;padding:3px 7px}"
-    },
-    {
-      "name": "Chat content panel",
-      "kind": "card",
-      "refersTo": "companion-panel",
-      "description": "Paper content surface inside the elevated native chat dialog.",
-      "html": "<section class=\"ds-panel\"><span class=\"ds-wordmark\">Guardian</span><p class=\"ds-copy\">พร้อมช่วยคุณ</p></section>",
-      "css": ".ds-panel{font-family:\"Leelawadee UI\",Tahoma,sans-serif;background:var(--guardian-surface,#fffefa);color:var(--guardian-ink,#203d34);border-radius:16px;padding:22px 26px}.ds-wordmark{font:600 19px/1.4 Georgia,serif;letter-spacing:-.02em}.ds-copy{font-size:13px;color:#59685f;line-height:1.65}"
-    },
-    {
-      "name": "Wallet card",
-      "kind": "card",
-      "refersTo": "wallet-card",
-      "description": "Flat paper card with exact quantities, tabular numerals and divider-separated holdings.",
-      "html": "<section class=\"ds-wallet\"><h2>กระเป๋าของคุณ</h2><div class=\"ds-asset\"><span>AVAX</span><span class=\"ds-amount\">12.5</span></div><p>ยอดนี้เป็นข้อมูลตัวอย่าง</p></section>",
-      "css": ".ds-wallet{font-family:\"Leelawadee UI\",Tahoma,sans-serif;background:#fffefa;color:#203d34;border:1px solid #dce1d1;border-radius:16px;padding:36px}.ds-wallet h2{font-size:24px;font-weight:500;margin:0 0 20px}.ds-asset{display:flex;justify-content:space-between;gap:24px;padding:20px 0;border-bottom:1px solid #dce1d1;font-size:16px}.ds-amount{font-variant-numeric:tabular-nums;font-size:18px}.ds-wallet p{font-size:13px;color:#59685f;line-height:1.7}"
+      "name": "View details",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "Quiet underlined action.",
+      "html": "<button class=\"ds-text\" type=\"button\">View details</button>",
+      "css": ".ds-text{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;background:transparent;color:#ffb781;border:0;padding:10px 0;min-height:44px;font-size:13px;text-decoration:underline;text-underline-offset:4px;cursor:pointer;transition:background .2s,transform .2s}.ds-text:focus-visible{outline:2px solid #ffad70;outline-offset:4px}.ds-text:active{transform:translateY(2px)}.ds-text:disabled{opacity:.5;cursor:wait}@media(prefers-reduced-motion:reduce){.ds-text{transition:none}}.ds-text:hover{filter:brightness(1.1)}"
     },
     {
       "name": "Settings field",
       "kind": "input",
-      "description": "Persistent visible label, generous input height and clear keyboard focus.",
-      "html": "<label class=\"ds-label\" for=\"ds-address\">Public wallet address<input class=\"ds-field\" id=\"ds-address\" placeholder=\"0x…\" autocomplete=\"off\" spellcheck=\"false\"></label>",
-      "css": ".ds-label{display:block;font-family:\"Leelawadee UI\",Tahoma,sans-serif;font-size:14px;line-height:1.7;color:#203d34}.ds-field{display:block;width:100%;min-height:44px;background:#fffefa;color:#203d34;border:1px solid #b7c4ad;border-radius:7px;padding:10px;margin-top:6px;font:16px \"Leelawadee UI\",Tahoma,sans-serif;caret-color:#285946}.ds-field::placeholder{color:#687064}.ds-field:focus-visible{outline:3px solid #9a5635;outline-offset:4px}"
+      "refersTo": "input",
+      "description": "Labeled dark field with a visible focus outline.",
+      "html": "<label class=\"ds-field-label\">Public wallet address<input class=\"ds-field\" placeholder=\"0x…\" autocomplete=\"off\"></label>",
+      "css": ".ds-field-label{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;display:block;color:#f5f1e9;font-size:14px;line-height:1.7}.ds-field{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;display:block;max-width:100%;min-height:46px;background:#15171d;color:#f5f1e9;border:1px solid #51515b;border-radius:9px;padding:11px 13px;margin-top:7px;font-size:16px}.ds-field::placeholder{color:#9697a2}.ds-field:hover{border-color:#8a7466}.ds-field:focus-visible{outline:2px solid #ffad70;outline-offset:4px}"
+    },
+    {
+      "name": "Settings shortcuts",
+      "kind": "nav",
+      "refersTo": "settings-navigation",
+      "description": "Sticky section navigation scrolls within the same Settings dialog.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Settings sections\"><button aria-current=\"true\">Wallet</button><button>Connections</button><button>Your goals</button></nav>",
+      "css": ".ds-nav{display:flex;gap:8px;overflow-x:auto}.ds-nav button{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;white-space:nowrap;min-height:44px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted,#afb0b7);padding:8px 12px;font-size:12px;cursor:pointer}.ds-nav button:hover{background:#2b2c33;color:#fff}.ds-nav button[aria-current=true]{background:#3b2c23;border-color:#775035;color:#ffb781}.ds-nav button:focus-visible{outline:2px solid #ffad70;outline-offset:4px}"
+    },
+    {
+      "name": "Demo status",
+      "kind": "chip",
+      "description": "Written data mode; a status label, not a filter or safety rating.",
+      "html": "<span class=\"ds-mode\">DEMO</span>",
+      "css": ".ds-mode{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;display:inline-block;font-size:10px;letter-spacing:1.3px;font-weight:750;border:1px solid #795033;color:#ffb781;background:#382b24;border-radius:6px;padding:5px 8px}"
+    },
+    {
+      "name": "Wallet surface",
+      "kind": "card",
+      "refersTo": "wallet-card",
+      "description": "Shared surface with a small orange top accent and exact quantities.",
+      "html": "<section class=\"ds-wallet\" aria-label=\"Wallet\"><h2>Your wallet</h2><div class=\"ds-holding\"><strong>AVAX</strong><span>12.5</span></div></section>",
+      "css": ".ds-wallet{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;position:relative;background:var(--surface,#1c1e25);color:#f5f1e9;border:1px solid #3b3b42;border-radius:24px;padding:40px 44px 28px;box-shadow:0 24px 64px #00000026}.ds-wallet:before{content:'';position:absolute;top:-1px;left:44px;width:52px;height:3px;background:var(--accent,#ff994d);border-radius:0 0 3px 3px}.ds-wallet h2{font-size:clamp(28px,3.5vw,40px);font-weight:550;line-height:1.25;letter-spacing:-1.5px;margin:0 0 30px}.ds-holding{display:flex;justify-content:space-between;gap:24px;padding:22px 0;border-block:1px solid var(--line,#34363d)}.ds-holding strong{font-size:16px;font-weight:650}.ds-holding span{font-size:25px;font-weight:550;letter-spacing:-.7px;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Chat composer",
+      "kind": "input",
+      "refersTo": "composer",
+      "description": "Fixed bottom composer with icon microphone and circular orange send action.",
+      "html": "<div class=\"ds-composer\"><textarea class=\"ds-message-input\" aria-label=\"Ask Guardian\" placeholder=\"Ask Guardian anything…\" rows=\"2\"></textarea><div class=\"ds-tools\"><button class=\"ds-mic\" aria-label=\"Tap to speak\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"><rect x=\"9\" y=\"3\" width=\"6\" height=\"12\" rx=\"3\"/><path d=\"M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8\"/></svg></button><button class=\"ds-send\" aria-label=\"Send message\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"><path d=\"m5 12 7-7 7 7M12 5v15\"/></svg></button></div></div>",
+      "css": ".ds-composer{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;display:flex;flex-direction:column;gap:8px;padding:16px;background:#25272e;border:1px solid #575058;border-radius:18px}.ds-composer:focus-within{border-color:var(--accent,#ff994d)}.ds-message-input{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;resize:none;width:100%;min-height:48px;max-height:112px;border:0;outline:none;background:transparent;color:#f5f1e9;font-size:15px;line-height:1.6;padding:0}.ds-message-input::placeholder{color:#a1a1ac}.ds-tools{display:flex;align-items:center;justify-content:flex-end;gap:8px}.ds-tools button{display:grid;place-items:center;cursor:pointer;border:0}.ds-tools button svg{width:21px;height:21px}.ds-mic{margin-right:auto;min-width:44px;min-height:44px;color:#dcd5cc;background:transparent;border-radius:10px}.ds-mic:hover{background:#3a3430}.ds-send{width:42px;height:42px;border-radius:50%;background:var(--accent,#ff994d);color:#211b16}.ds-send:hover{filter:brightness(1.1)}.ds-tools button:focus-visible{outline:2px solid #ffad70;outline-offset:4px}.ds-tools button:active{transform:translateY(1px)}"
+    },
+    {
+      "name": "Watch proposal",
+      "kind": "card",
+      "refersTo": "watch-proposal",
+      "description": "Visible confirmation remains in the answer, outside collapsed sources.",
+      "html": "<section class=\"ds-proposal\"><strong>Review before saving</strong><p>Watch for quantity changes across my wallet.</p><small>Checks run while this page is visible.</small><button class=\"ds-confirm\">Confirm watch</button></section>",
+      "css": ".ds-proposal{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;background:#30261f;color:#f5f1e9;border:1px solid #785134;padding:18px;border-radius:12px}.ds-proposal small{display:block;color:#c5b3a4}.ds-confirm{font-family:Manrope,\"Leelawadee UI\",Tahoma,sans-serif;display:block;margin-top:12px;border:0;background:var(--accent,#ff994d);color:#211b16;padding:10px 16px;min-height:44px;border-radius:9px;font-weight:650;cursor:pointer}.ds-confirm:hover{filter:brightness(1.1)}.ds-confirm:focus-visible{outline:2px solid #ffad70;outline-offset:4px}.ds-confirm:active{transform:translateY(1px)}"
     }
   ],
   "narrative": {
     "northStar": "The companion beside your wallet",
-    "overview": "An approachable geometric robot sits within a calm daylight workspace. Warm ivory, forest ink and sage preserve the established identity; quiet space gives the mascot a recognizable presence while Thai explanations and evidence remain easy to read. This is descriptive language for the shipped world, not a separately approved concept.\n\nThe wallet is a quiet paper surface, while chat and settings use focused dialogs. The mascot lends personality to the entry point and pairs its expression with written operational status inside chat. Reusable visual decisions are recorded here; the single-page composition and interaction contract live in the surface brief.",
+    "overview": "A graphite workspace uses warm orange actions and ivory text to make wallet information clear and approachable. The user-authorized U-topia palette reference informs the color direction; an original shield wordmark, single-wallet composition and retained sage geometric robot give U-Guardian its own expression. This documents the implemented local code-led redesign, with no approved image comp or generated imagery.\n\nDark tonal layers and generous space frame exact quantities and plain-language explanations. The companion brings personality through a gentle float and written state-linked expressions. Dialogs focus chat and configuration on the same page, with restrained entrances and reduced-motion support.",
     "keyCharacteristics": [
-      "Warm ivory surfaces with forest controls and sage emphasis.",
-      "Thai-first interface text with restrained serif wordmarks.",
-      "A geometric robot whose expression accompanies written status.",
-      "Quiet dividers, expandable evidence and explicit review actions."
+      "Graphite surfaces, orange actions with dark text, and ivory reading text.",
+      "Self-hosted Manrope with Thai system fallbacks.",
+      "An original shield wordmark and retained sage CSS companion.",
+      "Exact quantities, explicit states, expandable evidence and confirmation actions.",
+      "Bounded dialogs with sticky controls and keyboard focus return."
     ],
     "rules": [
       {
         "name": "The Written State Rule",
-        "body": "Operational state is expressed in text alongside mascot changes; color and expression do not carry the message alone.",
+        "body": "Pair operational colors and mascot expressions with readable state text.",
         "section": "colors"
-      },
-      {
-        "name": "The Quiet Surface Rule",
-        "body": "Keep the wallet flat; use modal elevation for focused work and local shading for the character.",
-        "section": "elevation"
       }
     ],
     "dos": [
-      "Do preserve warm ivory, forest and sage across wallet, chat and settings.",
+      "Do preserve graphite surfaces, orange actions with dark text, and ivory reading text across all views.",
+      "Do keep the original shield and the retained sage mascot distinct from the palette reference.",
       "Do pair mascot state with readable operational status.",
-      "Do keep voice user initiated and preserve the text alternative.",
-      "Do keep evidence and monitoring limits near the relevant action.",
-      "Do keep close controls available while dialog content scrolls."
+      "Do preserve exact wallet quantities and decorative-only asset monograms.",
+      "Do keep evidence, monitoring limits and confirmation near the relevant action.",
+      "Do retain sticky close controls, keyboard focus return and reduced-motion support.",
+      "Do preserve mobile heading clearance for both English and Thai."
     ],
     "donts": [
       "Don't use the mascot's expression as a claim that a wallet is safe.",
       "Don't turn demo data, missing evidence or unavailable monitoring into certainty.",
-      "Don't promote compact diagnostic typography into primary reading text.",
-      "Don't reuse dormant welcome, launcher or multi-column styles as current design guidance."
+      "Don't tilt financial values with pointer movement or make motion required to understand a state.",
+      "Don't replace the same-dialog Settings shortcuts with separate screens without a new product decision.",
+      "Don't promote diagnostic typography into primary reading text or crowd the default chat with secondary controls.\r"
     ]
   }
 }

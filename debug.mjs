@@ -1,5 +1,6 @@
 import {AsyncLocalStorage} from 'node:async_hooks';
 import {randomUUID} from 'node:crypto';
+import {reportProgress} from './progress.mjs';
 
 // Request-scoped, opt-in diagnostics. Never persisted or printed to server logs.
 const scope=new AsyncLocalStorage();
@@ -32,9 +33,8 @@ export function createDebug(config={}){
  };
  return trace;
 }
-export function debugEvent(type,label,data){scope.getStore()?.add(type,label,data);}
+export function debugEvent(type,label,data){reportProgress(type,label);scope.getStore()?.add(type,label,data);}
 export async function debugStep(kind,label,input,fn){
- const trace=scope.getStore();if(!trace)return fn();
  const spanId=randomUUID(),started=Date.now();debugEvent(kind+'.start',label,{spanId,input});
  try{const result=await fn();debugEvent(kind+'.result',label,{spanId,durationMs:Date.now()-started,result});return result;}
  catch(error){debugEvent(kind+'.error',label,{spanId,durationMs:Date.now()-started,error:error.message});throw error;}

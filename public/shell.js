@@ -20,7 +20,7 @@ function render(s){
  $('network').textContent=live?(wallet?.network||tr('ยังไม่เชื่อมกระเป๋า')):tr('กระเป๋าตัวอย่าง · ข้อมูลจำลอง');
  $('address').textContent=live?s.live.settings.address:tr('ไม่มีการใช้เงินจริง');
  $('assets').replaceChildren();const assets=live?(wallet?.assets||[]):s.assets;
- for(const a of assets){const row=node('div','');row.className='asset';const name=node('div','');name.append(node('strong',a.symbol),node('small',a.name||''));const amount=node('span',String(a.units));amount.className='amount';row.append(name,amount);$('assets').append(row);}
+ for(const [index,a] of assets.entries()){const row=node('div','');row.className='asset';row.dataset.symbol=a.symbol;row.style.setProperty('--row',String(Math.min(index,5)));const identity=node('div','');identity.className='asset-identity';const mark=node('span',String(a.symbol||'?').slice(0,1));mark.className='asset-icon';mark.setAttribute('aria-hidden','true');const name=node('div','');name.append(node('strong',a.symbol),node('small',a.name||''));identity.append(mark,name);const amount=node('span',String(a.units));amount.className='amount';row.append(identity,amount);$('assets').append(row);}
  if(!assets.length)$('assets').append(node('p',wallet?tr('ยังไม่พบสินทรัพย์ในข้อมูลที่อ่านได้'):tr('เปิดตั้งค่าแล้วเพิ่ม public wallet เพื่อเริ่มอ่านข้อมูลจริง')));
  $('freshness').textContent=live?(wallet?tr('อ่านเมื่อ ')+new Date(wallet.fetchedAt).toLocaleString(locale)+(s.live.stale?tr(' · ข้อมูลเก่า กรุณารีเฟรช'):''):tr('ยังไม่มีข้อมูล')):tr('ยอดนี้เป็นข้อมูลตัวอย่าง');
  $('wallet-error').textContent=live?[s.live.error,...(wallet?.warnings||[])].filter(Boolean).join(' · '):'';
@@ -34,11 +34,11 @@ function fillSettings(){
  $('agent-mode').value=c.mode;
  for(const [id,key] of [['voice-id','voiceId'],['tts-model','ttsModel'],['stt-model','sttModel']])$(id).value=c[key]||'';
  renderProviders(c);
- $('storage-note').textContent=c.deployment==='vercel'?tr('บันทึกสำหรับเซสชันของเบราว์เซอร์นี้ เก็บ API keys ฝั่งเซิร์ฟเวอร์'):tr('บันทึก API keys ลง .env ของเครื่องนี้');
+ $('storage-note').textContent=c.managedProviders?tr('ผู้จัดเดโมดูแล API keys ส่วนกระเป๋าและเป้าหมายบันทึกแยกตามเบราว์เซอร์'):c.deployment==='vercel'?tr('บันทึกสำหรับเซสชันของเบราว์เซอร์นี้ เก็บ API keys ฝั่งเซิร์ฟเวอร์'):tr('บันทึก API keys ลง .env ของเครื่องนี้');
  for(const [k,v]of Object.entries(state.guardian?.goal||{})){const field=$('goal').elements.namedItem(k);if(field&&[...field.options].some(o=>o.value===v))field.value=v;}
  fillMapping();
 }
-function renderProviders(c){for(const name of ['ubot','eleven','avalanche','tokenomist'])$(name+'-status').textContent=!c[name+'Configured']?tr('ยังไม่ตั้งค่า'):c[name+'Status']==='verified'?tr('ทดสอบแล้ว'):name==='ubot'?'Available':tr('บันทึก key แล้ว');}
+function renderProviders(c){for(const name of ['ubot','eleven','avalanche','tokenomist']){const value=!c[name+'Configured']?tr('ยังไม่ตั้งค่า'):c[name+'Status']==='verified'?tr('ทดสอบแล้ว'):tr('บันทึก key แล้ว');$(name+'-status').textContent=value;$('managed-'+name).textContent=value;}const managed=!!c.managedProviders;$('managed-connections').hidden=!managed;$('integration-form').hidden=managed;$('clear-connections').hidden=managed;$('connection-help').hidden=managed;}
 function fillMapping(){
  const assets=state.live.snapshot?.chainId==='43114'?state.live.snapshot.assets.filter(a=>a.address!=='native'):[];
  const selected=$('mapping-asset').value;$('mapping-asset').replaceChildren(new Option(tr('เลือกเหรียญในกระเป๋า'),''));
@@ -67,12 +67,24 @@ widget.addEventListener('guardian:error',e=>{if(!widget.$('chat-dialog').open)st
 $('open-settings').onclick=async()=>{if(settingsBusy||widget.settingsBusy||widget.busy){status('home-status',tr('Guardian กำลังทำงาน รอสักครู่ก่อนเปลี่ยนการตั้งค่า'));return;}widget.stopVoice();if(!state){try{await reload();}catch(e){status('home-status',e.message,true);return;}}fillSettings();$('settings').showModal();};
 $('close-settings').onclick=()=>$('settings').close();
 $('settings').addEventListener('close',()=>{clearCredentialInputs();$('open-settings').focus();});
+// Section shortcuts remain ordinary navigation; all settings stay in one form surface.
+const sectionLinks=[...document.querySelectorAll('[data-section]')];
+for(const button of sectionLinks)button.onclick=()=>{const target=$(button.dataset.section);if(target.tagName==='DETAILS')target.open=true;target.scrollIntoView({block:'start'});};
+let scrollFrame=0;
+$('settings').addEventListener('scroll',()=>{if(scrollFrame)return;scrollFrame=requestAnimationFrame(()=>{scrollFrame=0;const top=$('settings').getBoundingClientRect().top+170;let active=sectionLinks[0];for(const button of sectionLinks)if($(button.dataset.section).getBoundingClientRect().top<=top)active=button;for(const button of sectionLinks)button.setAttribute('aria-current',String(button===active));});},{passive:true});
+// A small spatial response around the companion, with no tilt applied to financial data.
+const motionAllowed=matchMedia('(prefers-reduced-motion: no-preference) and (pointer: fine)');
+const layout=document.querySelector('.layout');let pointerFrame=0;
+layout.addEventListener('pointermove',event=>{if(!motionAllowed.matches||pointerFrame)return;const {clientX,clientY}=event;pointerFrame=requestAnimationFrame(()=>{pointerFrame=0;const rect=layout.getBoundingClientRect();layout.style.setProperty('--drift-x',((clientX-rect.left)/rect.width-.5)*10+'px');layout.style.setProperty('--drift-y',((clientY-rect.top)/rect.height-.5)*8+'px');});},{passive:true});
+layout.addEventListener('pointerleave',()=>{cancelAnimationFrame(pointerFrame);pointerFrame=0;layout.style.setProperty('--drift-x','0px');layout.style.setProperty('--drift-y','0px');});
 $('data-mode').onchange=toggleLive;
 $('wallet-form').onsubmit=e=>{e.preventDefault();const mode=$('data-mode').value,payload={...state.live.settings,reserveContract:'',target:'0.1',monitor:false,address:$('wallet-address').value.trim(),chainId:$('wallet-chain').value,horizonDays:Number($('horizon-days').value)};
  operation('wallet-status',async()=>{widget.acceptState(await widget.request(mode==='live'?'wallet/connect':'data-mode',mode==='live'?payload:{mode}));fillMapping();status('wallet-status',mode==='live'?tr('อ่านกระเป๋าจริงแล้ว กลับไปคุยกับ Guardian ได้เลย'):tr('ใช้กระเป๋าตัวอย่างแล้ว'));});};
 $('integration-form').onsubmit=e=>{e.preventDefault();const payload=configPayload();operation('integration-status',async()=>{await saveConfig(payload);status('integration-status',tr('บันทึกการเชื่อมต่อแล้ว'));});};
-$('connect-ubot').onclick=()=>operation('ubot-result',async()=>{widget.setPhase('connecting');try{await widget.request('ubot/connect',{});widget.clearConversation();await reload();$('agent-mode').value=state.integration.mode;renderProviders(state.integration);status('ubot-result','Connected to the shared U-Bot demo account.');widget.setPhase('idle');}catch(e){widget.setPhase('error');throw e;}});
-$('disconnect-ubot').onclick=()=>operation('ubot-result',async()=>{widget.cancelChat(false);await widget.request('ubot/disconnect',{});widget.clearConversation();await reload();$('agent-mode').value=state.integration.mode;renderProviders(state.integration);status('ubot-result','U-Bot disconnected for this visitor.');widget.setPhase('disconnected');});
+for(const [connectId,disconnectId,resultId] of [['connect-ubot','disconnect-ubot','ubot-result'],['managed-connect-ubot','managed-disconnect-ubot','managed-ubot-result']]){
+ $(connectId).onclick=()=>operation(resultId,async()=>{await widget.request('ubot/connect',{});await reload();$('agent-mode').value=state.integration.mode;renderProviders(state.integration);status(resultId,tr('เชื่อมต่อแล้ว · เปิดใช้ U-bot agent แล้ว'));});
+ $(disconnectId).onclick=()=>operation(resultId,async()=>{await widget.request('ubot/disconnect',{});await reload();$('agent-mode').value=state.integration.mode;renderProviders(state.integration);status(resultId,tr('ล้างการเชื่อมต่อแล้ว'));});
+}
 document.querySelectorAll('[data-test]').forEach(b=>b.onclick=()=>{const provider=b.dataset.test,out=(provider==='elevenlabs'?'eleven':provider)+'-result',payload=configPayload();operation(out,async()=>{
  await saveConfig(payload);const r=await widget.request('test/'+provider,{});
  if(provider==='elevenlabs'){$('voice-select').replaceChildren(new Option(tr('เลือกเสียง'),''));for(const v of r.voices)$('voice-select').add(new Option(v.name,v.id));$('voice-options').hidden=false;status(out,tr('โหลดได้ {0} เสียง เลือกเสียงแล้วกดบันทึกการเชื่อมต่อ',r.voices.length));}

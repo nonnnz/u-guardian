@@ -3,6 +3,7 @@ import * as blob from '@vercel/blob';
 import {randomBytes} from 'node:crypto';
 import {Readable} from 'node:stream';
 import {createApplication} from '../application.mjs';
+import {cloudConfig} from '../cloud-config.mjs';
 import {privateSessions,sessionPath,callPath,SessionBusy} from '../cloud-store.mjs';
 
 export const config={api:{bodyParser:false}};
@@ -32,23 +33,23 @@ export default async function handler(req,res){
    path=sessionPath(id);
   }
   workspace=await sessions.workspace(path,req.method==='POST');
-  const app=await createApplication({cloud:true,host,env:{},store:workspace.store,config:{...workspace.record.config,
-   avalancheKey:workspace.record.config.avalancheKey||process.env.AVALANCHE_DATA_API_KEY||'',
-   elevenKey:workspace.record.config.elevenKey||process.env.ELEVENLABS_API_KEY||'',
-   voiceId:workspace.record.config.voiceId||process.env.ELEVENLABS_VOICE_ID||'',
-   ttsModel:workspace.record.config.ttsModel||process.env.ELEVENLABS_TTS_MODEL||'eleven_v3',
-   sttModel:workspace.record.config.sttModel||process.env.ELEVENLABS_STT_MODEL||'scribe_v2',
-   tokenomistKey:workspace.record.config.tokenomistKey||process.env.TOKENOMIST_API_KEY||''},saveConfig:workspace.saveConfig});
+  const resolved=cloudConfig(process.env,workspace.record.config);
+  const app=await createApplication({cloud:true,host,env:{},store:workspace.store,managedProviders:resolved.managed,config:resolved.config,saveConfig:config=>workspace.saveConfig(resolved.persist(config))});
   // Keep the application's raw-body contract if the platform parsed a JSON body.
   if(req.body!==undefined){const stream=Readable.from([Buffer.isBuffer(req.body)?req.body:Buffer.from(typeof req.body==='string'?req.body:JSON.stringify(req.body))]);stream.headers=req.headers;stream.url=req.url;stream.method=req.method;stream.guardianSignal=req.guardianSignal;req=stream;}
-  const result={status:200,headers:{},body:null};
-  const buffer={setHeader:(k,v)=>{result.headers[k]=v;},writeHead:(code,headers)=>{result.status=code;Object.assign(result.headers,headers);},end:body=>{result.body=body;}};
+  const streaming=req.headers['x-guardian-stream']==='1'&&['/api/agent/chat','/api/agent/brief'].includes(pathname);
+  const result={status:200,headers:{},body:null,chunks:[]};
+  const buffer={setHeader:(k,v)=>{result.headers[k]=v;},writeHead:(code,headers)=>{result.status=code;Object.assign(result.headers,headers);},flushHeaders(){if(streaming&&!res.headersSent){for(const [key,value] of Object.entries(result.headers))res.setHeader(key,value);res.writeHead(result.status);}},write:chunk=>{if(streaming){if(String(chunk).includes('"type":"result"'))result.chunks.push(chunk);else res.write(chunk);}else result.chunks.push(chunk);},end:body=>{result.body=body;}};
   await (callback?app.callback:app.handler)(req,buffer);
-  if(req.method==='POST'){await app.persist();await workspace.saveConfig(app.config);await workspace.release();workspace=null;}
+  if(req.method==='POST'){await app.persist();await workspace.saveConfig(resolved.persist(app.config));await workspace.release();workspace=null;}
+  if(streaming){for(const chunk of result.chunks)res.write(chunk);if(result.body)res.write(result.body);return res.end();}
   for(const [key,value] of Object.entries(result.headers))res.setHeader(key,value);
   res.setHeader('Cache-Control','private, no-store');res.writeHead(result.status);res.end(result.body);
  }catch(e){
   if(workspace)await workspace.release().catch(()=>{});
-  error(res,e instanceof SessionBusy?409:503,e instanceof SessionBusy?e.message:'บันทึกหรืออ่าน session ไม่สำเร็จ กรุณาลองใหม่ หากเพิ่งส่งคำขอโทรให้ตรวจประวัติสายก่อนส่งซ้ำ',req.headers['x-guardian-language']);
+  const status=e instanceof SessionBusy?409:503;
+  const message=e instanceof SessionBusy?e.message:'บันทึกหรืออ่าน session ไม่สำเร็จ กรุณาลองใหม่ หากเพิ่งส่งคำขอโทรให้ตรวจประวัติสายก่อนส่งซ้ำ';
+  if(res.headersSent){res.write(JSON.stringify({type:'result',status,data:{error:translate(message,req.headers['x-guardian-language'])}})+'\n');res.end();}
+  else error(res,status,message,req.headers['x-guardian-language']);
  }
 }

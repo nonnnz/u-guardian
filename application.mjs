@@ -1,5 +1,6 @@
 import {t as tr,language,withLanguage} from './locale.mjs';
 import {createDebug,debugEvent} from './debug.mjs';
+import {withProgress} from './progress.mjs';
 import {planWithUbot} from './planner.mjs';
 import {createGuardian} from './guardian-service.mjs';
 import http from 'node:http';
@@ -29,6 +30,7 @@ const port = Number(options.port || process.env.PORT || 4173);
 const cloud=!!options.cloud;
 const envPath=process.env.GUARDIAN_ENV_FILE||fileURLToPath(new URL('./.env',import.meta.url));
 const env=options.env ?? (process.env.GUARDIAN_IGNORE_SUPPLIED_KEYS==='1'?{}:{...await loadEnv(envPath),...process.env});
+if(!cloud&&process.env.GUARDIAN_IGNORE_SUPPLIED_KEYS!=='1')for(const key of ['UBOT_SUPABASE_URL','UBOT_SUPABASE_ANON_KEY','UBOT_SUPABASE_PUBLISHABLE_KEY','UBOT_EMAIL','UBOT_PASSWORD','UBOT_CHAT_URL'])if(env[key]&&!process.env[key])process.env[key]=env[key];
 const store=options.store || localStore(process.env.GUARDIAN_STATE_DIR||fileURLToPath(new URL('./.local',import.meta.url)));
 const saved=await store.load();
 let state=cloud&&saved?.demo?saved.demo:createState();
@@ -39,6 +41,7 @@ for(const [key,session] of Object.entries(phone.sessions))if(session.expiresAt<D
 const phoneSecret=await store.secret();
 let dataMode=saved?.dataMode||'demo';
 const serverUbotConfigured=!!(process.env.UBOT_EMAIL&&process.env.UBOT_PASSWORD&&(process.env.UBOT_SUPABASE_ANON_KEY||process.env.UBOT_SUPABASE_PUBLISHABLE_KEY));
+const autoConnectUbot=!!options.managedProviders&&serverUbotConfigured&&!Object.hasOwn(options.config||{},'mode');
 const config={ubotToken:'',ubotTemplate:env.UBOT_TEMPLATE_BASE64?Buffer.from(env.UBOT_TEMPLATE_BASE64,'base64').toString():env.UBOT_TEMPLATE||defaultTemplate,
  avalancheKey:env.AVALANCHE_DATA_API_KEY||'',tokenomistKey:env.TOKENOMIST_API_KEY||'',elevenKey:env.ELEVENLABS_API_KEY||'',voiceId:env.ELEVENLABS_VOICE_ID||'',
  ttsModel:env.ELEVENLABS_TTS_MODEL||'eleven_v3',sttModel:env.ELEVENLABS_STT_MODEL||'scribe_v2',mode:env.GUARDIAN_AGENT_MODE==='ubot'?'ubot':'demo',
@@ -51,7 +54,13 @@ const persist=()=>store.save({version:2,dataMode,live,phone,agent:guardian.agent
 const saveConfig=()=>options.saveConfig?options.saveConfig(config):saveProviderEnv(envPath,config);
 const status=()=>({ubotConfigured:serverUbotConfigured,ubotStatus:config.ubotStatus,elevenConfigured:!!config.elevenKey,elevenStatus:config.elevenStatus,
  avalancheConfigured:!!config.avalancheKey,avalancheStatus:config.avalancheStatus,tokenomistConfigured:!!config.tokenomistKey,tokenomistStatus:config.tokenomistStatus,
- voiceId:config.voiceId,mode:config.mode,ttsModel:config.ttsModel,sttModel:config.sttModel,storage:cloud?'private-session':'.env',deployment:cloud?'vercel':'local'});
+ voiceId:config.voiceId,mode:config.mode,ttsModel:config.ttsModel,sttModel:config.sttModel,storage:cloud?'private-session':'.env',deployment:cloud?'vercel':'local',managedProviders:!!options.managedProviders});
+async function ensureUbot(){
+ if(!autoConnectUbot||config.mode==='ubot')return;
+ const result=await verifyUbotConnection(config,{});
+ Object.assign(config,result.config);
+ await saveConfig();
+}
 const guardian=createGuardian({saved:saved?.agent,config,live,getDemo:()=>state,getMode:()=>dataMode,refresh:()=>refreshAll(),persist,cloud});
 const snapshot=()=>({...state,assessment:assessment(state),integration:status(),dataMode,live:{...live,stale:!fresh(live.snapshot),risk:personalizedRisk(live)},phone:publicPhone(phone,config),guardian:guardian.summary()});
 async function refreshSupply(){
@@ -134,9 +143,9 @@ const coreHandler = async (req,res) => {
       if (!(req.headers['content-type'] || '').includes('application/json')) throw new Error('Expected JSON');
       const p = JSON.parse((await readBody(req)).toString() || '{}');
       debugEvent('request.input','Request input',p);
-      if(pathname==='/api/agent/chat'){if(config.mode==='ubot')limitUbot(req,'chat',12);return json(res,200,{...await guardian.message(p.message,signal),state:snapshot()});}
+      if(pathname==='/api/agent/chat'){await ensureUbot();if(config.mode==='ubot')limitUbot(req,'chat',12);return json(res,200,{...await guardian.message(p.message,signal),state:snapshot()});}
       if(pathname==='/api/agent/new-chat'){guardian.agent.history=[];guardian.agent.proposals=[];await persist();return json(res,200,snapshot());}
-      if(pathname==='/api/agent/brief')return json(res,200,{...await guardian.brief(),state:snapshot()});
+      if(pathname==='/api/agent/brief'){await ensureUbot();return json(res,200,{...await guardian.brief(),state:snapshot()});}
       if(pathname==='/api/agent/ack')return json(res,200,await guardian.acknowledge());
       if(pathname==='/api/agent/check')return json(res,200,await guardian.check());
       if(pathname==='/api/agent/watch/confirm')return json(res,200,await guardian.confirm(p.id));
@@ -188,9 +197,9 @@ const coreHandler = async (req,res) => {
       if(pathname==='/api/phone/agent'){const result=await provisionAgent(phone,config,phoneSecret,persist);return json(res,200,{...result,state:snapshot()});}
       if(pathname==='/api/phone/call'){if(dataMode!=='live'||p.confirm!==true)throw new Error('เปิด Live wallet และยืนยันการโทรก่อน');const call=await placeCall(phone,live,config,persist,true);return json(res,200,{call,state:snapshot()});}
       if(pathname==='/api/phone/status'){const call=await checkCall(phone,p.id,config,persist);return json(res,200,{call,state:snapshot()});}
-      if (pathname === '/api/integrations') { await checkedConfig(p); return json(res,200,status()); }
+      if (pathname === '/api/integrations') { if(options.managedProviders)return json(res,403,{error:'Provider settings are managed by the demo organizer.'});await checkedConfig(p); return json(res,200,status()); }
       if (pathname === '/api/ubot/disconnect') { config.mode='demo';config.ubotStatus='untested';guardian.agent.history=[];await saveConfig();await persist();return json(res,200,status()); }
-      if (pathname === '/api/disconnect') { config.ubotToken=''; config.elevenKey='';config.avalancheKey='';config.avalancheStatus='untested'; config.ubotStatus='untested'; config.elevenStatus='untested'; config.mode='demo';guardian.agent.history=[];config.tokenomistKey='';config.tokenomistStatus='untested';clearTokenCache();live.supply=null;await saveConfig();await persist(); return json(res,200,status()); }
+      if (pathname === '/api/disconnect') { if(options.managedProviders)return json(res,403,{error:'Provider settings are managed by the demo organizer.'});config.ubotToken=''; config.elevenKey='';config.avalancheKey='';config.avalancheStatus='untested'; config.ubotStatus='untested'; config.elevenStatus='untested'; config.mode='demo';guardian.agent.history=[];config.tokenomistKey='';config.tokenomistStatus='untested';clearTokenCache();live.supply=null;await saveConfig();await persist(); return json(res,200,status()); }
       if (pathname === '/api/ubot/connect') {
         limitUbot(req,'connect',5);
         const result=await verifyUbotConnection(config,p);
@@ -213,12 +222,12 @@ const coreHandler = async (req,res) => {
       return json(res,404,{error:'Unknown API route'});
     }
     if(req.method==='GET'&&['/settings.html','/embed-example.html'].includes(pathname)){res.writeHead(302,{Location:'/'});return res.end();}
-    const files = {'/':'index.html','/index.html':'index.html','/guardian-widget.js':'guardian-widget.js','/guardian-widget.css':'guardian-widget.css','/shell.js':'shell.js','/shell.css':'shell.css','/i18n.js':'i18n.js','/messages.js':'messages.js','/guardian-mascot.js':'guardian-mascot.js','/guardian-mascot.css':'guardian-mascot.css','/assets/mascot/manifest.json':'assets/mascot/manifest.json','/guardian-mascot-state.js':'guardian-mascot-state.js'};
+    const files = {'/fonts/manrope-variable.ttf':'fonts/manrope-variable.ttf','/':'index.html','/index.html':'index.html','/guardian-widget.js':'guardian-widget.js','/guardian-widget.css':'guardian-widget.css','/shell.js':'shell.js','/shell.css':'shell.css','/i18n.js':'i18n.js','/messages.js':'messages.js','/guardian-mascot.js':'guardian-mascot.js','/guardian-mascot.css':'guardian-mascot.css','/assets/mascot/manifest.json':'assets/mascot/manifest.json','/guardian-mascot-state.js':'guardian-mascot-state.js'};
     for(const state of ['idle','thinking','searching','answering'])for(const file of [`${state}.webm`,`${state}.webp`,`${state}-poster.webp`])files[`/assets/mascot/${file}`]=`assets/mascot/${file}`;
     if (req.method !== 'GET' || !files[pathname]) return json(res,404,{error:'Not found'});
     const file = files[pathname];
     const bytes = await readFile(fileURLToPath(new URL(`./public/${file}`,import.meta.url)));
-    res.writeHead(200,{'Content-Type':file.endsWith('.html')?'text/html; charset=utf-8':file.endsWith('.css')?'text/css; charset=utf-8':file.endsWith('.webm')?'video/webm':file.endsWith('.webp')?'image/webp':file.endsWith('.json')?'application/json; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'no-store'});res.end(bytes);
+    res.writeHead(200,{'Content-Type':file.endsWith('.html')?'text/html; charset=utf-8':file.endsWith('.css')?'text/css; charset=utf-8':file.endsWith('.ttf')?'font/ttf':file.endsWith('.webm')?'video/webm':file.endsWith('.webp')?'image/webp':file.endsWith('.json')?'application/json; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'no-store'});res.end(bytes);
   } catch (e) {
     if (pathname === '/api/test/ubot') config.ubotStatus='error';
     if (['/api/agent/chat','/api/chat'].includes(pathname)&&['auth','expired'].includes(e.code)){config.ubotStatus='error';config.mode='demo';}
@@ -242,7 +251,15 @@ const tracedHandler=async(req,res)=>{
  res.setHeader('Cache-Control','private, no-store');
  return log.run(async()=>{log.add('request.start','Request started',{path,mode:config.mode,dataMode});await coreHandler(req,output);});
 };
-const handler=(req,res)=>withLanguage(req.headers['x-guardian-language']||'en',()=>tracedHandler(req,res));
+const handler=(req,res)=>withLanguage(req.headers['x-guardian-language']||'en',()=>{
+ const pathname=new URL(req.url,'http://localhost').pathname;
+ if(req.headers['x-guardian-stream']!=='1'||req.method!=='POST'||!['/api/agent/chat','/api/agent/brief'].includes(pathname))return tracedHandler(req,res);
+ res.writeHead(200,{'Content-Type':'application/x-ndjson; charset=utf-8','Cache-Control':'private, no-store','X-Accel-Buffering':'no'});res.flushHeaders?.();
+ const emit=event=>{if(!res.destroyed)res.write(JSON.stringify(event)+'\n');};let status=200;
+ const output={setHeader(){},writeHead(code){status=code;},on:(event,fn)=>res.on?.(event,fn),end(body){let data;try{data=JSON.parse(body);}catch{data={error:'Invalid server response'};}emit({type:'result',status,data});res.end();}};
+ emit({type:'phase',phase:'thinking'});
+ return withProgress(emit,()=>tracedHandler(req,output));
+});
 const callback=async(req,res)=>{
   if(req.url!=='/phone/tool'||req.method!=='POST')return json(res,404,{error:'Not found'});
   if(dataMode!=='live'||!authenticatePhone(req.headers,phoneSecret,phone,live))return json(res,403,{error:'Unauthorized or expired call context'});
