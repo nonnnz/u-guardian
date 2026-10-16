@@ -4,6 +4,16 @@ An English-first, bilingual voice companion for understanding a crypto wallet. T
 
 Live app: https://u-guardian.vercel.app
 
+Pitch deck (Team TuiDui, U-Hackathon 2026 Track 1: AI): https://u-guardian-pitch-desk.nonnnz.dev · [PDF](deck/U-Guardian-Pitch-Deck.pdf) · [screenshots](deck/screenshots) · see [Pitch deck](#pitch-deck)
+
+## Pitch deck
+
+A 9-slide interactive deck in the app's dark palette, built from [pitch deck.md](pitch%20deck.md). Slide 4 is a clickable walkthrough of the real product, and slide 5 shows a live pull from the Avalanche, Tokenomist and CoinGecko APIs. Print or export to PDF and slide 4 expands into four static pages (one per demo step).
+
+- Site: https://u-guardian-pitch-desk.nonnnz.dev (Cloudflare Worker serving static assets). Keys: arrows/space, `N` notes, `F` fullscreen.
+- Source: `deck-src/template.html`. Build the self-contained page (fonts, logo, screenshots and QR inlined) with `node deck-src/build.mjs`, which writes `deck/index.html`.
+- Deploy: `cd deck-src && npx wrangler deploy` (config in `deck-src/wrangler.jsonc`).
+
 ## What works
 
 - Wallet health: Avalanche C-Chain balances, available recent transfers, concentration when priced coverage is complete, and goal-aware explanations.

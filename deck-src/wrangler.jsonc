@@ -1,0 +1,6 @@
+{
+  "name": "u-guardian-pitch-desk",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "../deck" },
+  "routes": [{ "pattern": "u-guardian-pitch-desk.nonnnz.dev", "custom_domain": true }]
+}

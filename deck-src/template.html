@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>U-Guardian · Pitch Deck</title>
+<meta name="description" content="U-Guardian by Team TuiDui: an AI companion that explains your crypto wallet.">
+<link rel="icon" href="{{LOGO}}">
+<style>
+/*FONTS*/
+:root{
+  /* U-Guardian dark palette (DESIGN.md) */
+  --bg:#111318; --surface:#1c1e25; --composer:#25272e; --line:#34363d; --line2:#4a4c55;
+  --ink:#f5f1e9; --ink2:#d9d5cc; --ink3:#afb0b7; --ink4:#74767e;
+  --orange:#ff994d; --orange2:#ffb070; --orangeText:#ffb781; --inset:#30261f; --leaf:#d8e8b3; --err:#ffb39c;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#0b0c10;font-family:Manrope,"Leelawadee UI",Tahoma,sans-serif;color:var(--ink)}
+.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:0 0}
+.slide{position:absolute;inset:0;padding:148px 150px 130px;background:
+  radial-gradient(1000px 640px at 88% -8%,rgba(255,153,77,.16),transparent 60%),
+  radial-gradient(800px 600px at 0% 110%,rgba(216,232,179,.07),transparent 60%),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 1px,transparent 1px 120px),var(--bg);
+  opacity:0;visibility:hidden;transition:opacity .5s var(--ease),visibility .5s;display:flex;flex-direction:column}
+.slide.on{opacity:1;visibility:visible}
+.chip{position:absolute;left:150px;top:62px;display:flex;align-items:center;border:1px solid var(--line2);border-radius:999px;padding:6px 22px 6px 6px;background:rgba(255,255,255,.03);font-size:22px;color:var(--ink2);font-weight:500}
+.chip b{font:500 19px "JetBrains Mono",monospace;background:var(--orange);color:#211b16;border-radius:999px;padding:6px 14px;margin-right:14px}
+.chip.r{left:auto;right:150px;padding:10px 22px;font:500 19px "JetBrains Mono",monospace;letter-spacing:.08em;color:var(--ink3)}
+.chip.warn{border-color:rgba(255,153,77,.55);color:var(--orangeText);background:rgba(255,153,77,.08)}
+.foot{position:absolute;left:150px;right:150px;bottom:48px;display:flex;justify-content:space-between;align-items:center;font-size:21px;color:var(--ink3)}
+.foot .br{display:flex;align-items:center;gap:14px;color:var(--ink);font-weight:750;letter-spacing:-.02em;font-size:25px}
+.foot .br img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.foot .br span{font-weight:500;color:var(--ink4);margin-left:8px;font-size:20px;letter-spacing:0}
+.foot .n{font:500 19px "JetBrains Mono",monospace;letter-spacing:.1em}.foot .n b{color:var(--ink)}
+.tag{font:400 21px "JetBrains Mono",monospace;color:var(--orangeText);margin-bottom:18px}
+.tag:before{content:"> ";color:var(--ink4)}
+h1,h2{font-weight:600;letter-spacing:-.035em;line-height:1.08}
+h2{font-size:68px;margin-bottom:36px}
+h2 em,h1 em{font-style:normal;color:var(--orange)}
+h2 em{margin-left:0}
+p{font-size:28px;line-height:1.5;color:var(--ink2);font-weight:400}
+b,strong{font-weight:700;color:var(--ink)}
+.glass{border:1px solid var(--line);border-radius:26px;background:var(--surface);position:relative;padding:34px;box-shadow:0 30px 70px -30px rgba(0,0,0,.7)}
+.glass:before{content:"";position:absolute;left:12%;right:12%;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);opacity:.8}
+.pill{display:inline-flex;align-items:center;border-radius:999px;padding:9px 22px;font-size:21px;border:1px solid var(--line2);color:var(--ink2);background:rgba(255,255,255,.03);font-weight:500}
+.pill.v{background:var(--orange);border-color:transparent;color:#211b16;font-weight:700}
+.note{font-size:23px;color:var(--ink3);line-height:1.45}
+.src{font:400 19px/1.5 "JetBrains Mono",monospace;color:var(--ink4)}
+.src a{color:var(--orangeText);text-decoration:none}
+.r{opacity:0;transform:translateY(24px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.on .r{opacity:1;transform:none}.on .r:nth-child(2){transition-delay:.1s}.on .r:nth-child(3){transition-delay:.2s}.on .r:nth-child(4){transition-delay:.3s}
+/* browser frame for product screenshots */
+.shot{border:1px solid var(--line2);border-radius:20px;overflow:hidden;background:#0b0c10;box-shadow:0 40px 90px -30px rgba(0,0,0,.8),0 0 0 1px rgba(255,153,77,.12)}
+.shot .bar{display:flex;align-items:center;gap:10px;padding:11px 16px;background:#16181e;border-bottom:1px solid var(--line);font:400 16px "JetBrains Mono",monospace;color:var(--ink4)}
+.shot .bar i{width:11px;height:11px;border-radius:50%;background:#3a3c44}
+.shot .bar span{margin-left:10px;flex:1;text-align:center;margin-right:50px}
+.shot img{display:block;width:100%;height:auto}
+/* 1 */
+.s1{padding-top:0;justify-content:center}
+.s1 .wrap{display:grid;grid-template-columns:1fr 880px;gap:60px;align-items:center}
+.logo{display:flex;align-items:center;gap:22px;margin-bottom:38px}
+.logo img{width:88px;height:88px;border-radius:50%;border:2px solid var(--orange);object-fit:cover}
+.logo span{font-size:46px;font-weight:750;letter-spacing:-.04em}
+.s1 h1{font-size:68px;margin-bottom:30px}
+.s1 .bot{position:absolute;left:150px;right:150px;bottom:48px;display:flex;justify-content:space-between;align-items:center;color:var(--ink3);font-size:21px}
+.clock{font-family:"JetBrains Mono",monospace;display:flex;gap:26px;align-items:center}
+.clock i{width:9px;height:9px;border-radius:50%;background:var(--leaf);display:inline-block;margin-right:10px}
+/* 2 */
+.s2 .two{display:grid;grid-template-columns:1.05fr 1fr;gap:44px;align-items:start}
+.s2 ul{list-style:none}
+.s2 li{padding:24px 0;border-bottom:1px solid var(--line);font-size:30px;line-height:1.45;color:var(--ink2)}
+.s2 li:first-child{border-top:1px solid var(--line)}
+.stat{display:flex;gap:30px;align-items:center;padding:26px 34px}
+.stat b{font-size:96px;font-weight:700;letter-spacing:-.05em;line-height:1;color:var(--orange);min-width:210px}
+.stat p{font-size:24px;line-height:1.4}
+/* 3 */
+table{width:100%;border-collapse:separate;border-spacing:0}
+.t3 th,.t7 th{font:500 19px "JetBrains Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);text-align:left;padding:14px 26px}
+.t3 td,.t7 td{padding:28px 26px;border-top:1px solid var(--line);vertical-align:top;font-size:25px;line-height:1.42;color:var(--ink2)}
+.t3 td:first-child,.t7 td:first-child{font-weight:700;color:var(--ink);font-size:28px;width:23%}
+.t3 td:nth-child(2){color:var(--orangeText);font-style:italic;width:30%}
+.t7 td{padding:18px 26px!important}.t7 td:last-child{color:var(--ink);background:rgba(255,153,77,.07)}
+.t7 td:nth-child(2){width:32%}
+/* 4 */
+.demo{display:grid;grid-template-columns:600px 1fr;gap:40px;flex:1;min-height:0}
+.steps{display:flex;flex-direction:column;gap:12px}
+.step{display:flex;gap:18px;align-items:flex-start;padding:16px 22px;border:1px solid var(--line);border-radius:22px;cursor:pointer;background:var(--surface);transition:.3s var(--ease)}
+.step b{font:500 19px "JetBrains Mono",monospace;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--composer);flex:none;color:var(--ink3);margin-top:2px}
+.step span{font-size:22px;line-height:1.38;color:var(--ink3)}
+.step span strong{color:inherit;font-weight:700}
+.step.act{border-color:var(--orange);background:var(--inset)}.step.act b{background:var(--orange);color:#211b16}.step.act span{color:var(--ink)}
+.notice{margin-top:6px;font-size:20px;line-height:1.45;color:var(--ink3);padding:4px 6px}
+.notice b{color:var(--orangeText)}
+.demo .shot{align-self:start}
+.demo .shot img{aspect-ratio:1920/1200;object-fit:cover;transition:opacity .2s}
+/* 5 */
+.tech{display:grid;grid-template-columns:1.12fr 1fr;gap:40px;flex:1;min-height:0}
+.flow{display:flex;flex-direction:column;gap:10px}
+.node{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:16px 26px;font-size:23px;text-align:center;line-height:1.35;color:var(--ink2)}
+.node.hi{border-color:rgba(255,153,77,.6);background:var(--inset);color:var(--ink)}
+.arr{color:var(--orange);text-align:center;font-size:24px;line-height:1}
+.srcrow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.srcrow .node{text-align:left;padding:18px 20px}
+.srcrow h4{font:500 18px "JetBrains Mono",monospace;color:var(--orangeText);margin-bottom:6px}
+.srcrow .big{font-size:36px;font-weight:700;letter-spacing:-.03em;margin-bottom:4px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.srcrow .what{font-size:19px;color:var(--ink);font-weight:600;margin-bottom:6px}
+.srcrow p{font-size:17px;line-height:1.35;color:var(--ink3)}
+.why{display:flex;flex-direction:column;gap:22px}
+.why .glass{padding:26px 30px}
+.why h3{font:500 18px "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--orangeText);margin-bottom:10px}
+.why p{font-size:23px;line-height:1.48}
+/* 6 */
+.cols{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.cols .glass h3{font:500 19px "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--orangeText);margin-bottom:12px}
+.cols .glass p{font-size:26px;line-height:1.45}
+/* 7 */
+.who{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:26px}
+.who .glass{padding:24px 30px}
+.who p{font-size:23px;line-height:1.45}
+.who h3{font:500 18px "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--orangeText);margin-bottom:8px}
+/* 8 */
+.road{display:grid;grid-template-columns:1.55fr 1fr 1fr 1fr;gap:20px}
+.road .glass{padding:30px;min-height:600px}
+.road .when{font:500 18px "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--orangeText);margin-bottom:14px}
+.road .done .when{color:var(--leaf)}
+.road h3{font-size:32px;font-weight:700;letter-spacing:-.02em;margin-bottom:18px}
+.road li{list-style:none;font-size:22px;line-height:1.42;padding:9px 0 9px 30px;position:relative;color:var(--ink2)}
+.road li:before{content:"→";position:absolute;left:0;color:var(--orange)}
+.road .done li:before{content:"✓";color:var(--leaf)}
+.road .done{border-color:rgba(216,232,179,.35)}
+/* 9 */
+.s9 .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;flex:1;min-height:0}
+.s9 h2{font-size:66px;margin-bottom:28px}.s9 h2 em{display:block;margin-left:0}
+blockquote{font-size:36px;font-weight:700;line-height:1.25;letter-spacing:-.02em;border-left:5px solid var(--orange);padding-left:28px;margin:6px 0 30px}
+blockquote span{color:var(--orange)}
+.mem{display:flex;gap:26px;align-items:center;padding:24px 30px;margin-bottom:20px}
+.mem img{width:112px;height:112px;border-radius:22px;object-fit:cover;border:2px solid var(--orange)}
+.mem h3{font-size:32px;font-weight:700;letter-spacing:-.02em}.mem .rl{font-size:22px;color:var(--ink3);margin:2px 0 8px}
+.mem a{font:400 17px "JetBrains Mono",monospace;color:var(--orangeText);text-decoration:none;margin-right:16px}
+.qr{display:flex;gap:30px;align-items:center;padding:26px 30px}
+.qr .code{width:210px;height:210px;border-radius:18px;overflow:hidden;background:#fff;flex:none}
+.qr .code svg{display:block;width:100%;height:100%}
+.qr h3{font-size:32px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}.qr p{font-size:23px;margin-bottom:10px}
+.qr .u{font:500 21px "JetBrains Mono",monospace;color:var(--orangeText)}
+.s9 .mas{position:absolute;right:150px;bottom:110px;width:250px;height:250px}
+img.mascot{display:block;width:100%;height:100%;object-fit:contain}
+/* nav */
+#bar{position:fixed;left:0;bottom:0;height:4px;background:var(--orange);z-index:9;transition:width .5s var(--ease)}
+#nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:center;z-index:9;background:rgba(17,19,24,.9);backdrop-filter:blur(10px);border:1px solid var(--line2);padding:8px 14px;border-radius:999px;opacity:0;transition:.3s}
+body:hover #nav{opacity:1}
+#nav button{background:none;border:0;color:#fff;font:500 16px Manrope;cursor:pointer;padding:4px 10px}
+#nav .d{width:10px;height:10px;border-radius:50%;background:var(--ink4);padding:0}
+#nav .d.on{background:var(--orange)}
+#notes{position:fixed;left:0;right:0;bottom:0;background:rgba(11,12,16,.97);border-top:1px solid var(--orange);padding:22px 40px 60px;font-size:20px;line-height:1.55;color:var(--ink2);z-index:8;transform:translateY(100%);transition:.3s}
+#notes.show{transform:none}#notes b{color:var(--orangeText);font:500 14px "JetBrains Mono",monospace;letter-spacing:.16em;margin-right:12px}
+@media print{
+  @page{size:1920px 1080px;margin:0}
+  html,body{overflow:visible;height:auto;background:var(--bg)}
+  #stage{position:static;transform:none!important;width:1920px;height:auto}
+  .slide{position:relative;width:1920px;height:1080px;opacity:1;visibility:visible;break-after:page;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .r{opacity:1;transform:none;transition:none}
+  .step,.demo .shot img{transition:none!important}
+  #bar,#nav,#notes{display:none}
+}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="stage">
+
+<!-- 1 · Meet U-Guardian -->
+<section class="slide s1" data-notes="We are building an AI companion for the wallet people already use. U-Guardian turns complex wallet data into clear explanations and gives users a simple way to follow what matters to them.">
+  <div class="wrap">
+    <div>
+      <div class="tag r">hello_judges · meet_u_guardian</div>
+      <div class="logo r"><img src="{{LOGO}}" alt="U-Guardian"><span>u—guardian</span></div>
+      <h1 class="r">Your wallet shows what you own. <em>U&#8209;Guardian explains what matters.</em></h1>
+      <p class="r" style="max-width:820px">An AI companion that explains your crypto wallet, investigates relevant changes, and speaks up when a watch you chose is triggered.</p>
+      <div class="r" style="margin-top:34px;display:flex;gap:12px;flex-wrap:wrap"><span class="pill v">Team TuiDui</span><span class="pill">AI agent orchestration</span><span class="pill">Web3 data</span><span class="pill">Voice experience</span></div>
+    </div>
+    <div class="shot r"><div class="bar"><i></i><i></i><i></i><span>u-guardian.vercel.app</span></div><img src="{{S_home}}" alt="U-Guardian wallet with the mascot perched on the wallet card"></div>
+  </div>
+  <div class="bot"><span class="pill">U-Hackathon 2026 Track 1: AI</span><div class="clock"><span><i></i>Bangkok</span><span id="clk">--:--:--</span></div></div>
+</section>
+
+<!-- 2 · Problem -->
+<section class="slide s2" data-notes="Imagine someone holding AVAX and a stablecoin for an expense six months from now. They can see the token balances, but they may not know whether the wallet is too concentrated, how a price move affects that goal, or whether a supply event deserves attention. The UK survey gives us a signal that clearer risk information matters; it does not measure U-topia users.">
+  <div class="chip"><b>02</b>Problem</div>
+  <div class="tag">a_balance_is_not_an_answer</div>
+  <h2>A balance is <em>not an answer.</em></h2>
+  <div class="two">
+    <ul class="r">
+      <li>A wallet can show <b>how much</b> you hold. It rarely explains <b>what changed, why it matters to your goal, or what to watch next</b>.</li>
+      <li>A new user may have to piece together wallet activity, token supply, market context, and news across several products.</li>
+      <li>This matters when the same money is intended for a future expense, savings, or everyday use.</li>
+    </ul>
+    <div>
+      <div class="glass stat r" style="margin-bottom:22px"><b>13%</b><p>of cryptoasset users thought they would have financial protection when purchasing cryptoassets.</p></div>
+      <div class="glass stat r"><b>9%</b><p>said they used a credit card or existing credit facility to obtain cryptoassets.</p></div>
+    </div>
+  </div>
+  <p class="src r" style="margin-top:30px">Evidence: FCA 2025 UK survey. UK survey findings, <b style="color:var(--orangeText)">not</b> measured behavior of U-topia users.<br><a href="https://www.fca.org.uk/publications/research-notes/cryptoassets-consumer-research-2025">fca.org.uk · cryptoassets-consumer-research-2025</a> · <a href="https://www.fca.org.uk/publication/research-notes/cryptoasset-consumer-research-2025-wave-6.pdf">2025 report, risk understanding</a></p>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>02</b> / 09</span></div>
+</section>
+
+<!-- 3 · Solution -->
+<section class="slide s3" data-notes="People should be able to ask a useful question without learning Web3 terminology first. U-bot selects the relevant tools, then explains their results in plain language. Users can inspect the evidence, and every watch must be reviewed and confirmed before it becomes active.">
+  <div class="chip"><b>03</b>Solution</div>
+  <div class="tag">one_companion_three_jobs</div>
+  <h2>One companion, <em>three jobs.</em></h2>
+  <div class="glass r" style="padding:14px 8px">
+  <table class="t3">
+    <tr><th>Pillar</th><th>What the user asks</th><th>What Guardian does</th></tr>
+    <tr><td>Wallet health</td><td>“Is my wallet too concentrated for a six-month goal?”</td><td>Reads the public Avalanche wallet and explains holdings, coverage, and concentration in the context of a saved goal.</td></tr>
+    <tr><td>What changed &amp; monitor</td><td>“What changed?” / “Alert me if AVAX drops 10%.”</td><td>Compares the latest observations with a prior briefing; drafts a specific watch for user confirmation.</td></tr>
+    <tr><td>Advice with real information</td><td>“What is AVAX, and what should I watch out for?”</td><td>Uses retrieved project, market, tokenomics, and available headline evidence to explain trade-offs and uncertainty.</td></tr>
+  </table></div>
+  <p class="r" style="margin-top:30px;font-size:27px"><b style="color:var(--orangeText)">Product idea:</b> the mascot is the agent interface. Text, voice, status animations, sources, and watch confirmations are all in one conversation.</p>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>03</b> / 09</span></div>
+</section>
+
+<!-- 4 · Demo -->
+<section class="slide s4" style="padding-top:132px" data-notes="Start with the sample wallet so the alert is repeatable. If time allows, show a real public Avalanche wallet and a Tokenomist research question afterward. The incoming-call card in this demo is simulated inside the website; it does not place a telephone call. Click the four steps to see the real product at each moment.">
+  <div class="chip"><b>04</b>Demo</div><div class="chip r" id="demoChip">CLICK A STEP · REAL PRODUCT</div>
+  <h2 style="font-size:58px;margin-bottom:26px">From a question <em>to a useful alert.</em></h2>
+  <div class="demo">
+    <div>
+      <div class="steps">
+        <div class="step act" data-i="0"><b>01</b><span>Open the single-page wallet; click the mascot. Ask <strong>“Check my wallet health.”</strong> Show the answer and <strong>Sources &amp; details</strong>.</span></div>
+        <div class="step" data-i="1"><b>02</b><span>Ask <strong>“Alert me when AVAX price drops 10% from the price when I confirm.”</strong> Review the exact threshold and <strong>Confirm watch</strong>.</span></div>
+        <div class="step" data-i="2"><b>03</b><span>In <strong>Demo</strong> wallet mode, simulate <strong>AVAX price −12%</strong>. Show the <strong>simulated in-app call</strong>; answer it and let ElevenLabs read the alert.</span></div>
+        <div class="step" data-i="3"><b>04</b><span>Ask <strong>“What changed since my last briefing?”</strong> Show how the agent investigates. Open <strong>Debug</strong> briefly to reveal the tool path.</span></div>
+      </div>
+      <p class="notice"><b>Judges should notice:</b> the mascot changes between idle, thinking, search and answer as the agent works. Plain-language answer plus its evidence. Backup clip: 30–60 s, same demo wallet and confirmed watch. Price movement is <b>synthetic</b> and labelled “Demo data”.</p>
+    </div>
+    <div class="shot" id="demoShot"><div class="bar"><i></i><i></i><i></i><span>u-guardian.vercel.app</span></div><img id="demoImg" src="{{S_health}}" alt="Product screenshot"></div>
+  </div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>Screenshots from the live product · price move is synthetic demo data</span></span><span class="n"><b>04</b> / 09</span></div>
+</section>
+
+<!-- 5 · Technology -->
+<section class="slide s5" style="padding-top:132px" data-notes="The agent does more than answer from one prompt. U-bot can choose tools over several steps. Our backend validates each tool name and its arguments before calling an API, then returns the result to U-bot for an explanation. When a source lacks coverage, the answer should say what is missing rather than invent a number. The three numbers are a real pull from the provider APIs the app uses.">
+  <div class="chip"><b>05</b>Technology</div><div class="chip r warn" id="liveChip">● REAL API PULL</div>
+  <h2 style="font-size:58px;margin-bottom:26px">Agent decisions <em>backed by named tools.</em></h2>
+  <div class="tech">
+    <div class="flow">
+      <div class="node r">User text / voice <b>→ ElevenLabs speech-to-text</b></div><div class="arr">↓</div>
+      <div class="node hi r"><b>U-bot Professional:</b> choose a validated tool → read result → explain</div><div class="arr">↓</div>
+      <div class="srcrow r">
+        <div class="node"><h4>Avalanche</h4><div class="big" id="dBlock">–</div><div class="what">Wallet / transfer</div><p><span id="dAvax">–</span> AVAX in the sampled public wallet</p></div>
+        <div class="node"><h4>Tokenomist</h4><div class="big" id="dTok">–</div><div class="what">Supply / token</div><p>tokens in catalog · AVAX circulating <span id="dCirc">–</span></p></div>
+        <div class="node"><h4>CoinGecko + RSS</h4><div class="big" id="dPrice">–</div><div class="what">Market / project / news</div><p>AVAX <span id="dChg">–</span> 24h · mcap <span id="dCap">–</span></p></div>
+      </div><div class="arr">↓</div>
+      <div class="node hi r">Evidence + watch proposal → <b>user confirmation</b> → alert + ElevenLabs voice</div>
+    </div>
+    <div class="why r">
+      <div class="glass"><h3>Built with</h3><p>Node.js backend; a single-page JavaScript web UI; Vercel and private session storage for the hosted MVP. The server validates U-bot's JSON tool request against an allowlist and executes the selected function. The model does <b>not</b> run arbitrary generated code.</p></div>
+      <div class="glass"><h3>Why this matters</h3><p>Wallet data personalizes the answer. Tokenomist adds supply and project evidence. Public market and news sources fill gaps the sponsor APIs do not cover. ElevenLabs makes the agent accessible by voice. Debug shows each tool choice, result, and failure.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span id="dWhen"></span></span><span class="n"><b>05</b> / 09</span></div>
+</section>
+
+<!-- 6 · Impact -->
+<section class="slide s6" data-notes="For U-topia, the opportunity is to put this companion inside an app people already use. The current product is a working, single-page web MVP. Embedding it in another app is the next product step, not a feature we claim to have shipped today.">
+  <div class="chip"><b>06</b>Impact &amp; business model</div>
+  <div class="tag">inside_an_existing_app</div>
+  <h2 style="font-size:58px">Make crypto easier to understand <em>inside an existing app.</em></h2>
+  <div class="cols">
+    <div class="glass r"><h3>Value to users</h3><p>Fewer tabs to interpret a wallet; clearer risk context tied to a personal goal; user-chosen alerts with an explanation of what triggered them.</p></div>
+    <div class="glass r"><h3>Value to a platform</h3><p>A companion that can sit beside an existing wallet experience and make its data more useful without asking the platform to replace its wallet.</p></div>
+    <div class="glass r"><h3>Proposed model · hypothesis</h3><p><b>B2B licensing / white-label companion</b> for wallet and financial apps, with a platform fee and usage-based pricing for agent and voice calls. Not launched pricing.</p></div>
+    <div class="glass r"><h3>Pilot measures · to measure</h3><p>Time to understand a wallet change; % of users who correctly understand an alert; watch activation and retention; source-detail views; voice use; provider cost per useful answer. Not claimed results.</p></div>
+  </div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>06</b> / 09</span></div>
+</section>
+
+<!-- 7 · Market -->
+<section class="slide s7" data-notes="Other wallets and assistants already do useful things. What we can demonstrate is a single conversation that combines a person's wallet context, several named data sources, tool selection, and voice. We would use a pilot to learn how many U-topia users actually want that experience.">
+  <div class="chip"><b>07</b>Market &amp; advantage</div>
+  <div class="tag">context_a_balance_screen_misses</div>
+  <h2>Context that a <em>balance screen misses.</em></h2>
+  <div class="who r">
+    <div class="glass"><h3>Initial users</h3><p>English- and Thai-speaking crypto holders who want plain-language help with a wallet, goals, and selected monitoring.</p></div>
+    <div class="glass"><h3>Initial buyer hypothesis</h3><p>Wallet, exchange, or consumer-finance platforms that already serve these users.</p></div>
+  </div>
+  <div class="glass r" style="padding:10px 6px">
+  <table class="t7">
+    <tr><th>Common alternative</th><th>What users still need to do</th><th>U-Guardian MVP</th></tr>
+    <tr><td>Wallet balance / history view</td><td>Interpret events and their relevance themselves</td><td>Explains the observed wallet and compares it with a saved goal or briefing</td></tr>
+    <tr><td>General-purpose chatbot</td><td>Supply their own current wallet and token evidence</td><td>Retrieves named sources and keeps evidence inspectable</td></tr>
+    <tr><td>Separate alert service</td><td>Set a rule in a different interface</td><td>Drafts a watch conversationally and asks for confirmation</td></tr>
+  </table></div>
+  <p class="src r" style="margin-top:22px"><b style="color:var(--orangeText)">Market evidence, not TAM:</b> FCA 2025 UK survey reports 8% adult ownership and 91% awareness. We would validate demand with an in-app pilot before estimating U-topia-specific adoption or revenue. <a href="https://www.fca.org.uk/publications/research-notes/cryptoassets-consumer-research-2025">fca.org.uk</a></p>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>TuiDui</span></span><span class="n"><b>07</b> / 09</span></div>
+</section>
+
+<!-- 8 · Roadmap -->
+<section class="slide s8" data-notes="Today, the website checks watches while the page is visible and presents alerts as simulated in-app calls. Background monitoring and delivery to a user after they leave the app are future work. Moving checks to a background service is a priority if the pilot shows that users value these alerts.">
+  <div class="chip"><b>08</b>Roadmap</div>
+  <div class="tag">from_hackathon_mvp_to_in_app_companion</div>
+  <h2>From hackathon MVP <em>to in-app companion.</em></h2>
+  <div class="road">
+    <div class="glass done r"><div class="when">Built during the hackathon</div><h3>Working MVP</h3><ul>
+      <li>Three working conversation pillars with validated U-bot tool calls, source details, Debug flow, and English/Thai UI.</li>
+      <li>Avalanche wallet reading; Tokenomist tokenomics research; market and headline tools; ElevenLabs push-to-talk and spoken answers.</li>
+      <li>Confirmed watch rules for wallet quantity, supply events, review dates, activation-price moves, and transfer-value thresholds; simulated in-app alerts.</li></ul></div>
+    <div class="glass r"><div class="when">Next 3 months</div><h3>Pilot</h3><ul><li>Pilot inside a host app.</li><li>Improve the shared U-bot account connection.</li><li>Validate answer quality, alert comprehension, and provider cost.</li></ul></div>
+    <div class="glass r"><div class="when">Next 6 months</div><h3>Always on</h3><ul><li>Background watch evaluation and real delivery channels.</li><li>Stronger wallet coverage and explicit freshness / coverage reporting.</li></ul></div>
+    <div class="glass r"><div class="when">Next 12 months</div><h3>Platform</h3><ul><li>Reusable integration kit.</li><li>Production-grade consent and account controls.</li><li>Broader asset coverage and measured platform rollout.</li></ul></div>
+  </div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>“Next” items are proposals, not current product behavior</span></span><span class="n"><b>08</b> / 09</span></div>
+</section>
+
+<!-- 9 · Team & close -->
+<section class="slide s9" data-notes="Picture opening your wallet and hearing Guardian explain what changed since your last visit. You can ask a follow-up by voice and choose what it should watch next. For consequential answers, you can always inspect the information Guardian used. We would like to test that experience with U-topia users.">
+  <div class="chip"><b>09</b>Team &amp; close</div>
+  <div class="mas"><img class="mascot" src="{{P_answering}}" alt=""></div>
+  <div class="wrap">
+    <div>
+      <div class="tag">give_every_wallet_a_guide</div>
+      <h2>Give every wallet <em>a guide.</em></h2>
+      <blockquote class="r">Crypto should come with context, <span>not just a balance.</span></blockquote>
+      <p class="r" style="font-size:25px"><b style="color:var(--orangeText)">Our ask:</b> pilot U-Guardian as a companion inside U-topia's existing app, measure whether users understand their assets and alerts better, then build the integration together.</p>
+      <div class="glass qr r" style="margin-top:30px"><div class="code">{{QR}}</div><div><h3>Q&amp;A · try it live</h3><p>Scan to open the demo.</p><div class="u">u-guardian.vercel.app</div></div></div>
+    </div>
+    <div style="padding-top:8px">
+      <div class="pill v" style="margin-bottom:22px">Team TuiDui</div>
+      <p class="r" style="font-size:24px;margin-bottom:24px">We built and tested a working agent journey across AI orchestration, wallet data, tokenomics, voice, and a usable consumer interface.</p>
+      <div class="glass mem r"><img src="{{A_wayu}}" alt="Wayu Tharai"><div><h3>Wayu Tharai</h3><div class="rl">AI Engineer · Bangkok Bank</div><a href="https://github.com/Wayu650610806">github/Wayu650610806</a><a href="https://www.linkedin.com/in/wayu-tharai-b575a5338/">linkedin/wayu-tharai</a></div></div>
+      <div class="glass mem r"><img src="{{A_nonnnz}}" alt="Ratchanon Buachum"><div><h3>Ratchanon Buachum</h3><div class="rl">AI Engineer · Armstrong Technology</div><a href="https://github.com/nonnnz">github/nonnnz</a><a href="https://www.linkedin.com/in/ratchanon-buachum/">linkedin/ratchanon-buachum</a></div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="br"><img src="{{LOGO}}" alt="">u—guardian<span>Team TuiDui · Thank you</span></span><span class="n"><b>09</b> / 09</span></div>
+</section>
+</div>
+
+<div id="notes"></div>
+<div id="nav"><button id="prev">◀</button><span id="dots"></span><button id="next">▶</button><button id="nbtn">Notes</button><button id="fs">⛶</button></div>
+
+<script>window.LIVE_DATA={{LIVE}};window.SHOTS={health:"{{S_health}}",watch:"{{S_watch}}",call:"{{S_call}}",debug:"{{S_debug}}"};</script>
+<script>
+const LIVE=window.LIVE_DATA,SHOTS=window.SHOTS;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const slides=$$('.slide'),N=slides.length;let cur=0;
+const f=(n,d=2)=>Number(n).toLocaleString('en-US',{maximumFractionDigits:d});
+function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080);$('#stage').style.transform=`scale(${s}) translate(-50%,-50%)`}
+addEventListener('resize',fit);fit();
+$('#dots').innerHTML=slides.map((_,i)=>`<button class="d" data-i="${i}"></button>`).join('');
+function go(i){cur=Math.max(0,Math.min(N-1,i));slides.forEach((s,k)=>s.classList.toggle('on',k===cur));$$('#dots .d').forEach((d,k)=>d.classList.toggle('on',k===cur));
+  $('#bar').style.width=((cur+1)/N*100)+'%';history.replaceState(null,'','#'+(cur+1));$('#notes').innerHTML='<b>NOTES</b>'+(slides[cur].dataset.notes||'')}
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);$('#dots').onclick=e=>e.target.dataset.i&&go(+e.target.dataset.i);
+$('#nbtn').onclick=()=>$('#notes').classList.toggle('show');$('#fs').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+addEventListener('keydown',e=>{const k=e.key;if(['ArrowRight','PageDown',' ','Enter'].includes(k)){e.preventDefault();go(cur+1)}else if(['ArrowLeft','PageUp','Backspace'].includes(k))go(cur-1);else if(k==='Home')go(0);else if(k==='End')go(N-1);else if(k==='n'||k==='N')$('#notes').classList.toggle('show');else if(k==='f'||k==='F')$('#fs').click();else if(/^[1-9]$/.test(k))go(+k-1)});
+let tx=0;addEventListener('touchstart',e=>tx=e.touches[0].clientX);addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(cur+(d<0?1:-1))});
+const tick=()=>{$('#clk').textContent=new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Bangkok'})};tick();setInterval(tick,1000);
+// demo steps swap real product screenshots
+const ORDER=['health','watch','call','debug'];
+function setStep(i){$$('.step').forEach((s,k)=>s.classList.toggle('act',k===i));const img=$('#demoImg');img.style.opacity=.15;setTimeout(()=>{img.src=SHOTS[ORDER[i]];img.style.opacity=1},160)}
+$$('.step').forEach(s=>s.onclick=()=>setStep(+s.dataset.i));
+
+// Print/PDF: expand the interactive demo into 4 static pages, one per step.
+function expandDemo(){const s4=slides[3];if(document.querySelector('.s4-print'))return;let after=s4;
+  for(let i=0;i<4;i++){const c=i===0?s4:s4.cloneNode(true);
+    if(i){c.classList.add('s4-print');c.classList.add('on');after.after(c);after=c}
+    c.querySelectorAll('.step').forEach((e,k)=>e.classList.toggle('act',k===i));
+    const im=c.querySelector('img[alt="Product screenshot"]');im.src=SHOTS[ORDER[i]];im.style.opacity=1;
+    c.querySelector('.chip.r').textContent='STEP '+(i+1)+' / 4 · REAL PRODUCT';
+    if(i)c.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'))}
+  }
+function collapseDemo(){$$('.s4-print').forEach(e=>e.remove());$('#demoChip').textContent='CLICK A STEP · REAL PRODUCT'}
+addEventListener('beforeprint',expandDemo);addEventListener('afterprint',collapseDemo);
+// real API numbers
+$('#dBlock').textContent='#'+Number(LIVE.wallet.block).toLocaleString('en-US');
+$('#dAvax').textContent=f(LIVE.wallet.avax,0);
+$('#dTok').textContent=LIVE.tokenomist.tokens;
+$('#dCirc').textContent=f(LIVE.tokenomist.avax.circulatingSupply/1e6,1)+'M';
+$('#dPrice').textContent='$'+f(LIVE.market.priceUsd);
+$('#dChg').textContent=(LIVE.market.change24hPercent>0?'+':'')+f(LIVE.market.change24hPercent)+'%';
+$('#dCap').textContent='$'+f(LIVE.market.marketCapUsd/1e9,2)+'B';
+$('#dWhen').textContent='live pull '+LIVE.fetchedAt.replace('T',' ').slice(0,16)+' UTC';
+go(+(location.hash.slice(1)||1)-1);
+</script>
+</body>
+</html>
