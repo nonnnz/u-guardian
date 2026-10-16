@@ -46,6 +46,23 @@ test('watch response explicitly states confirmation is required even if model om
  const r=await runAgent({message:'ติดตามยอดกระเป๋า',config:{},agent:createAgentState(),context:{dataMode:'demo'},tools:{propose_watch:()=>({id:'draft',status:'draft'})},call:async(_c,p)=>p.includes('EXPLAINER')?'ติดตามยอดกระเป๋าได้ครับ':'{"type":"tool","tool":"propose_watch","args":{"kind":"wallet_change","label":"ติดตามยอดกระเป๋า"},"finishAfterTool":true}'});
  assert.match(r.text,/ยังเป็นร่าง/);assert.match(r.text,/ยืนยันการติดตาม/);assert.equal(r.proposals.length,1);
 });
+test('a model-only watch claim retries the planner and cannot invent a confirmation button',async()=>{
+ const message='Alert me when an outgoing transfer exceeds $10.';
+ const claim='A draft watch has been created. Tap the Confirm watch button.';
+ let calls=0;
+ const r=await runAgent({message,config:{},agent:createAgentState(),context:{dataMode:'demo'},tools:{propose_watch:()=>({id:'draft',kind:'transfer_value',status:'draft'})},call:async(_c,p)=>{
+  calls++;
+  if(calls===1)return JSON.stringify({type:'answer',text:claim});
+  if(calls===2){assert.match(p,/watch has not been created/);return JSON.stringify({type:'tool',tool:'propose_watch',args:{kind:'transfer_value',label:'Outgoing transfers over $10',usd:10,direction:'outgoing'},finishAfterTool:true});}
+  return 'A draft is ready. Tap Confirm watch.';
+ }});
+ assert.equal(r.proposals.length,1);
+ assert.equal(calls,3);
+ const failed=await runAgent({message,config:{},agent:createAgentState(),context:{dataMode:'demo'},tools:{},call:async()=>JSON.stringify({type:'answer',text:claim})});
+ assert.equal(failed.proposals.length,0);
+ assert.match(failed.text,/No watch was created|ยังไม่ได้สร้างกฎติดตาม/);
+ assert.doesNotMatch(failed.text,/draft watch has been created/i);
+});
 test('health uses one tool then separate explanation with evidence numbers and no redundant planning call',async()=>{
  const prompts=[];let tools=0;
  const r=await runAgent({message:'ช่วยตรวจสุขภาพกระเป๋า',config:{},agent:createAgentState(),context:{dataMode:'live'},tools:{assess_wallet:async()=>{tools++;return {concentration:{symbol:'AVAX',percent:57},fetchedAt:'2026-10-16T00:00:00Z'};}},call:async(_c,p,timeout)=>{

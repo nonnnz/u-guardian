@@ -132,7 +132,7 @@ function narrative(raw){
 }
 export async function runAgent({message,config,agent,tools,context,call=ubot,maxSteps=5,budgetMs=170000,planningTimeoutMs=40000,answerTimeoutMs=55000}){
  if(typeof message!=='string'||!message.trim()||message.length>2000)throw new Error(tr('ข้อความต้องมี 1–2,000 ตัวอักษร'));
- const deadline=Date.now()+budgetMs,trace=[],evidence=[],proposals=[],warnings=[],seen=new Set();let text='',needsExplanation=false;
+ const deadline=Date.now()+budgetMs,trace=[],evidence=[],proposals=[],warnings=[],seen=new Set();let text='',needsExplanation=false,watchRepair='';
  const answerReserve=Math.min(answerTimeoutMs,Math.floor(budgetMs/3));
  const plannerDeadline=deadline-answerReserve;
  const ctx={...context,language:language(),today:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),timeZone:'Asia/Bangkok'};
@@ -145,7 +145,7 @@ export async function runAgent({message,config,agent,tools,context,call=ubot,max
    if(Date.now()>plannerDeadline-1000){warn(tr('ถึงเวลาที่กันไว้สำหรับสรุปผล จึงหยุดค้นข้อมูลเพิ่ม'));needsExplanation=true;break;}
    let step,repair;
    for(let attempt=0;attempt<2;attempt++){
-    const prompt=planningPrompt({message,context:ctx,history:agent.history,evidence,stepsLeft:maxSteps-i,repair});
+    const prompt=planningPrompt({message,context:ctx,history:agent.history,evidence,stepsLeft:maxSteps-i,repair:repair||watchRepair});
     try{
      const raw=await withinBudget(plannerDeadline,()=>debugStep('model','U-bot Professional · choose next step',{step:i+1,attempt:attempt+1,prompt},()=>call(config,prompt,Math.max(1,Math.min(planningTimeoutMs,plannerDeadline-Date.now())))));
      step=parseAgentStep(raw);debugEvent('agent.decision','Validated JSON decision',{step:i+1,decision:step});break;
@@ -159,7 +159,15 @@ export async function runAgent({message,config,agent,tools,context,call=ubot,max
     }
    }
    if(!step)break;
-   if(step.type==='answer'){if(!evidence.length&&step.text)text=step.text;else needsExplanation=true;break;}
+   if(step.type==='answer'){
+    if(wantsWatch(message)&&!proposals.length&&/\b(?:draft watch|watch (?:has been|is) (?:created|ready)|confirm watch)\b|ยืนยันการติดตาม|สร้าง(?:ร่าง)?(?:กฎ|เงื่อนไข)/i.test(step.text||'')){
+     debugEvent('agent.guard','Model claimed a watch without a proposal',{step:i+1});
+     watchRepair='A watch has not been created. Use propose_watch to create a real draft if the request is supported; otherwise explain why it cannot be created. Never say Confirm watch without a successful propose_watch result.';
+     if(i<maxSteps-1&&Date.now()<plannerDeadline-1000)continue;
+     text=say('No watch was created, so there is no Confirm watch button. Please try the alert request again.','ยังไม่ได้สร้างกฎติดตาม จึงไม่มีปุ่มยืนยัน กรุณาสั่งตั้งแจ้งเตือนอีกครั้ง');break;
+    }
+    if(!evidence.length&&step.text)text=step.text;else needsExplanation=true;break;
+   }
    const signature=JSON.stringify([step.tool,step.args]);
    if(seen.has(signature)){debugEvent('agent.guard','Repeated tool call blocked',{tool:step.tool,args:step.args});warn(tr('หยุดเรียกเครื่องมือซ้ำ ใช้หลักฐานที่อ่านได้แล้ว'));needsExplanation=true;break;}seen.add(signature);
    if(Date.now()>=plannerDeadline){warn(tr('หมดเวลาสำหรับเรียกเครื่องมือเพิ่ม'));needsExplanation=true;break;}
@@ -181,6 +189,7 @@ export async function runAgent({message,config,agent,tools,context,call=ubot,max
    catch(e){if(typeof e.code==='string'||e.name==='AbortError')throw e;warn(tr('สรุปด้วย U-bot ไม่สำเร็จ: ')+e.message);}
   }
   if(!text)text=tr('ยังสรุปคำตอบให้ครบไม่ได้ในรอบนี้ครับ ดูผลที่อ่านได้ในหลักฐานด้านล่าง แล้วลองถามประเด็นที่ต้องการต่อได้ ไม่มีการโอน ซื้อขาย หรือเปิดกฎติดตามอัตโนมัติ');
+  if(!proposals.length&&wantsWatch(message)&&/\b(?:draft watch|watch (?:has been|is) (?:created|ready)|confirm watch)\b|ยืนยันการติดตาม|สร้าง(?:ร่าง)?(?:กฎ|เงื่อนไข)/i.test(text))text=say('No watch was created, so there is no Confirm watch button. Please try the alert request again.','ยังไม่ได้สร้างกฎติดตาม จึงไม่มีปุ่มยืนยัน กรุณาสั่งตั้งแจ้งเตือนอีกครั้ง');
   if(proposals.length)text+=tr('\n\nรายการติดตามนี้ยังเป็นร่างครับ ต้องกด “ยืนยันการติดตาม” ในแชตก่อนจึงจะเริ่มทำงาน');
   debugEvent('agent.answer','Final answer',{text,toolCount:evidence.length,warnings});
   agent.history.push({role:'user',text:message},{role:'assistant',text});agent.history=agent.history.slice(-12);
