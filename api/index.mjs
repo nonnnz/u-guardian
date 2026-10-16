@@ -32,7 +32,10 @@ export default async function handler(req,res){
    path=sessionPath(id);
   }
   workspace=await sessions.workspace(path,req.method==='POST');
-  const app=await createApplication({cloud:true,host,env:{},store:workspace.store,config:workspace.record.config,saveConfig:workspace.saveConfig});
+  const app=await createApplication({cloud:true,host,env:{},store:workspace.store,config:{...workspace.record.config,
+   avalancheKey:workspace.record.config.avalancheKey||process.env.AVALANCHE_DATA_API_KEY||'',
+   elevenKey:workspace.record.config.elevenKey||process.env.ELEVENLABS_API_KEY||'',
+   tokenomistKey:workspace.record.config.tokenomistKey||process.env.TOKENOMIST_API_KEY||''},saveConfig:workspace.saveConfig});
   // Keep the application's raw-body contract if the platform parsed a JSON body.
   if(req.body!==undefined){const stream=Readable.from([Buffer.isBuffer(req.body)?req.body:Buffer.from(typeof req.body==='string'?req.body:JSON.stringify(req.body))]);stream.headers=req.headers;stream.url=req.url;stream.method=req.method;stream.guardianSignal=req.guardianSignal;req=stream;}
   const result={status:200,headers:{},body:null};
