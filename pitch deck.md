@@ -2,7 +2,7 @@
 
 **Team:** Tuidui
 
-**Format:** 9 slides, about 4–5 minutes plus live demo and Q&A
+**Format:** 10 slides, about 4–5 minutes plus live demo and Q&A
 
 **Slide language:** English, including speaker notes
 
@@ -75,7 +75,23 @@ An AI companion that explains your crypto wallet, investigates relevant changes,
 
 ---
 
-## 5. Technology — Agent decisions backed by named tools
+## 5. Architecture — U-Guardian at a glance
+
+**On slide:** a one-page system diagram (source: `deck-src/diagrams/`).
+
+```text
+Guardian web app ──► Node.js backend ──► U-bot agent (plans, picks tools)
+                          │
+                          ├─► Avalanche · Tokenomist · CoinGecko   (allowlisted tool calls)
+                          ├─► ElevenLabs                           (speech in / voice out)
+                          └─► Storage                              (confirmed watches → in-app alerts)
+```
+
+**Speaker note:** Here is the whole system on one page. The user talks to the Guardian web app. Our Node.js backend asks U-bot to plan, validates each tool request against an allowlist, and calls Avalanche, Tokenomist and CoinGecko. ElevenLabs gives the agent a voice. A watch only becomes active after the user confirms it, and a triggered watch comes back as an in-app alert.
+
+---
+
+## 6. Technology — Agent decisions backed by named tools
 
 **On slide**
 
@@ -98,7 +114,7 @@ Evidence + watch proposal → user confirmation → alert + ElevenLabs voice
 
 ---
 
-## 6. Impact & business model — Make crypto easier to understand inside an existing app
+## 7. Impact & business model — Make crypto easier to understand inside an existing app
 
 **On slide**
 
@@ -114,7 +130,7 @@ Evidence + watch proposal → user confirmation → alert + ElevenLabs voice
 
 ---
 
-## 7. Market & advantage — Context that a balance screen misses
+## 8. Market & advantage — Context that a balance screen misses
 
 **On slide**
 
@@ -132,7 +148,7 @@ Evidence + watch proposal → user confirmation → alert + ElevenLabs voice
 
 ---
 
-## 8. Roadmap — From hackathon MVP to in-app companion
+## 9. Roadmap — From hackathon MVP to in-app companion
 
 **On slide**
 
@@ -152,7 +168,7 @@ Evidence + watch proposal → user confirmation → alert + ElevenLabs voice
 
 ---
 
-## 9. Team & close — Give every wallet a guide
+## 10. Team & close — Give every wallet a guide
 
 **On slide**
 

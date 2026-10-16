@@ -63,23 +63,27 @@ Text in quotation marks is meant to be spoken. Directions in brackets are for th
 
 **If a provider stalls:** Wait briefly, then say: “External APIs can be slow during a live demo. Here is the same tested flow recorded on this build.” Play the backup clip and continue to Slide 5. Do not present a recording as a live result.
 
-## Slide 5 — Technology (~40 seconds)
+## Slide 5 — Architecture (~25 seconds)
+
+> “Here is the whole system on one page. You talk to the Guardian web app. Our Node.js backend asks U-bot to plan, checks each tool request against an allowlist, and calls Avalanche, Tokenomist, and CoinGecko. ElevenLabs gives the agent a voice. A watch only becomes active after you confirm it, and a triggered watch comes back as an in-app alert.”
+
+## Slide 6 — Technology (~40 seconds)
 
 > “U-bot Professional is the agent’s reasoning layer. It decides which named tool to use, reads the result, and explains it. Our Node.js backend validates every JSON tool request and its arguments before execution; we do not run code produced by the model. Avalanche provides public C-Chain wallet data. Tokenomist adds available supply and tokenomics evidence. CoinGecko and publisher feeds supply market and headline context. ElevenLabs handles speech input and output. The mascot’s states follow real agent progress, including when a tool starts.”
 
-## Slide 6 — Impact and business model (~30 seconds)
+## Slide 7 — Impact and business model (~30 seconds)
 
 > “For a user, Guardian can reduce the work of interpreting a wallet change and make chosen alerts easier to understand. For a platform like U-topia, the opportunity is an intelligent companion inside an app people already use. Our proposed business model is licensing that companion to wallet and finance platforms. We have not launched pricing or measured user impact yet; those are questions for a pilot.”
 
-## Slide 7 — Market and difference (~30 seconds)
+## Slide 8 — Market and difference (~30 seconds)
 
 > “Wallets, chatbots, and alert services each solve part of this problem. Guardian brings wallet context, named external evidence, tool selection, and voice into one conversation. We are starting with crypto holders who want plain-language help, in English or Thai. The size of the opportunity inside U-topia is something we want to validate with its users, rather than guess from a global crypto statistic.”
 
-## Slide 8 — Roadmap (~30 seconds)
+## Slide 9 — Roadmap (~30 seconds)
 
 > “The hackathon MVP already demonstrates the three conversation pillars, confirmed watches, a bilingual interface, and a voice-enabled mascot. Our next step is to pilot the companion inside a host app and measure whether people understand their wallet and alerts better. After that, we would add background watch evaluation and real delivery channels. Today, watches are checked while the web page is visible.”
 
-## Slide 9 — Close (~20 seconds)
+## Slide 10 — Close (~20 seconds)
 
 > “Our goal is simple: crypto should come with context, not just a balance. We would love to pilot U-Guardian with U-topia, learn from real users, and turn this working agent into a companion in the app they already trust. Thank you. We’re happy to take your questions.”
 
