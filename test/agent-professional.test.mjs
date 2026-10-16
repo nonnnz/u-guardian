@@ -47,13 +47,13 @@ test('watch response explicitly states confirmation is required even if model om
  assert.match(r.text,/ยังเป็นร่าง/);assert.match(r.text,/ยืนยันการติดตาม/);assert.equal(r.proposals.length,1);
 });
 test('a model-only watch claim retries the planner and cannot invent a confirmation button',async()=>{
- const message='Alert me when an outgoing transfer exceeds $10.';
+ const message='Alert me when my wallet balance changes.';
  const claim='A draft watch has been created. Tap the Confirm watch button.';
  let calls=0;
  const r=await runAgent({message,config:{},agent:createAgentState(),context:{dataMode:'demo'},tools:{propose_watch:()=>({id:'draft',kind:'transfer_value',status:'draft'})},call:async(_c,p)=>{
   calls++;
   if(calls===1)return JSON.stringify({type:'answer',text:claim});
-  if(calls===2){assert.match(p,/watch has not been created/);return JSON.stringify({type:'tool',tool:'propose_watch',args:{kind:'transfer_value',label:'Outgoing transfers over $10',usd:10,direction:'outgoing'},finishAfterTool:true});}
+  if(calls===2){assert.match(p,/watch has not been created/);return JSON.stringify({type:'tool',tool:'propose_watch',args:{kind:'wallet_change',label:'Watch wallet balance'},finishAfterTool:true});}
   return 'A draft is ready. Tap Confirm watch.';
  }});
  assert.equal(r.proposals.length,1);
@@ -62,6 +62,13 @@ test('a model-only watch claim retries the planner and cannot invent a confirmat
  assert.equal(failed.proposals.length,0);
  assert.match(failed.text,/No watch was created|ยังไม่ได้สร้างกฎติดตาม/);
  assert.doesNotMatch(failed.text,/draft watch has been created/i);
+});
+test('a precise transfer request creates a real watch draft before U-bot explains it',async()=>{
+ const used=[];
+ const r=await runAgent({message:'Alert me when an outgoing transfer exceeds $10.',config:{},agent:createAgentState(),context:{dataMode:'live'},tools:{get_wallet:async()=>{used.push('get_wallet');return {assets:[],address:'0x123'};},propose_watch:async args=>{used.push('propose_watch');assert.equal(args.kind,'transfer_value');assert.equal(args.usd,10);assert.equal(args.direction,'outgoing');return {...args,id:'draft',status:'draft'};}},call:async(_c,p)=>{assert.match(p,/EXPLAINER/);used.push('explain');return 'A draft watch is ready. Tap Confirm watch.';}});
+ assert.deepEqual(used,['get_wallet','propose_watch','explain']);
+ assert.equal(r.proposals.length,1);
+ assert.match(r.text,/Confirm watch|ยืนยันการติดตาม/);
 });
 test('health uses one tool then separate explanation with evidence numbers and no redundant planning call',async()=>{
  const prompts=[];let tools=0;

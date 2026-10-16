@@ -90,6 +90,24 @@ export function validateToolArgs(tool,args){
  return {};
 }
 const wantsWatch=text=>/ติดตาม|แจ้งเตือน|เตือน|watch|track|alert|notify|remind|monitor|text me|(?:call|โทร).*?(?:when|if|เมื่อ|ถ้า)/i.test(text);
+function explicitNumericWatch(message,wallet){
+ if(!wantsWatch(message))return null;
+ const amount=message.match(/\$\s*([\d,]+(?:\.\d+)?)/)||message.match(/([\d,]+(?:\.\d+)?)\s*(?:USD|dollars?|ดอลลาร์)/i);
+ if(/transfer|transaction|โอน|ธุรกรรม/i.test(message)&&amount&&/over|above|exceed|greater than|more than|เกิน|มากกว่า/i.test(message)){
+  const outgoing=/outgoing|sent|send|โอนออก/i.test(message),incoming=/incoming|received|receive|โอนเข้า/i.test(message);
+  if(outgoing&&incoming)return null;
+  return {kind:'transfer_value',label:message.slice(0,160),usd:Number(amount[1].replaceAll(',','')),direction:outgoing?'outgoing':incoming?'incoming':'any'};
+ }
+ const percent=message.match(/(\d+(?:\.\d+)?)\s*(?:%|percent|เปอร์เซ็นต์)/i);
+ if(/price|ราคา/i.test(message)&&percent){
+  const down=/drop|fall|decreas|down|ลด|ตก/i.test(message),up=/ris(?:e|es)|increas|up|ขึ้น|เพิ่ม/i.test(message);
+  if(down===up)return null;
+  const matches=(wallet?.assets||[]).filter(a=>[a.symbol,a.name,a.address].filter(Boolean).some(v=>message.toLowerCase().includes(v.toLowerCase())));
+  if(matches.length!==1)return null;
+  return {kind:'price_change',label:message.slice(0,160),assetId:matches[0].address,percent:Number(percent[1]),direction:down?'down':'up'};
+ }
+ return null;
+}
 export function unsupportedWatchReason(message){
  if(typeof message!=='string'||!wantsWatch(message))return null;
  const priceRequest=/price|ราคา/i.test(message)&&/\d+(?:\.\d+)?\s*(?:%|percent|เปอร์เซ็นต์)/i.test(message)&&/drop|fall|decreas|down|ris(?:e|es)|increas|up|ลด|ตก|ขึ้น|เพิ่ม/i.test(message);
@@ -141,7 +159,24 @@ export async function runAgent({message,config,agent,tools,context,call=ubot,max
   debugEvent('agent.start','Professional agent loop',{context:ctx,maxSteps,budgetMs,answerReserveMs:answerReserve});
   const unsupported=unsupportedWatchReason(message);
   if(unsupported){text=unsupported;debugEvent('agent.guard','Unsupported watch condition',{message});}
-  for(let i=0;!text&&i<maxSteps;i++){
+  if(!text&&wantsWatch(message)&&/\d/.test(message)&&/price|ราคา|transfer|transaction|โอน|ธุรกรรม/i.test(message)){
+   try{
+    const wallet=await withinBudget(plannerDeadline,()=>debugStep('tool','get_wallet',{},()=>tools.get_wallet()));
+    evidence.push({tool:'get_wallet',result:wallet});trace.push({name:'get_wallet',source:context.dataMode==='demo'?tr('ข้อมูลจำลอง'):tr('ข้อมูลจากเครื่องมือ'),detail:JSON.stringify(wallet)});
+    const args=explicitNumericWatch(message,wallet);
+    if(args){
+     validateWatchIntent(args,message);
+     const result=await withinBudget(plannerDeadline,()=>debugStep('tool','propose_watch',args,()=>tools.propose_watch(args)));
+     proposals.push(result);evidence.push({tool:'propose_watch',result});trace.push({name:'propose_watch',source:tr('ข้อมูลจากเครื่องมือ'),detail:JSON.stringify(result)});
+     needsExplanation=true;
+    }
+   }catch(e){
+    if(typeof e.code==='string'||e.name==='AbortError')throw e;
+    warn(tr('สร้างร่างกฎติดตามไม่สำเร็จ: ')+e.message);
+    text=say('No watch was created. '+e.message,'ยังไม่ได้สร้างกฎติดตาม: '+e.message);
+   }
+  }
+  for(let i=0;!text&&!proposals.length&&i<maxSteps;i++){
    if(Date.now()>plannerDeadline-1000){warn(tr('ถึงเวลาที่กันไว้สำหรับสรุปผล จึงหยุดค้นข้อมูลเพิ่ม'));needsExplanation=true;break;}
    let step,repair;
    for(let attempt=0;attempt<2;attempt++){
