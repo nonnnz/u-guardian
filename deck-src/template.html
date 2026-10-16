@@ -67,6 +67,15 @@ b,strong{font-weight:700;color:var(--ink)}
 .s1 .bot{position:absolute;left:150px;right:150px;bottom:48px;display:flex;justify-content:space-between;align-items:center;color:var(--ink3);font-size:21px}
 .clock{font-family:"JetBrains Mono",monospace;display:flex;gap:26px;align-items:center}
 .clock i{width:9px;height:9px;border-radius:50%;background:var(--leaf);display:inline-block;margin-right:10px}
+/* sponsors */
+.spons{margin-top:26px;padding:22px 28px}
+.spons .lbl{font:500 17px "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);margin-bottom:16px}
+.spons .row{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.spons .it{display:flex;align-items:center;gap:12px;font-size:21px;font-weight:700;color:var(--ink)}
+.spons .it img{height:46px;width:46px;border-radius:11px;display:block}
+.spons .it .w{height:26px;width:auto;border-radius:0}
+.spons .it .inv{background:#fff;padding:11px;filter:none}
+.spons .it small{display:block;font-size:15px;font-weight:500;color:var(--ink3)}
 /* 2 */
 .s2 .two{display:grid;grid-template-columns:1.05fr 1fr;gap:44px;align-items:start}
 .s2 ul{list-style:none}
@@ -180,7 +189,12 @@ body:hover #nav{opacity:1}
       <p class="r" style="max-width:820px">An AI companion that explains your crypto wallet, investigates relevant changes, and speaks up when a watch you chose is triggered.</p>
       <div class="r" style="margin-top:34px;display:flex;gap:12px;flex-wrap:wrap"><span class="pill v">Team TuiDui</span><span class="pill">AI agent orchestration</span><span class="pill">Web3 data</span><span class="pill">Voice experience</span></div>
     </div>
-    <div class="shot r"><div class="bar"><i></i><i></i><i></i><span>u-guardian.vercel.app</span></div><img src="{{S_home}}" alt="U-Guardian wallet with the mascot perched on the wallet card"></div>
+    <div><div class="shot r"><div class="bar"><i></i><i></i><i></i><span>u-guardian.vercel.app</span></div><img src="{{S_home}}" alt="U-Guardian wallet with the mascot perched on the wallet card"></div>
+      <div class="glass spons"><div class="lbl">Built with</div><div class="row">
+        <div class="it"><img class="w" src="{{SP_utopia}}" alt="u-topia"><span>U-bot</span></div>
+        <div class="it"><img src="{{SP_avax}}" alt="Avalanche"><span>Avalanche</span></div>
+        <div class="it"><img src="{{SP_tok}}" alt="Tokenomist"><span>Tokenomist</span></div>
+        <div class="it"><img class="inv" src="{{SP_el}}" alt="ElevenLabs"><span>ElevenLabs</span></div></div></div></div>
   </div>
   <div class="bot"><span class="pill">U-Hackathon 2026 Track 1: AI</span><div class="clock"><span><i></i>Bangkok</span><span id="clk">--:--:--</span></div></div>
 </section>

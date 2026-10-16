@@ -9,6 +9,10 @@ const rep={
   '{{P_answering}}':b64('assets/mascot/answering-poster.webp','image/webp'),
   '{{A_wayu}}':b64('assets/team/Wayu650610806.png','image/jpeg'),
   '{{A_nonnnz}}':b64('assets/team/nonnnz.jpg','image/jpeg'),
+  '{{SP_utopia}}':b64('assets/sponsors/u-topia.png','image/png'),
+  '{{SP_avax}}':b64('assets/sponsors/avalanche.png','image/png'),
+  '{{SP_tok}}':b64('assets/sponsors/tokenomist.png','image/png'),
+  '{{SP_el}}':b64('assets/sponsors/elevenlabs.svg','image/svg+xml'),
   '{{QR}}':r(new URL('qr.svg',s),'utf8'),
   '{{LIVE}}':r(new URL('live-data.js',d),'utf8').replace(/^window\.LIVE_DATA=|;\s*$/g,''),
 };
