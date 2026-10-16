@@ -212,11 +212,12 @@ const coreHandler = async (req,res) => {
       return json(res,404,{error:'Unknown API route'});
     }
     if(req.method==='GET'&&['/settings.html','/embed-example.html'].includes(pathname)){res.writeHead(302,{Location:'/'});return res.end();}
-    const files = {'/':'index.html','/index.html':'index.html','/guardian-widget.js':'guardian-widget.js','/guardian-widget.css':'guardian-widget.css','/shell.js':'shell.js','/shell.css':'shell.css','/i18n.js':'i18n.js','/messages.js':'messages.js'};
+    const files = {'/':'index.html','/index.html':'index.html','/guardian-widget.js':'guardian-widget.js','/guardian-widget.css':'guardian-widget.css','/shell.js':'shell.js','/shell.css':'shell.css','/i18n.js':'i18n.js','/messages.js':'messages.js','/guardian-mascot.js':'guardian-mascot.js','/guardian-mascot.css':'guardian-mascot.css','/assets/mascot/manifest.json':'assets/mascot/manifest.json','/guardian-mascot-state.js':'guardian-mascot-state.js'};
+    for(const state of ['idle','thinking','searching','answering'])for(const file of [`${state}.webm`,`${state}.webp`,`${state}-poster.webp`])files[`/assets/mascot/${file}`]=`assets/mascot/${file}`;
     if (req.method !== 'GET' || !files[pathname]) return json(res,404,{error:'Not found'});
     const file = files[pathname];
     const bytes = await readFile(fileURLToPath(new URL(`./public/${file}`,import.meta.url)));
-    res.writeHead(200,{'Content-Type':file.endsWith('.html')?'text/html; charset=utf-8':file.endsWith('.css')?'text/css; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'no-store'});res.end(bytes);
+    res.writeHead(200,{'Content-Type':file.endsWith('.html')?'text/html; charset=utf-8':file.endsWith('.css')?'text/css; charset=utf-8':file.endsWith('.webm')?'video/webm':file.endsWith('.webp')?'image/webp':file.endsWith('.json')?'application/json; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'no-store'});res.end(bytes);
   } catch (e) {
     if (pathname === '/api/test/ubot') config.ubotStatus='error';
     if (['/api/agent/chat','/api/chat'].includes(pathname)&&['auth','expired'].includes(e.code)){config.ubotStatus='error';config.mode='demo';}

@@ -1,0 +1,46 @@
+{
+  "idle": {
+    "width": 448,
+    "height": 448,
+    "fps": 18,
+    "loop": "ping-pong",
+    "files": {
+      "idle.webp": 3756078,
+      "idle.webm": 895590,
+      "idle-poster.webp": 33202
+    }
+  },
+  "thinking": {
+    "width": 448,
+    "height": 448,
+    "fps": 18,
+    "loop": "ping-pong",
+    "files": {
+      "thinking.webp": 3233962,
+      "thinking.webm": 568961,
+      "thinking-poster.webp": 30280
+    }
+  },
+  "searching": {
+    "width": 448,
+    "height": 448,
+    "fps": 18,
+    "loop": "ping-pong",
+    "files": {
+      "searching.webp": 3959484,
+      "searching.webm": 973081,
+      "searching-poster.webp": 35720
+    }
+  },
+  "answering": {
+    "width": 448,
+    "height": 448,
+    "fps": 18,
+    "loop": "ping-pong",
+    "files": {
+      "answering.webp": 4023238,
+      "answering.webm": 875014,
+      "answering-poster.webp": 34892
+    }
+  }
+}
